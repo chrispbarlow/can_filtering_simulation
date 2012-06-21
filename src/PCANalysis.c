@@ -28,17 +28,19 @@ typedef struct
 	unsigned int timeDeltaMax;
 	unsigned int prevLoggedTime;
 	unsigned int messageJitterMax;
-	unsigned int messageJitterMaxNew;
 	unsigned int prevCanID;
 	unsigned int prevCanIDNew;
 	unsigned int passedCount;
 	unsigned int frozenTime;
-	unsigned int frozenTriesCounter;
+	unsigned int frozenTriesCount;
 	unsigned int deltaAvCounter;
 	unsigned long deltaAv;
 	unsigned long long deltaAvSum;
 	unsigned int messageOffset;
 	unsigned int messageOffsetDiff;
+	unsigned int beforeTargetCount;
+	unsigned int afterTargetCount;
+	unsigned int onTargetCount;
 
 } CAN_message;
 
@@ -47,6 +49,8 @@ CAN_message OrderedMessages[BUFFERSIZE];
 
 void getCanSequence(char *filename, FILE *log);
 void getCanTiming(char *filename, FILE *log);
+void getPrecisionCanTiming(char *filename, FILE *log);
+void calculateAverages(void);
 void csvOutput(char *filename);
 void orderMessages(void);
 void summaryOutput(FILE *csv);
@@ -61,8 +65,11 @@ int main(void)
 
 	FILE *logFile = fopen("log.txt", "w");
 
-	getCanSequence("Short_Log_for_analysis.asc", logFile);
-	getCanTiming("Short_Log_for_analysis.asc", logFile);
+	getCanSequence("Log_for_analysis.asc", logFile);
+	getCanTiming("Log_for_analysis.asc", logFile);
+
+	calculateAverages();
+	getPrecisionCanTiming("Log_for_analysis.asc", logFile);
 
 	orderMessages();
 
@@ -93,8 +100,8 @@ void getCanSequence(char *filename, FILE *log)
 	while(fgets(inputStr, 190, bufferFile) != NULL)
 	{
 		/* Extract values from input string */
-		unsigned int scanReturn = sscanf(inputStr,"%4u.%06u 1  %3x             Rx%s",&timeNow_s, &timeNow_us, &ID, &canData);
-		printf("%u Sequencing log line: %s\n", scanReturn, inputStr);
+		unsigned int scanReturn = sscanf(inputStr,"%4u.%06u 1  %3x             Rx%s\n",&timeNow_s, &timeNow_us, &ID, &canData);
+		printf("%u Sequencing log line: %s", scanReturn, inputStr);
 
 		timeNow_us += (timeNow_s * 1000000);
 
@@ -137,7 +144,7 @@ void getCanSequence(char *filename, FILE *log)
 					if(CAN1Buffer[pointer].frozenTime == 0)
 					{
 						CAN1Buffer[pointer].prevCanID = prevID;
-						CAN1Buffer[pointer].frozenTriesCounter = 0;
+						CAN1Buffer[pointer].frozenTriesCount = 0;
 					}
 
 				}
@@ -145,7 +152,7 @@ void getCanSequence(char *filename, FILE *log)
 				{
 					if(CAN1Buffer[pointer].frozenTime == 0)
 					{
-						if(CAN1Buffer[pointer].frozenTriesCounter == FREEZE_TRIES)
+						if(CAN1Buffer[pointer].frozenTriesCount == FREEZE_TRIES)
 						{
 							CAN1Buffer[pointer].frozenTime++;
 							fprintf(log, " FFFF");
@@ -156,7 +163,7 @@ void getCanSequence(char *filename, FILE *log)
 						CAN1Buffer[pointer].passedCount++;
 					}
 
-					CAN1Buffer[pointer].frozenTriesCounter++;
+					CAN1Buffer[pointer].frozenTriesCount++;
 				}
 
 				if(CAN1Buffer[pointer].frozenTime > 0)
@@ -293,34 +300,85 @@ void getCanTiming(char *filename, FILE *log)
 
 }
 
-
-
-void summaryOutput(FILE *output)
+void orderMessages(void)
 {
-	char outputStr[400];
+	unsigned int i, pointer, minOffsetPrev = 0;
+	unsigned int minOffset = 999999;
+
+
+	for (i = 0; i <= BUFFERSIZE; i++)
+	{
+		for(pointer = 1; pointer <= BUFFERSIZE; pointer++)
+		{
+
+			if(((CAN1Buffer[pointer].messageOffset < minOffset)
+							&& (CAN1Buffer[pointer].messageOffset > minOffsetPrev))
+					|| ((i == 0) && (CAN1Buffer[pointer].messageOffset == 0)))
+			{
+				if(CAN1Buffer[pointer].canID != 0)
+				{
+					minOffset = CAN1Buffer[pointer].messageOffset;
+
+					OrderedMessages[i].canID = CAN1Buffer[pointer].canID;
+					OrderedMessages[i].logCounter = CAN1Buffer[pointer].logCounter;
+					OrderedMessages[i].timeDeltaMin = CAN1Buffer[pointer].timeDeltaMin;
+					OrderedMessages[i].timeDeltaMax = CAN1Buffer[pointer].timeDeltaMax;
+					OrderedMessages[i].prevLoggedTime = CAN1Buffer[pointer].prevLoggedTime;
+					OrderedMessages[i].messageJitterMax = CAN1Buffer[pointer].messageJitterMax;
+					OrderedMessages[i].prevCanID = CAN1Buffer[pointer].prevCanID;
+					OrderedMessages[i].prevCanIDNew = CAN1Buffer[pointer].prevCanIDNew;
+					OrderedMessages[i].passedCount = CAN1Buffer[pointer].passedCount;
+					OrderedMessages[i].frozenTime = CAN1Buffer[pointer].frozenTime;
+					OrderedMessages[i].frozenTriesCount = CAN1Buffer[pointer].frozenTriesCount;
+					OrderedMessages[i].deltaAvCounter = CAN1Buffer[pointer].deltaAvCounter;
+					OrderedMessages[i].deltaAvSum = CAN1Buffer[pointer].deltaAvSum;
+					OrderedMessages[i].deltaAv = CAN1Buffer[pointer].deltaAv;
+					OrderedMessages[i].messageOffset = CAN1Buffer[pointer].messageOffset;
+					OrderedMessages[i].messageOffsetDiff = CAN1Buffer[pointer].messageOffsetDiff;
+
+					OrderedMessages[i].beforeTargetCount = CAN1Buffer[pointer].beforeTargetCount;
+					OrderedMessages[i].afterTargetCount = CAN1Buffer[pointer].afterTargetCount;
+					OrderedMessages[i].onTargetCount = CAN1Buffer[pointer].onTargetCount;
+
+				}
+			}
+
+		}
+
+		OrderedMessages[i].messageOffsetDiff = (minOffset - minOffsetPrev);
+
+
+		minOffsetPrev = minOffset;
+		minOffset = 999999;
+	}
+}
+
+void calculateAverages(void)
+{
 	unsigned int pointer = 0;
 	unsigned long deltaDiv = 0;
 
-	sprintf(outputStr, 						"\n\n\n\n| CAN ID |  Total | Times      | Times in | Max. Jitter | Av. Period | Max. Period | Min. Period |  Offset [diff] |\n");
-	sprintf(outputStr + strlen(outputStr), 	        "|        | (logs) | frozen for | sequence |        (us) |       (us) |        (us) |        (us) |           (us) |\n");
-	sprintf(outputStr + strlen(outputStr), 	        "|========|========|============|==========|=============|============|=============|=============|================|\n");
-
-	printf("%u\n", strlen(outputStr));
-
-	fprintf(output,outputStr);
-	printf(outputStr);
-
 	for(pointer = 0; pointer < BUFFERSIZE; pointer++)
 	{
-		if(OrderedMessages[pointer].canID != 0)
+		if(CAN1Buffer[pointer].canID != 0)
 		{
 				deltaDiv = 0;
 
 				/* Compensate for blocks of missed data */
-
-				if(OrderedMessages[pointer].timeDeltaMin > 0)
+				if((CAN1Buffer[pointer].deltaAvCounter - deltaDiv)  > 0)
 				{
-					deltaDiv = (OrderedMessages[pointer].timeDeltaMax / OrderedMessages[pointer].timeDeltaMin);
+					CAN1Buffer[pointer].deltaAvCounter += deltaDiv;
+					CAN1Buffer[pointer].deltaAv = (CAN1Buffer[pointer].deltaAvSum / CAN1Buffer[pointer].deltaAvCounter);
+				}
+				else
+				{
+					CAN1Buffer[pointer].deltaAv = 0;
+				}
+
+
+/*				if(CAN1Buffer[pointer].deltaAv > 0)
+				{
+					deltaDiv = (CAN1Buffer[pointer].timeDeltaMax / CAN1Buffer[pointer].deltaAv);
 				}
 				else
 				{
@@ -330,19 +388,9 @@ void summaryOutput(FILE *output)
 				if(deltaDiv > 1)
 				{
 					deltaDiv -= 1;
-					OrderedMessages[pointer].timeDeltaMax -= (OrderedMessages[pointer].timeDeltaMin * deltaDiv);
+					CAN1Buffer[pointer].timeDeltaMax -= (CAN1Buffer[pointer].deltaAv * deltaDiv);
 				}
-
-				if((OrderedMessages[pointer].deltaAvCounter - deltaDiv)  > 0)
-				{
-					OrderedMessages[pointer].deltaAvCounter += deltaDiv;
-					OrderedMessages[pointer].deltaAv = (OrderedMessages[pointer].deltaAvSum / OrderedMessages[pointer].deltaAvCounter);
-				}
-				else
-				{
-					OrderedMessages[pointer].deltaAv = 0;
-				}
-
+*/
 
 			/* Max. Jitter for these
 			 * purposes is defined as the greatest time difference from the average period */
@@ -355,65 +403,153 @@ void summaryOutput(FILE *output)
 				OrderedMessages[pointer].messageJitterMax = (OrderedMessages[pointer].timeDeltaMax - deltaAv);
 			}
 */
-			//printf("%u\n", OrderedMessages[pointer].messageJitterMaxNew);
 
-			OrderedMessages[pointer].messageJitterMax = (OrderedMessages[pointer].timeDeltaMax - OrderedMessages[pointer].timeDeltaMin);
+				CAN1Buffer[pointer].messageJitterMax = (CAN1Buffer[pointer].timeDeltaMax - CAN1Buffer[pointer].timeDeltaMin);
 
-			sprintf(outputStr, "|  0x%03X | %6u | %10u | %8u | %11u | %10lu | %11u | %11u | %5u [+%5u] | %u\n",
+				CAN1Buffer[pointer].prevLoggedTime = 0;
+		}
+	}
+}
+
+void getPrecisionCanTiming(char *filename, FILE *log)
+{
+	char inputStr[200];
+	char canData;
+	unsigned int pointer;
+	unsigned int timeNow_s ,timeNow_us, messagePeriod, logTimeDelta, prevLogTimeDelta, timeOrigin = 0;
+	int ID, prevID;
+	printf("Reading CAN log...\r\n");
+
+	unsigned int targetBuffer_lower = 0;
+	unsigned int targetBuffer_upper = 0;
+	unsigned int processBuffer = 100;
+
+	/* open trace file */
+	FILE *bufferFile = fopen(filename, "r");
+
+	/* Read trace file one line at a time until end of file */
+	while(fgets(inputStr, 190, bufferFile) != NULL)
+	{
+		/* Extract values from input string */
+		unsigned int scanReturn = sscanf(inputStr,"%4u.%06u 1  %3x             Rx%s",&timeNow_s, &timeNow_us, &ID, &canData);
+		printf("%u Further Analysing log line: %s", scanReturn, inputStr);
+
+		timeNow_us += (timeNow_s * 1000000);
+
+		/* Find pointer for buffer array (v11X logic) */
+		pointer = GetCAN1BufferPointer(ID);
+
+		if(scanReturn == 4)
+		{
+
+			/* Don't count if repeated or not in ID list */
+			if(pointer != 9999)
+			{
+
+				/* Find timeNow origin */
+				if(timeOrigin == 0)
+				{
+					timeOrigin = timeNow_us;
+				}
+
+				/* Find current time delta from origin */
+				timeDelta = (timeNow_us - timeOrigin);
+
+				/* Find time delta since last message */
+				logTimeDelta = timeDelta - prevLogTimeDelta;
+
+				if((CAN1Buffer[pointer].frozenTime > 0) && ((CAN1Buffer[pointer].prevCanID == prevID) || (timeOrigin == 0)))
+				{
+
+					/* Find time delta since last occurrence of current CAN ID */
+					messagePeriod = (timeDelta - CAN1Buffer[pointer].prevLoggedTime);
+
+
+					if((messagePeriod >= CAN1Buffer[pointer].timeDeltaMin) && (messagePeriod <= CAN1Buffer[pointer].timeDeltaMax) && (logTimeDelta > processBuffer))
+					{
+						if(messagePeriod < (CAN1Buffer[pointer].deltaAv - targetBuffer_lower))
+						{
+							CAN1Buffer[pointer].beforeTargetCount++;
+						}
+						else if(messagePeriod > (CAN1Buffer[pointer].deltaAv + targetBuffer_upper))
+						{
+							CAN1Buffer[pointer].afterTargetCount++;
+						}
+						else
+						{
+							CAN1Buffer[pointer].onTargetCount++;
+						}
+					}
+
+					CAN1Buffer[pointer].prevLoggedTime = timeDelta;
+
+				}
+
+				/* file output */
+/*				fprintf(log,"Time: %11lu  ID: 0x%03X  Instance: %7u  Previous Time: %11u  Message period: %6u  Time dif: %6u Offset: %u - %u ",
+						timeDelta,
+						ID,
+						CAN1Buffer[pointer].logCounter,
+						CAN1Buffer[pointer].prevLoggedTime,
+						messagePeriod,
+						logTimeDelta,
+						CAN1Buffer[pointer].messageOffset,
+						CAN1Buffer[pointer].timeDeltaMin);
+
+				fprintf(log, "\n");
+*/
+				prevLogTimeDelta = timeDelta;
+			}
+
+			prevID = ID;
+
+		}
+	}
+
+	fclose(bufferFile);
+
+}
+
+
+void summaryOutput(FILE *output)
+{
+	char outputStr[500];
+	unsigned int pointer = 0;
+	unsigned long deltaDiv = 0;
+
+	sprintf(outputStr, 						"\n\n\n\n| CAN ID |  Total | Times      | Times in | Times on Target | Times before Target | Times after Target | Max. Jitter | Av. Period | Max. Period | Min. Period |  Offset [diff] |\n");
+	sprintf(outputStr + strlen(outputStr), 	        "|        | (logs) | frozen for | sequence |          (logs) |              (logs) |             (logs) |        (us) |       (us) |        (us) |        (us) |           (us) |\n");
+	sprintf(outputStr + strlen(outputStr), 	        "|========|========|============|==========|=================|=====================|====================|=============|============|=============|=============|================|\n");
+
+	printf("%u\n", strlen(outputStr));
+
+	fprintf(output,outputStr);
+	printf(outputStr);
+
+	for(pointer = 0; pointer < BUFFERSIZE; pointer++)
+	{
+		if(OrderedMessages[pointer].canID != 0)
+		{
+
+			sprintf(outputStr, "|  0x%03X | %6u | %10u | %8u | %15u | %19u | %18u | %11u | %10lu | %11u | %11u | %5u [+%5u] | %lu %u\n",
 					OrderedMessages[pointer].canID,
 					OrderedMessages[pointer].logCounter,
 					OrderedMessages[pointer].frozenTime,
 					OrderedMessages[pointer].passedCount,
+					OrderedMessages[pointer].onTargetCount,
+					OrderedMessages[pointer].beforeTargetCount,
+					OrderedMessages[pointer].afterTargetCount,
 					OrderedMessages[pointer].messageJitterMax,
 					OrderedMessages[pointer].deltaAv,
 					OrderedMessages[pointer].timeDeltaMax,
 					OrderedMessages[pointer].timeDeltaMin,
 					OrderedMessages[pointer].messageOffset,
 					OrderedMessages[pointer].messageOffsetDiff,
-					deltaDiv);
+					deltaDiv,
+					OrderedMessages[pointer].deltaAvCounter);
 
 			fprintf(output, outputStr);
 			printf(outputStr);
-
-//			int i, first, start, middle, end;
-//
-//			first = (OrderedMessages[pointer].messageOffset / 100);
-//			start = ((OrderedMessages[pointer].timeDeltaMin / 100) - first);
-//			middle = ((deltaAv / 100) - start);
-//			end = ((OrderedMessages[pointer].timeDeltaMin / 100) - middle);
-//
-//			for(i = 0; i < first; i++)
-//			{
-//				strcat(outputStr, " ");
-//			}
-//
-//			strcat(outputStr, "!");
-//
-//			for(i = 0; i < start; i++)
-//			{
-//				strcat(outputStr, " ");
-//			}
-//
-//			strcat(outputStr, "[");
-//
-//			for(i = 0; i < middle; i++)
-//			{
-//				strcat(outputStr, " ");
-//			}
-//
-//			strcat(outputStr, "|");
-//
-//			for(i = 0; i < end; i++)
-//			{
-//				strcat(outputStr, " ");
-//			}
-//
-//			strcat(outputStr, "]");
-//
-//			fprintf(output, outputStr);
-//			printf(outputStr);
-//
-//			sprintf(outputStr, "\n");
 
 		}
 	}
@@ -475,51 +611,7 @@ void csvOutput(char *filename)
 	}
 }
 
-void orderMessages(void)
-{
-	unsigned int i, pointer, minOffsetPrev = 0;
-	unsigned int minOffset = 999999;
 
-
-	for (i = 0; i <= BUFFERSIZE; i++)
-	{
-		for(pointer = 1; pointer <= BUFFERSIZE; pointer++)
-		{
-
-			if(((CAN1Buffer[pointer].messageOffset < minOffset)
-							&& (CAN1Buffer[pointer].messageOffset > minOffsetPrev))
-					|| ((i == 0) && (CAN1Buffer[pointer].messageOffset == 0)))
-			{
-				if(CAN1Buffer[pointer].canID != 0)
-				{
-					minOffset = CAN1Buffer[pointer].messageOffset;
-
-					OrderedMessages[i].canID = CAN1Buffer[pointer].canID;
-					OrderedMessages[i].logCounter = CAN1Buffer[pointer].logCounter;
-					OrderedMessages[i].timeDeltaMin = CAN1Buffer[pointer].timeDeltaMin;
-					OrderedMessages[i].timeDeltaMax = CAN1Buffer[pointer].timeDeltaMax;
-					OrderedMessages[i].prevLoggedTime = CAN1Buffer[pointer].prevLoggedTime;
-					OrderedMessages[i].messageJitterMax = CAN1Buffer[pointer].messageJitterMax;
-					OrderedMessages[i].prevCanID = CAN1Buffer[pointer].prevCanID;
-					OrderedMessages[i].prevCanIDNew = CAN1Buffer[pointer].prevCanIDNew;
-					OrderedMessages[i].passedCount = CAN1Buffer[pointer].passedCount;
-					OrderedMessages[i].frozenTime = CAN1Buffer[pointer].frozenTime;
-					OrderedMessages[i].frozenTriesCounter = CAN1Buffer[pointer].frozenTriesCounter;
-					OrderedMessages[i].deltaAvCounter = CAN1Buffer[pointer].deltaAvCounter;
-					OrderedMessages[i].deltaAvSum = CAN1Buffer[pointer].deltaAvSum;
-					OrderedMessages[i].messageOffset = CAN1Buffer[pointer].messageOffset;
-				}
-			}
-
-		}
-
-		OrderedMessages[i].messageOffsetDiff = (minOffset - minOffsetPrev);
-
-
-		minOffsetPrev = minOffset;
-		minOffset = 999999;
-	}
-}
 
 
 
