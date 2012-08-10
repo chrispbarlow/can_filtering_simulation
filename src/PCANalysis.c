@@ -64,7 +64,7 @@ char *logFormat = "%4u.%06u 1  %3x             Tx%s";
 
 int main(void)
 {
-	char *CANlogFile = "Log_for_analysis2.asc";
+	char *CANlogFile = "Log_for_analysis.asc";
 
 	FILE *outputFile = fopen("output.txt", "w");
 
@@ -96,7 +96,7 @@ int main(void)
 void getCanSequence(char *filename, FILE *log)
 {
 	char inputStr[200];
-	char canData;
+	char canData[200];
 	unsigned int pointer;
 	unsigned int timeNow_s ,timeNow_us, timeDelta, logTimeDelta, prevLogTimeDelta, timeOrigin = 0;
 
@@ -114,7 +114,7 @@ void getCanSequence(char *filename, FILE *log)
 
 //		if(inputStr[0] != 'NULL')
 		{
-			printf("%u Sequencing log line: %s\n", scanReturn, inputStr);
+			printf("%u Sequencing log line: %s", scanReturn, inputStr);
 		}
 			timeNow_us += (timeNow_s * 1000000);
 
@@ -207,7 +207,7 @@ void getCanSequence(char *filename, FILE *log)
 void getCanTiming(char *filename, FILE *log)
 {
 	char inputStr[200];
-	char canData;
+	char canData[200];
 	unsigned int pointer, pointer2;
 	unsigned int timeNow_s ,timeNow_us, messagePeriod, logTimeDelta, prevLogTimeDelta, timeOrigin = 0;
 	int ID, prevID;
@@ -224,7 +224,7 @@ void getCanTiming(char *filename, FILE *log)
 
 	//	if(inputStr[0] != 'NULL')
 		{
-			printf("%u Analysing log line: %s\n", scanReturn, inputStr);
+			printf("%u Analysing log line: %s", scanReturn, inputStr);
 		}
 
 		timeNow_us += (timeNow_s * 1000000);
@@ -424,7 +424,7 @@ void calculateAverages(void)
 void getPrecisionCanTiming(char *filename, FILE *log)
 {
 	char inputStr[200];
-	char canData;
+	char canData[200];
 	unsigned int pointer, pointer2;
 	unsigned int timeNow_s ,timeNow_us, messagePeriod, logTimeDelta, prevLogTimeDelta, timeOrigin = 0;
 	int ID, prevID;
@@ -445,7 +445,7 @@ void getPrecisionCanTiming(char *filename, FILE *log)
 
 	//	if(inputStr[0] != NULL)
 		{
-			printf("%u Further Analysing log line: %s\n", scanReturn, inputStr);
+			printf("%u Further Analysing log line: %s", scanReturn, inputStr);
 		}
 
 		timeNow_us += (timeNow_s * 1000000);
@@ -550,7 +550,7 @@ void getPrecisionCanTiming(char *filename, FILE *log)
 void getPrecisionCan_Sequence_Timing(char *filename, FILE *log)
 {
 	char inputStr[200];
-	char canData;
+	char canData[200];
 	unsigned int pointer, pointer2;
 	unsigned int timeNow_s ,timeNow_us, messagePeriod, logTimeDelta, prevLogTimeDelta, timeOrigin = 0;
 	int ID, prevID;
@@ -571,7 +571,7 @@ void getPrecisionCan_Sequence_Timing(char *filename, FILE *log)
 
 	//	if(inputStr[0] != NULL)
 		{
-			printf("%u Further Analysing log line: %s\n", scanReturn, inputStr);
+			printf("%u Executing log line: %s", scanReturn, inputStr);
 		}
 
 		timeNow_us += (timeNow_s * 1000000);
