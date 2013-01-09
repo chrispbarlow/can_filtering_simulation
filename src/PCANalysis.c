@@ -13,7 +13,7 @@
 #include <string.h>
 
 #define BUFFERSIZE 		(363)
-#define FILTERSIZE 		(363)
+#define FILTERSIZE 		(33)
 
 #define FREEZE_TRIES 	(0)
 #define MESSAGE_TIME_DELTA_MAX (100500)
@@ -82,7 +82,7 @@ int main(void)
 
 	FILE *outputFile = fopen("output.txt", "w");
 
-	FILE *logFile = fopen("log.txt", "w");
+	FILE *logFile = fopen("log2.txt", "w");
 
 	noIDs = 0;
 
@@ -182,8 +182,8 @@ void checkLogability(char *filename, FILE *log)
 {
 	char inputStr[200];
 	char canData[200];
-	int i = 0, sequencePointer = 0, IDLogCount = 0, IDMissedCount = 0;
-	flag_t IDlogged = FALSE;
+	int i = 0, j = 0, sequencePointer = 0, sequencePointerStart = 0, IDLogCount = 0, IDMissedCount = 0;
+	flag_t IDlogged = FALSE, IDfound = FALSE;
 	unsigned long timeNow_s ,timeNow_us;
 
 	int ID;
@@ -205,12 +205,14 @@ void checkLogability(char *filename, FILE *log)
 	while(fgets(inputStr, 190, bufferFile) != NULL)
 	{
 		IDlogged = FALSE;
+		IDfound = FALSE;
 		i = 0;
 
 		/* Extract values from input string */
 		unsigned int scanReturn = sscanf(inputStr, logFormat, &timeNow_s, &timeNow_us, &ID, &canData);
 		if((scanReturn == 4) && (GetCAN1BufferPointer(ID) != -1))
 		{
+			printf("%u Checking log line: %s", scanReturn, inputStr);
 			fprintf(log,"Found ID: 0x%03X ", ID);
 
 			do
@@ -219,11 +221,28 @@ void checkLogability(char *filename, FILE *log)
 				{
 					IDLogCount++;
 
-					sequencePointer++;
-					if(loggingSequence[sequencePointer] == 0)
+					sequencePointerStart = sequencePointer;
+
+					do
 					{
-						sequencePointer = 0;
-					}
+						sequencePointer++;
+						if(loggingSequence[sequencePointer] == 0)
+						{
+							sequencePointer = 0;
+						}
+
+						IDfound = FALSE;
+
+						for(j = 0; j < FILTERSIZE; j++)
+						{
+							if(acceptanceFilter[j] == loggingSequence[sequencePointer])
+							{
+								IDfound = TRUE;
+							}
+
+						}
+
+					}while((sequencePointer != sequencePointerStart) && (IDfound == TRUE));
 
 					acceptanceFilter[i] = loggingSequence[sequencePointer];
 
