@@ -13,6 +13,8 @@
 #include <string.h>
 
 #define BUFFERSIZE 		(363)
+#define FILTERSIZE 		(363)
+
 #define FREEZE_TRIES 	(0)
 #define MESSAGE_TIME_DELTA_MAX (100500)
 #define MESSAGE_TIME_DELTA_MIN (0)
@@ -47,10 +49,20 @@ typedef struct
 	unsigned long projectedNextArrival;	/* Projected time for next occurrence of ID */
 } CAN_message;
 
+typedef enum {TRUE, FALSE}flag_t;
+
+int loggingSequence[BUFFERSIZE];
+int acceptanceFilter[FILTERSIZE];
+
 CAN_message CAN1Buffer[BUFFERSIZE];
 CAN_message OrderedMessages[BUFFERSIZE];
 
 void getCanSequence(char *filename, FILE *log);
+void getSimpleCanSequence(char *filename, FILE *log);
+void checkLogability(char *filename, FILE *log);
+
+
+
 void getCanTiming(char *filename, FILE *log);
 void getPrecisionCanTiming(char *filename, FILE *log);
 void calculateAverages(void);
@@ -60,7 +72,7 @@ void summaryOutput(FILE *csv);
 void changeFilter(void);
 
 
-unsigned int GetCAN1BufferPointer(unsigned int ID);
+int GetCAN1BufferPointer(unsigned int ID);
 
 char *logFormat = "%4u.%06u 1  %3x             Tx%s";
 
@@ -74,26 +86,183 @@ int main(void)
 
 	noIDs = 0;
 
-	getCanSequence(CANlogFile, logFile);
+	getSimpleCanSequence(CANlogFile, logFile);
+	checkLogability(CANlogFile, logFile);
 
-	getCanTiming(CANlogFile, logFile);
-
-	noIDs = orderMessages();
-
-	calculateAverages();
-
-
-	getPrecisionCanTiming(CANlogFile, logFile);
-
-	summaryOutput(outputFile);
-
-	csvOutput("CANtiming.csv");
+//	getCanSequence(CANlogFile, logFile);
+//
+//	getCanTiming(CANlogFile, logFile);
+//
+//	noIDs = orderMessages();
+//
+//	calculateAverages();
+//
+//
+//	getPrecisionCanTiming(CANlogFile, logFile);
+//
+//	summaryOutput(outputFile);
+//
+//	csvOutput("CANtiming.csv");
 
 	fclose(outputFile);
 	fclose(logFile);
 
 	return EXIT_SUCCESS;
 }
+
+
+void getSimpleCanSequence(char *filename, FILE *log)
+{
+	char inputStr[200];
+	char canData[200];
+	int i = 0;
+	flag_t IDfound = FALSE;
+	unsigned long timeNow_s ,timeNow_us;
+
+	int ID;
+	printf("Reading CAN log...\r\n");
+
+	/* open trace file */
+	FILE *bufferFile = fopen(filename, "r");
+
+	for(i = 0; i < BUFFERSIZE; i++)
+	{
+		loggingSequence[i] = 0;
+	}
+
+	while(fgets(inputStr, 190, bufferFile) != NULL)
+	{
+		/* Extract values from input string */
+		unsigned int scanReturn = sscanf(inputStr, logFormat, &timeNow_s, &timeNow_us, &ID, &canData);
+		if(scanReturn == 4)
+		{
+			printf("%u Sequencing log line: %s", scanReturn, inputStr);
+
+			if(GetCAN1BufferPointer(ID) != -1)
+			{
+				i = 0;
+				IDfound = FALSE;
+
+				do
+				{
+					if(loggingSequence[i] == ID)
+					{
+						IDfound = TRUE;
+					}
+
+					if(loggingSequence[i] != 0)
+					{
+						i++;
+					}
+
+				}while((loggingSequence[i] != 0) && (i < BUFFERSIZE) && (IDfound == FALSE));
+
+				if((loggingSequence[i] == 0) && (IDfound == FALSE))
+				{
+					loggingSequence[i] = ID;
+				}
+			}
+		}
+
+	}
+
+	printf("Finished sequence:\n");
+
+	i = 0;
+
+	while((loggingSequence[i] != 0) && (i < BUFFERSIZE))
+	{
+		printf("0x%03X\n",loggingSequence[i]);
+		i++;
+	}
+
+}
+
+void checkLogability(char *filename, FILE *log)
+{
+	char inputStr[200];
+	char canData[200];
+	int i = 0, sequencePointer = 0, IDLogCount = 0, IDMissedCount = 0;
+	flag_t IDlogged = FALSE;
+	unsigned long timeNow_s ,timeNow_us;
+
+	int ID;
+
+	/* open trace file */
+	FILE *bufferFile = fopen(filename, "r");
+
+	printf("\n\n\nChecking logability...\r\n\n");
+
+	printf("Initial filter:\n");
+
+	for(i = 0; i < FILTERSIZE; i++)
+	{
+		acceptanceFilter[i] = loggingSequence[i];
+		printf("0x%03X\n",acceptanceFilter[i]);
+		sequencePointer = i;
+	}
+
+	while(fgets(inputStr, 190, bufferFile) != NULL)
+	{
+		IDlogged = FALSE;
+		i = 0;
+
+		/* Extract values from input string */
+		unsigned int scanReturn = sscanf(inputStr, logFormat, &timeNow_s, &timeNow_us, &ID, &canData);
+		if((scanReturn == 4) && (GetCAN1BufferPointer(ID) != -1))
+		{
+			fprintf(log,"Found ID: 0x%03X ", ID);
+
+			do
+			{
+				if(acceptanceFilter[i] == ID)
+				{
+					IDLogCount++;
+
+					sequencePointer++;
+					if(loggingSequence[sequencePointer] == 0)
+					{
+						sequencePointer = 0;
+					}
+
+					acceptanceFilter[i] = loggingSequence[sequencePointer];
+
+					IDlogged = TRUE;
+					fprintf(log,"Logged in %u, replaced with 0x%03X\n", i, loggingSequence[sequencePointer]);
+				}
+
+				i++;
+
+			}while((IDlogged == FALSE) && (i < FILTERSIZE));
+
+			if(IDlogged == FALSE)
+			{
+				IDMissedCount++;
+				fprintf(log,"Missed\n");
+			}
+		}
+	}
+
+	printf("Finished.   Logged: %u    Missed %u\n", IDLogCount, IDMissedCount);
+
+	i = 0;
+	while((loggingSequence[i] != 0) && (i < BUFFERSIZE))
+	{
+		printf("0x%03X\n",loggingSequence[i]);
+		i++;
+	}
+
+	printf("\n\nFilter:\n\n");
+	i = 0;
+	while((acceptanceFilter[i] != 0) && (i < FILTERSIZE))
+	{
+		printf("0x%03X\n",acceptanceFilter[i]);
+		i++;
+	}
+
+}
+
+
 
 void getCanSequence(char *filename, FILE *log)
 {
@@ -728,7 +897,7 @@ void csvOutput(char *filename)
 
 
 
-unsigned int GetCAN1BufferPointer(unsigned int ID)
+int GetCAN1BufferPointer(unsigned int ID)
 {
 	switch(ID)
 	{
@@ -1095,8 +1264,8 @@ unsigned int GetCAN1BufferPointer(unsigned int ID)
 		case(0x28D):	return 360;		break;
 		case(0x20D):	return 361;		break;
 		case(0x18D):	return 362;		break;
-		default:		return 9999;	break;
+		default:		return -1;	break;
 	}
 
-	return 9999;
+	return -1;
 }
