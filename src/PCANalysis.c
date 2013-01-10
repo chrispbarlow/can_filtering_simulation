@@ -49,20 +49,35 @@ typedef struct
 	unsigned int clashCount;			/* Number of times message clashes with processing of previous message */
 	unsigned int orderPointer;			/* Pointer to ordered list */
 	unsigned long projectedNextArrival;	/* Projected time for next occurrence of ID */
-} CAN_message;
+} CAN_message_t;
+
+typedef struct
+{
+	int canID;
+	unsigned long counter;
+	unsigned long loggedCounter;
+} logging_Sequence_t;
+
+typedef struct
+{
+	int canID;
+	int sequencePointer;
+} filter_t;
 
 typedef enum {TRUE, FALSE}flag_t;
 
-int loggingSequence[BUFFERSIZE];
-int acceptanceFilter[FILTERSIZE];
+logging_Sequence_t loggingSequence[BUFFERSIZE];
+filter_t acceptanceFilter[FILTERSIZE];
 
-CAN_message CAN1Buffer[BUFFERSIZE];
-CAN_message OrderedMessages[BUFFERSIZE];
+CAN_message_t CAN1Buffer[BUFFERSIZE];
+CAN_message_t OrderedMessages[BUFFERSIZE];
 
 void getCanSequence(char *filename, FILE *log);
 void getSimpleCanSequence(char *filename, FILE *log);
 void checkLogability(char *filename, FILE *log, int filterSize);
-int orderSequence(void);
+void orderSequence(void);
+int countSequence(void);
+
 
 
 
@@ -86,19 +101,22 @@ int main(void)
 
 	FILE *outputFile = fopen("output.txt", "w");
 
-	FILE *logFile = fopen("CAN_Logging_Simple_10-01-2013_Ordered.csv", "w");
+	FILE *logFile = fopen("CAN_Logging_Simple_10-01-2013_Individual_Counter.csv", "w");
 
 	noIDs = 0;
 
 	getSimpleCanSequence(CANlogFile, logFile);
 
-	sequenceSize = orderSequence();
+//	orderSequence();
+	sequenceSize = countSequence();
+
+	printf("\n\n %u ID's",sequenceSize);
 
 	printf("\n\n\nChecking logability...\r\n\n");
 	fprintf(logFile,"\n\n,,Filter Size,Logged,Missed\n");
-	for(i = 0; i < sequenceSize; i++)
+//	for(i = 0; i < sequenceSize; i++)
 	{
-		checkLogability(CANlogFile, logFile, i);
+		checkLogability(CANlogFile, logFile, 15);
 	}
 
 //	getCanSequence(CANlogFile, logFile);
@@ -139,7 +157,7 @@ void getSimpleCanSequence(char *filename, FILE *log)
 
 	for(i = 0; i < BUFFERSIZE; i++)
 	{
-		loggingSequence[i] = 0;
+		loggingSequence[i].canID = 0x000;
 	}
 
 	while((fgets(inputStr, 190, bufferFile) != NULL) && ((lineCounter++ < MAX_TRACE_LINES) || (MAX_TRACE_LINES == 0)))
@@ -157,21 +175,23 @@ void getSimpleCanSequence(char *filename, FILE *log)
 
 				do
 				{
-					if(loggingSequence[i] == ID)
+					if(loggingSequence[i].canID == ID)
 					{
 						IDfound = TRUE;
+						loggingSequence[i].counter++;
 					}
 
-					if(loggingSequence[i] != 0)
+					if(loggingSequence[i].canID != 0)
 					{
 						i++;
 					}
 
-				}while((loggingSequence[i] != 0) && (i < BUFFERSIZE) && (IDfound == FALSE));
+				}while((loggingSequence[i].canID != 0) && (i < BUFFERSIZE) && (IDfound == FALSE));
 
-				if((loggingSequence[i] == 0) && (IDfound == FALSE))
+				if((loggingSequence[i].canID == 0) && (IDfound == FALSE))
 				{
-					loggingSequence[i] = ID;
+					loggingSequence[i].canID = ID;
+					loggingSequence[i].counter = 1;
 				}
 			}
 		}
@@ -182,9 +202,9 @@ void getSimpleCanSequence(char *filename, FILE *log)
 
 	i = 0;
 
-	while((loggingSequence[i] != 0) && (i < BUFFERSIZE))
+	while((loggingSequence[i].canID != 0) && (i < BUFFERSIZE))
 	{
-		printf("0x%03X\n",loggingSequence[i]);
+		printf("0x%03X\n",loggingSequence[i].canID);
 		i++;
 	}
 
@@ -208,7 +228,8 @@ void checkLogability(char *filename, FILE *log, int filterSize)
 
 	for(i = 0; i <= filterSize; i++)
 	{
-		acceptanceFilter[i] = loggingSequence[i];
+		acceptanceFilter[i].canID = loggingSequence[i].canID;
+		acceptanceFilter[i].sequencePointer = i;
 //		printf("0x%03X\n",acceptanceFilter[i]);
 		sequencePointer = i;
 	}
@@ -228,16 +249,16 @@ void checkLogability(char *filename, FILE *log, int filterSize)
 
 			do
 			{
-				if(acceptanceFilter[i] == ID)
+				if(acceptanceFilter[i].canID == ID)
 				{
 					IDLogCount++;
+					loggingSequence[acceptanceFilter[i].sequencePointer].loggedCounter++;
 
 					sequencePointerStart = sequencePointer;
-
 					do
 					{
 						sequencePointer++;
-						if(loggingSequence[sequencePointer] == 0)
+						if(loggingSequence[sequencePointer].canID == 0)
 						{
 							sequencePointer = 0;
 						}
@@ -246,7 +267,7 @@ void checkLogability(char *filename, FILE *log, int filterSize)
 
 						for(j = 0; j <= filterSize; j++)
 						{
-							if(acceptanceFilter[j] == loggingSequence[sequencePointer])
+							if(acceptanceFilter[j].canID == loggingSequence[sequencePointer].canID)
 							{
 								IDfound = TRUE;
 							}
@@ -255,7 +276,8 @@ void checkLogability(char *filename, FILE *log, int filterSize)
 
 					}while((sequencePointer != sequencePointerStart) && (IDfound == TRUE));
 
-					acceptanceFilter[i] = loggingSequence[sequencePointer];
+					acceptanceFilter[i].canID = loggingSequence[sequencePointer].canID;
+					acceptanceFilter[i].sequencePointer = sequencePointer;
 
 					IDlogged = TRUE;
 //					fprintf(log,"Logged in %u, replaced with 0x%03X\n", i, loggingSequence[sequencePointer]);
@@ -275,6 +297,15 @@ void checkLogability(char *filename, FILE *log, int filterSize)
 
 	printf("filterSize: %u   Logged: %u    Missed %u\n", filterSize, IDLogCount, IDMissedCount);
 	fprintf(log,",,%u,%u,%u\n", filterSize, IDLogCount, IDMissedCount);
+
+	for(i = 0; i < BUFFERSIZE; i++)
+	{
+		if(loggingSequence[i].canID != 0)
+		{
+			printf("0x%03X: %lu of %lu   Missed: %lu\n",loggingSequence[i].canID, loggingSequence[i].loggedCounter, loggingSequence[i].counter, (loggingSequence[i].counter - loggingSequence[i].loggedCounter));
+		}
+	}
+
 
 //	i = 0;
 //	while((loggingSequence[i] != 0) && (i < BUFFERSIZE))
@@ -595,22 +626,24 @@ int orderMessages(void)
 	return counter;
 }
 
-int orderSequence(void)
+void orderSequence(void)
 {
-	unsigned int i, j, minIDPrev = 0, minID = 0xFFFF, counter;
-	int orderedSequence[BUFFERSIZE];
+	unsigned int i, j, minIDPrev = 0, minID = 0xFFFF, minIDPointer;
+	logging_Sequence_t orderedSequence[BUFFERSIZE];
 
 	for (i = 0; i < BUFFERSIZE; i++)
 	{
 		for(j = 0; j < BUFFERSIZE; j++)
 		{
-			if((loggingSequence[j] < minID) && (loggingSequence[j] > minIDPrev))
+			if((loggingSequence[j].canID < minID) && (loggingSequence[j].canID > minIDPrev))
 			{
-				minID = loggingSequence[j];
+				minID = loggingSequence[j].canID;
+				minIDPointer = j;
 			}
 		}
 
-		orderedSequence[i] = minID;
+		orderedSequence[i].canID = minID;
+		orderedSequence[i].counter = loggingSequence[minIDPointer].counter;
 		minIDPrev = minID;
 		minID = 0xFFFF;
 	}
@@ -619,16 +652,32 @@ int orderSequence(void)
 
 	for(i = 0; i < BUFFERSIZE; i++)
 	{
-		if(orderedSequence[i] == 0xFFFF)
+		if(orderedSequence[i].canID == 0xFFFF)
 		{
-			loggingSequence[i] = 0x000;
+			loggingSequence[i].canID = 0x000;
+			loggingSequence[i].counter = 0;
 		}
 		else
 		{
-			loggingSequence[i] = orderedSequence[i];
-			counter++;
+			loggingSequence[i].canID = orderedSequence[i].canID;
+			loggingSequence[i].counter = orderedSequence[i].counter;
 		}
-		printf("0x%03X\n",loggingSequence[i]);
+	}
+}
+
+int countSequence(void)
+{
+	unsigned int i, counter;
+
+	printf("\n\n");
+
+	for(i = 0; i < BUFFERSIZE; i++)
+	{
+		if(loggingSequence[i].canID != 0x000)
+		{
+			counter++;
+			printf("0x%03X: %lu\n",loggingSequence[i].canID, loggingSequence[i].counter);
+		}
 	}
 
 	return counter;
