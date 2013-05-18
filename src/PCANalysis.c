@@ -60,12 +60,12 @@ char *logFormat = "%4u.%06u 1  %3x             Tx%s";
 
 int main(void)
 {
-	char *CANlogFile = "Log_for_analysis2.asc";
+	char *CANlogFile = "Logs/Log_for_analysis2.asc";
 	int i, sequenceSize;
 
 	FILE *outputFile = fopen("output.txt", "w");
 
-	FILE *logFile = fopen("CAN_Logging_Simple_11-01-2013_Timing_perID_16_500us.txt", "w");
+	FILE *logFile = fopen("CAN_Logging_Simple_18-05-2013_Timing_perID_16_500us.txt", "w");
 
 	noIDs = 0;
 
