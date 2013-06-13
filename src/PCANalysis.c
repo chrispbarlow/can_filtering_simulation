@@ -27,12 +27,18 @@ unsigned long  Task_WCET;
 int noIDs;
 unsigned int filterPointer;
 
+typedef struct{
+	int canID;
+	unsigned int cycleTime;
+} logging_list_t;
 
 typedef struct
 {
 	int canID;
 	unsigned long counter;
 	unsigned long loggedCounter;
+	unsigned int timer;
+	unsigned int timer_reload;
 } logging_Sequence_t;
 
 typedef enum {TRUE, FALSE}flag_t;
@@ -48,18 +54,72 @@ typedef struct
 logging_Sequence_t loggingSequence[BUFFERSIZE];
 filter_t acceptanceFilter[FILTERSIZE];
 
+logging_list_t loggingList[]={
+	{ 0x187 , 10 },
+	{ 0x188 , 10 },
+	{ 0x189 , 10 },
+	{ 0x18A , 10 },
+	{ 0x18B , 10 },
+	{ 0x18C , 10 },
+	{ 0x18D , 10 },
+	{ 0x18E , 10 },
+	{ 0x207 , 10 },
+	{ 0x209 , 10 },
+	{ 0x20B , 10 },
+	{ 0x20D , 10 },
+	{ 0x287 , 10 },
+	{ 0x289 , 10 },
+	{ 0x28B , 10 },
+	{ 0x28D , 10 },
+	{ 0x307 , 10 },
+	{ 0x309 , 10 },
+	{ 0x30B , 10 },
+	{ 0x30D , 10 },
+	{ 0x385 , 10 },
+	{ 0x387 , 10 },
+	{ 0x389 , 10 },
+	{ 0x38B , 10 },
+	{ 0x38D , 10 },
+	{ 0x407 , 10 },
+	{ 0x409 , 10 },
+	{ 0x40B , 10 },
+	{ 0x40D , 10 },
+	{ 0x707 , 50 },
+	{ 0x709 , 50 },
+	{ 0x70B , 50 },
+	{ 0x70D , 50 }
+};
+
+unsigned int listSize = sizeof(loggingList)/sizeof(logging_list_t);
+
 void getSimpleCanSequence(char *filename, FILE *log);
 void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize);
 void orderSequence(void);
 int countSequence(void);
 
+void buildSequence(void){
+	int i, cycleTime_min;
+
+	cycleTime_min = 0xFFFF;
+	for(i=0;i<listSize;i++){
+		if(loggingList[i].cycleTime<cycleTime_min){
+			cycleTime_min = loggingList[i].cycleTime;
+		}
+	}
+
+	for(i=0;i<BUFFERSIZE;i++){
+		if(i<listSize){
+			loggingSequence[i].canID = loggingList[i].canID;
+			loggingSequence[i].timer_reload = loggingList[i].cycleTime/cycleTime_min;
+		}
+	}
+}
 
 int GetCAN1BufferPointer(unsigned int ID);
 
 char *logFormat = "%4u.%06u 1  %3x             Tx%s";
 
-int main(void)
-{
+int main(void){
 	char *CANlogFile = "Logs/Log_for_analysis2.asc";
 	int i, sequenceSize;
 
@@ -68,23 +128,22 @@ int main(void)
 	FILE *logFile = fopen("CAN_Logging_Simple_18-05-2013_Timing_perID_16_500us.txt", "w");
 
 	noIDs = 0;
-
-	getSimpleCanSequence(CANlogFile, logFile);
+	buildSequence();
+//	getSimpleCanSequence(CANlogFile, logFile);
 
 //	orderSequence();
 	sequenceSize = countSequence();
 	printf("\n\n\n");
 	printf("\n\n %u ID's",sequenceSize);
 
-	i = 16;
 
 	printf("\n\n\nChecking logability...\r\n\n");
 	fprintf(logFile,"\n\n,,Filter Size,Logged,Missed\n");
-//	for(i = 1; i <= sequenceSize; i++)
-	{
-		checkLogability(CANlogFile, logFile, i, sequenceSize);
-	}
+//	for(i = 1; i <= sequenceSize; i++)	{
+//		checkLogability(CANlogFile, logFile, i, sequenceSize);
+//	}
 
+	checkLogability(CANlogFile, logFile, 16, sequenceSize);
 
 	fclose(outputFile);
 	fclose(logFile);
@@ -147,7 +206,6 @@ void getSimpleCanSequence(char *filename, FILE *log)
 				}
 			}
 		}
-
 	}
 
 	printf("Finished sequence:\n");
