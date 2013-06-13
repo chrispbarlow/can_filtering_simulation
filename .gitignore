@@ -1,0 +1,8 @@
+Debug/objects.mk
+Debug/sources.mk
+Debug/src/subdir.mk
+Debug/makefile
+.cproject
+.project
+Debug/src/PCANalysis.o
+output.txt
