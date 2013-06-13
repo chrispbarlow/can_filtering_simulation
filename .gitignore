@@ -1,8 +1,2 @@
-Debug/objects.mk
-Debug/sources.mk
-Debug/src/subdir.mk
-Debug/makefile
-.cproject
-.project
-Debug/src/PCANalysis.o
+CAN_Logging_Simple_18-05-2013_Timing_perID_16_500us.txt
 output.txt
