@@ -93,11 +93,11 @@ logging_list_t loggingList[]={
 int listSize = sizeof(loggingList)/sizeof(logging_list_t);
 int sequenceSize;
 
-void getSimpleCanSequence(char *filename, FILE *log);
+void CanSequenceMessageCounter(char *filename);
 void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize);
 void orderSequence(void);
 int countSequence(void);
-int GetCAN1BufferPointer(unsigned int ID);
+flag_t GetCAN1BufferPointer(unsigned int ID);
 
 void buildSequence(void){
 	int i, cycleTime_min;
@@ -181,29 +181,20 @@ int main(void){
 
 	noIDs = 0;
 	buildSequence();
-////	getSimpleCanSequence(CANlogFile, logFile);
-//
-////	orderSequence();
+	CanSequenceMessageCounter(CANlogFile);
+//	orderSequence();
+
 	sequenceSize = countSequence();
 	printf("\n\n\n");
 	printf("\n\n %u ID's\n\n",sequenceSize);
 
-//	for(i = 0; i < 16; i++)	{
-//
-//		if(updateFilter(i)==TRUE){
-//			printf("filter ID: %03X\n", acceptanceFilter[i].canID);
-//		}
-//		else{
-//			printf("updateFilter FAIL\n");
-//		}
-//	}
 	printf("\n\n\nChecking logability...\r\n\n");
 	fprintf(logFile,"\n\n,,Filter Size,Logged,Missed\n");
-	for(i = 1; i <= sequenceSize; i++)	{
-		checkLogability(CANlogFile, logFile, i, sequenceSize);
-	}
+//	for(i = 1; i <= sequenceSize; i++)	{
+//		checkLogability(CANlogFile, logFile, i, sequenceSize);
+//	}
 
-//	checkLogability(CANlogFile, logFile, 28, sequenceSize);
+	checkLogability(CANlogFile, logFile, 16, sequenceSize);
 
 	fclose(outputFile);
 	fclose(logFile);
@@ -276,7 +267,7 @@ void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize
 			}
 
 			/* ID is in logging list */
-			if(GetCAN1BufferPointer(ID) == 1){
+			if(GetCAN1BufferPointer(ID) == TRUE){
 				IDlogged = FALSE;
 				i = 0;
 
@@ -305,29 +296,26 @@ void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize
 
 	printf("filterSize: %u   Logged: %u    Missed %u\n", filterSize, IDLogCount, IDMissedCount);
 
-	//	for(i = 0; i < BUFFERSIZE; i++)
-	//	{
-	//		if(loggingSequence[i].canID != 0)
-	//		{
-	//			fprintf(log,",,0x%03X,%lu,%lu,%lu\n",loggingSequence[i].canID, loggingSequence[i].loggedCounter, (loggingSequence[i].counter - loggingSequence[i].loggedCounter), loggingSequence[i].counter);
-	//		}
-	//	}
-	//	fprintf(log,"\n");
+		for(i = 0; i < BUFFERSIZE; i++){
+			if(loggingSequence[i].canID != 0){
+				fprintf(log,",,0x%03X,%lu,%lu,%lu\n",loggingSequence[i].canID, loggingSequence[i].loggedCounter, (loggingSequence[i].counter - loggingSequence[i].loggedCounter), loggingSequence[i].counter);
+			}
+		}
+		fprintf(log,"\n");
 
-	for(i = 0; i < BUFFERSIZE; i++)
-	{
-		if(loggingSequence[i].canID != 0)
-		{
+	for(i = 0; i < BUFFERSIZE; i++){
+		if(loggingSequence[i].canID != 0){
 			printf(",,0x%03X,%lu,%lu,%lu\n",loggingSequence[i].canID, loggingSequence[i].loggedCounter, (loggingSequence[i].counter - loggingSequence[i].loggedCounter), loggingSequence[i].counter);
 		}
 	}
 	printf("\n");
 
-	fprintf(log,",,%u,%u,%u\n", filterSize, IDLogCount, IDMissedCount);
+//	fprintf(log,",,%u,%u,%u\n", filterSize, IDLogCount, IDMissedCount);
 
 }
 
-void getSimpleCanSequence(char *filename, FILE *log)
+
+void CanSequenceMessageCounter(char *filename)
 {
 	char inputStr[200];
 	char canData[200];
@@ -341,44 +329,27 @@ void getSimpleCanSequence(char *filename, FILE *log)
 	/* open trace file */
 	FILE *bufferFile = fopen(filename, "r");
 
-	for(i = 0; i < BUFFERSIZE; i++)
-	{
-		loggingSequence[i].canID = 0x000;
-	}
-
 	while((fgets(inputStr, 190, bufferFile) != NULL) && ((lineCounter++ < MAX_TRACE_LINES) || (MAX_TRACE_LINES == 0)))
 	{
 		/* Extract values from input string */
 		unsigned int scanReturn = sscanf(inputStr, logFormat, &timeNow_s, &timeNow_us, &ID, &canData);
-		if(scanReturn == 4)
-		{
+		if(scanReturn == 4){
 			printf("%u Sequencing log line: %s", scanReturn, inputStr);
 
-			if(GetCAN1BufferPointer(ID) == 1)
-			{
+			if(GetCAN1BufferPointer(ID) == TRUE){
 				i = 0;
 				IDfound = FALSE;
 
-				do
-				{
-					if(loggingSequence[i].canID == ID)
-					{
-						IDfound = TRUE;
+				do{
+					if(loggingSequence[i].canID == ID){
 						loggingSequence[i].counter++;
 					}
 
-					if(loggingSequence[i].canID != 0)
-					{
+					if(loggingSequence[i].canID != 0){
 						i++;
 					}
 
-				}while((loggingSequence[i].canID != 0) && (i < BUFFERSIZE) && (IDfound == FALSE));
-
-				if((loggingSequence[i].canID == 0) && (IDfound == FALSE))
-				{
-					loggingSequence[i].canID = ID;
-					loggingSequence[i].counter = 1;
-				}
+				}while((loggingSequence[i].canID != 0) && (i < listSize) && (IDfound == FALSE));
 			}
 		}
 	}
@@ -389,7 +360,7 @@ void getSimpleCanSequence(char *filename, FILE *log)
 
 	while((loggingSequence[i].canID != 0) && (i < BUFFERSIZE))
 	{
-		printf("0x%03X\n",loggingSequence[i].canID);
+		printf("0x%03X: %u\n",loggingSequence[i].canID,loggingSequence[i].counter);
 		i++;
 	}
 
@@ -456,48 +427,14 @@ int countSequence(void){
 
 
 /* Checks if ID is in logging list */
-int GetCAN1BufferPointer(unsigned int ID){
-	switch(ID){
+flag_t GetCAN1BufferPointer(unsigned int ID){
+	int i;
+	flag_t IDfound = FALSE;
 
-		case(0x187):
-		case(0x188):
-		case(0x189):
-		case(0x18A):
-		case(0x18B):
-		case(0x18C):
-		case(0x18D):
-		case(0x18E):
-		case(0x207):
-		case(0x209):
-		case(0x20B):
-		case(0x20D):
-		case(0x287):
-		case(0x289):
-		case(0x28B):
-		case(0x28D):
-		case(0x307):
-		case(0x309):
-		case(0x30B):
-		case(0x30D):
-		case(0x385):
-		case(0x387):
-		case(0x389):
-		case(0x38B):
-		case(0x38D):
-		case(0x407):
-		case(0x409):
-		case(0x40B):
-		case(0x40D):
-		case(0x707):
-		case(0x709):
-		case(0x70B):
-		case(0x70D):
-			return 1;
-			break;
-		default:
-			return -1;
-			break;
+	for(i=0;i<listSize;i++){
+		if(ID == loggingList[i].canID){
+			IDfound = TRUE;
+		}
 	}
-
-	return -1;
+	return IDfound;
 }
