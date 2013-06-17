@@ -67,27 +67,27 @@ logging_list_t loggingList[]={
 	{ 0x209 , 10 },
 	{ 0x20B , 10 },
 	{ 0x20D , 10 },
-	{ 0x287 , 10 },
-	{ 0x289 , 10 },
-	{ 0x28B , 10 },
-	{ 0x28D , 10 },
-	{ 0x307 , 10 },
-	{ 0x309 , 10 },
-	{ 0x30B , 10 },
-	{ 0x30D , 10 },
-	{ 0x385 , 10 },
-	{ 0x387 , 10 },
-	{ 0x389 , 10 },
-	{ 0x38B , 10 },
-	{ 0x38D , 10 },
-	{ 0x407 , 10 },
-	{ 0x409 , 10 },
-	{ 0x40B , 10 },
-	{ 0x40D , 10 },
-	{ 0x707 , 50 },
-	{ 0x709 , 50 },
-	{ 0x70B , 50 },
-	{ 0x70D , 50 }
+//	{ 0x287 , 10 },
+//	{ 0x289 , 10 },
+//	{ 0x28B , 10 },
+//	{ 0x28D , 10 },
+//	{ 0x307 , 10 },
+//	{ 0x309 , 10 },
+//	{ 0x30B , 10 },
+//	{ 0x30D , 10 },
+//	{ 0x385 , 10 },
+//	{ 0x387 , 10 },
+//	{ 0x389 , 10 },
+//	{ 0x38B , 10 },
+//	{ 0x38D , 10 },
+//	{ 0x407 , 10 },
+//	{ 0x409 , 10 },
+//	{ 0x40B , 10 },
+//	{ 0x40D , 10 },
+//	{ 0x707 , 50 },
+//	{ 0x709 , 50 },
+//	{ 0x70B , 50 },
+//	{ 0x70D , 50 }
 };
 
 int listSize = sizeof(loggingList)/sizeof(logging_list_t);
@@ -161,8 +161,6 @@ flag_t updateFilter(unsigned int filterPointer){
 		acceptanceFilter[filterPointer].canID = loggingSequence[i].canID;
 		acceptanceFilter[filterPointer].sequencePointer = i;
 		acceptanceFilter[filterPointer].loggedFlag = FALSE;
-
-
 	}
 
 	return result;
@@ -296,12 +294,12 @@ void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize
 
 	printf("filterSize: %u   Logged: %u    Missed %u\n", filterSize, IDLogCount, IDMissedCount);
 
-		for(i = 0; i < BUFFERSIZE; i++){
-			if(loggingSequence[i].canID != 0){
-				fprintf(log,",,0x%03X,%lu,%lu,%lu\n",loggingSequence[i].canID, loggingSequence[i].loggedCounter, (loggingSequence[i].counter - loggingSequence[i].loggedCounter), loggingSequence[i].counter);
-			}
-		}
-		fprintf(log,"\n");
+//		for(i = 0; i < BUFFERSIZE; i++){
+//			if(loggingSequence[i].canID != 0){
+//				fprintf(log,",,0x%03X,%lu,%lu,%lu\n",loggingSequence[i].canID, loggingSequence[i].loggedCounter, (loggingSequence[i].counter - loggingSequence[i].loggedCounter), loggingSequence[i].counter);
+//			}
+//		}
+//		fprintf(log,"\n");
 
 	for(i = 0; i < BUFFERSIZE; i++){
 		if(loggingSequence[i].canID != 0){
@@ -310,7 +308,7 @@ void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize
 	}
 	printf("\n");
 
-//	fprintf(log,",,%u,%u,%u\n", filterSize, IDLogCount, IDMissedCount);
+	fprintf(log,",,%u,%u,%u\n", filterSize, IDLogCount, IDMissedCount);
 
 }
 
@@ -334,7 +332,7 @@ void CanSequenceMessageCounter(char *filename)
 		/* Extract values from input string */
 		unsigned int scanReturn = sscanf(inputStr, logFormat, &timeNow_s, &timeNow_us, &ID, &canData);
 		if(scanReturn == 4){
-			printf("%u Sequencing log line: %s", scanReturn, inputStr);
+			printf("%u Counting ID's... Log line: %s", scanReturn, inputStr);
 
 			if(GetCAN1BufferPointer(ID) == TRUE){
 				i = 0;
