@@ -1,2 +1,4 @@
 .metadata/
 RemoteSystemsTempFiles/.project
+Analysis_tool/.cproject
+Analysis_tool/Debug/src/PCANalysis.o
