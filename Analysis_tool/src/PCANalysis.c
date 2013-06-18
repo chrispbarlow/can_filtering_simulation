@@ -202,7 +202,6 @@ int main(void){
 
 
 
-
 void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize){
 	char inputStr[200];
 	char canData[200];
