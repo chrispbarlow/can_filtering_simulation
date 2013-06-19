@@ -1,0 +1,9 @@
+Debug/Example_2833xCpuTimer.map
+Debug/Example_2833xCpuTimer.out
+Debug/Lib/ADC/ADC.pp
+Debug/Lib/ADC/DSP2833x_Adc.pp
+Debug/Lib/ADC/subdir_rules.mk
+Debug/Lib/ADC/subdir_vars.mk
+Debug/Tasks/readADC/readADC.pp
+Debug/Tasks/readADC/subdir_rules.mk
+Debug/Tasks/readADC/subdir_vars.mk
