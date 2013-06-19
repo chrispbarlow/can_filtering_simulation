@@ -97,15 +97,9 @@ S64_DEPS__QUOTED :=
 SUBDIRS := \
 . \
 scheduler \
-Tasks/tickCounter \
 Tasks/sendCAN \
 Tasks/receiveCAN \
-Tasks/readADC \
-Tasks/printTick2 \
-Tasks/printTick \
 Tasks/newTask_Template \
-Tasks/handleCAN \
-Tasks/flashingLED \
 Lib/TI \
 Lib/CAN \
 Lib/ADC \

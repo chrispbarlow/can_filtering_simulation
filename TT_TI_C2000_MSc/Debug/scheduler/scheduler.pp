@@ -31,20 +31,6 @@ scheduler/scheduler.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_
 scheduler/scheduler.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_DefaultISR.h
 scheduler/scheduler.obj: ../scheduler/../scheduler/scheduler.h
 scheduler/scheduler.obj: ../scheduler/schedulerConfig.h
-scheduler/scheduler.obj: ../scheduler/../Tasks/tickCounter/tickCounter.h
-scheduler/scheduler.obj: ../scheduler/../Tasks/printTick/printTick.h
-scheduler/scheduler.obj: ../scheduler/../Tasks/printTick/../../global.h
-scheduler/scheduler.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h
-scheduler/scheduler.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/linkage.h
-scheduler/scheduler.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdarg.h
-scheduler/scheduler.obj: ../scheduler/../Tasks/printTick2/printTick2.h
-scheduler/scheduler.obj: ../scheduler/../Tasks/sendCAN/sendCAN.h
-scheduler/scheduler.obj: ../scheduler/../Tasks/sendCAN/../../Lib/CAN/CAN.h
-scheduler/scheduler.obj: ../scheduler/../Tasks/handleCAN/handleCAN.h
-scheduler/scheduler.obj: ../scheduler/../Tasks/receiveCAN/receiveCAN.h
-scheduler/scheduler.obj: ../scheduler/../Tasks/flashingLED/flashingLED.h
-scheduler/scheduler.obj: ../scheduler/../Tasks/readADC/readADC.h
-scheduler/scheduler.obj: ../scheduler/../Tasks/readADC/../../Lib/ADC/ADC.h
 
 ../scheduler/scheduler.c: 
 ../scheduler/scheduler.h: 
@@ -77,17 +63,3 @@ C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_I
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_DefaultISR.h: 
 ../scheduler/../scheduler/scheduler.h: 
 ../scheduler/schedulerConfig.h: 
-../scheduler/../Tasks/tickCounter/tickCounter.h: 
-../scheduler/../Tasks/printTick/printTick.h: 
-../scheduler/../Tasks/printTick/../../global.h: 
-C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h: 
-C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/linkage.h: 
-C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdarg.h: 
-../scheduler/../Tasks/printTick2/printTick2.h: 
-../scheduler/../Tasks/sendCAN/sendCAN.h: 
-../scheduler/../Tasks/sendCAN/../../Lib/CAN/CAN.h: 
-../scheduler/../Tasks/handleCAN/handleCAN.h: 
-../scheduler/../Tasks/receiveCAN/receiveCAN.h: 
-../scheduler/../Tasks/flashingLED/flashingLED.h: 
-../scheduler/../Tasks/readADC/readADC.h: 
-../scheduler/../Tasks/readADC/../../Lib/ADC/ADC.h: 

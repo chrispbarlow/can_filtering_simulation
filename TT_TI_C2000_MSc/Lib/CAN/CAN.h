@@ -23,11 +23,11 @@ typedef enum {DISABLED, TX_FREE, RX_FREE, TX_PENDING, RX_PENDING, TX_SENT, RX_AR
 typedef struct{
 
 	messageObjectStates_t 		mailboxState;		/* High-level Tx / Rx State of message object */
-	volatile struct MBOX *		mailbox;					/* Mailbox */
-	volatile union CANLAM_REG * LAMRegs; 					/* Local acceptance mask */
-	volatile Uint32 * 			ECanaMOTORegs;				/* Message Object Timeout */
-	volatile Uint32 * 			ECanaMOTSRegs;				/* Message Object Time Stamp */
-
+	volatile struct MBOX *		mailbox;			/* Mailbox */
+	volatile union CANLAM_REG * LAMRegs; 			/* Local acceptance mask */
+	volatile Uint32 * 			ECanaMOTORegs;		/* Message Object Timeout */
+	volatile Uint32 * 			ECanaMOTSRegs;		/* Message Object Time Stamp */
+	volatile Uint16 			sequencePointer;	/* Pointer to message in sequence */
 } messageObject_t;
 
 
@@ -44,7 +44,7 @@ void CAN_Test(void);
 int16 findMailbox(canPort_t * port, messageObjectStates_t state);
 
 /* returns -1 if mailbox already enabled, 0 on successful configuration */
-int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char IDE, Uint32 canID, Uint16 dataLength);
+int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char IDE, Uint32 canID, Uint16 dataLength, Uint16 newSequencePointer);
 
 /* takes data from byte array and loads into selected mailbox (mbNum) */
 int16 loadTxMailbox(char port, char mbNum, Uint32 data[]);

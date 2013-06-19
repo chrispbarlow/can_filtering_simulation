@@ -175,7 +175,7 @@ int16 findMailbox(canPort_t * port, messageObjectStates_t state)
 }
 
 /* Always returns 0  */
-int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char IDE, Uint32 canID, Uint16 dataLength){
+int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char IDE, Uint32 canID, Uint16 dataLength, Uint16 newSequencePointer){
 	int16 success = -1;
 
 	/*Read regs into shadow */
@@ -204,6 +204,7 @@ int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char
 
 	CAN_Ports[port].message_Objects[mbNum].mailbox->MSGID.all = canID;
 	CAN_Ports[port].message_Objects[mbNum].mailbox->MSGCTRL.bit.DLC = dataLength;
+	CAN_Ports[port].message_Objects[mbNum].sequencePointer = newSequencePointer;
 
 	/* Set direction & Initialise */
 	switch(direction){
