@@ -11,7 +11,7 @@ canTxMessage_t canMessage_Tx_7AB = {
 		0x7AB,
 		canData_Tx_7AB.rawData,
 		8,
-		1,
+		100,
 		0
 };
 

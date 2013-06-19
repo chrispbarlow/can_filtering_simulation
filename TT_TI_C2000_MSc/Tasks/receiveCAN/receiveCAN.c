@@ -11,10 +11,6 @@
 
 typedef enum{FALSE, TRUE}boolean_t;
 
-typedef struct{
-	Uint32 canID;
-	Uint16 messagePointer;
-}filterShadow_t;
 
 filterShadow_t mailBoxFilters[32];
 
@@ -29,19 +25,23 @@ void receiveCAN_init(void){
 
 void receiveCAN_update(void){
 	Uint16 mailBox, messagePointer;
+	static Uint32 heartbeat = 0;
 
 	for(mailBox=0; mailBox<31; mailBox++){
 		if(checkMailboxState(CANPORT_A, mailBox) == RX_PENDING){
 
 			messagePointer = mailBoxFilters[mailBox].messagePointer;
-
+			CAN_RxMessages[messagePointer].counter++;
 			readRxMailbox(CANPORT_A, mailBox, CAN_RxMessages[messagePointer].canData.rawData); /*TODO: read use sequence pointer for array index */
-			printf("0x%03X\n", (Uint16)CAN_RxMessages[messagePointer].canID);
+	//		printf("0x%03X\n", (Uint16)CAN_RxMessages[messagePointer].canID);
 
 			/*TODO: update mailBox pointer and ID */
 			updateFilter(mailBox);
 		}
 	}
+	heartbeat++;
+	CAN_TxMessages[0]->canData[0] = CAN_RxMessages[0].counter;
+	CAN_TxMessages[0]->canData[1] = heartbeat;
 }
 
 void updateFilter(unsigned int filterPointer){
@@ -88,6 +88,7 @@ void updateFilter(unsigned int filterPointer){
 		mailBoxFilters[filterPointer].messagePointer = i;
 
 		configureMailbox(CANPORT_A, filterPointer, CAN_RX, ID_STD, CAN_RxMessages[i].canID, CAN_RxMessages[i].canDLC);
-		printf("%02u: 0x%03X\n", filterPointer, (Uint16)mailBoxFilters[filterPointer].canID);
+		//printf("%02u: 0x%03X\n", filterPointer, (Uint16)mailBoxFilters[filterPointer].canID);
+
 	}
 }

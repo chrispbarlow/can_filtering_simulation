@@ -167,7 +167,7 @@ int16 findMailbox(canPort_t * port, messageObjectStates_t state){
 
 /* Always returns 0  */
 int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char IDE, Uint32 canID, Uint16 dataLength){
-	int16 success = -1;
+	int16 success = -1, counter;
 
 	/*Read regs into shadow */
 	canRegsShadow.CANME.all = CAN_Ports[port].canRegs->CANME.all;
@@ -179,6 +179,8 @@ int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char
 	while(canRegsShadow.CANTRS.all & (bitSelect_32<<mbNum) != 0){
 		canRegsShadow.CANTRR.all |= (bitSelect_32<<mbNum);
 		CAN_Ports[port].canRegs->CANTRR.all = canRegsShadow.CANTRR.all;
+		printf("%u\n",counter);
+		counter++;
 	}
 
 	/* disable mailbox */

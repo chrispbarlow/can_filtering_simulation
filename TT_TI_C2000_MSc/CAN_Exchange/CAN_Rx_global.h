@@ -80,6 +80,7 @@ typedef struct {
 	Uint16 canDLC;			/* Message byte length */
 	int16 timer;
 	int16 timer_reload;
+	Uint32 counter;
 } canRxMessage_t;
 
 extern canRxMessage_t CAN_RxMessages[];
