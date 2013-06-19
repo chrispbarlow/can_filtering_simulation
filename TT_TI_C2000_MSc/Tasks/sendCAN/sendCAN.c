@@ -11,12 +11,8 @@ Uint16 CANTimer;
 
 void sendCAN_init(void)
 {
-	Uint16 i;
+	configureMailbox(CANPORT_A, 31, CAN_TX, ID_STD, CAN_TxMessages[0]->canID, CAN_TxMessages[0]->canDLC);
 
-	for(i=0; i<numTxCANMsgs; i++)
-	{
-		configureMailbox(CANPORT_A, i, CAN_TX, ID_STD, CAN_TxMessages[i]->canID, CAN_TxMessages[i]->canDLC, i);
-	}
 	CANTimer = 10;
 
 	CANTx_clearAll();
@@ -24,22 +20,17 @@ void sendCAN_init(void)
 
 void sendCAN_update(void)
 {
-	Uint16 i;
 
-	for(i=0; i<numTxCANMsgs; i++)
+	if((checkMailboxState(CANPORT_A, 31) == TX_FREE) && (CAN_TxMessages[0]->offset == 0))
 	{
-		if((checkMailboxState(CANPORT_A, i) == TX_FREE) && (CAN_TxMessages[i]->offset == 0))
-		{
-			CAN_TxMessages[i]->offset = (CAN_TxMessages[i]->period - 1);
-			loadTxMailbox(CANPORT_A, i, CAN_TxMessages[i]->canData);
-			commitSendMailbox(CANPORT_A, i);
-		}
-		else if(CAN_TxMessages[i]->offset > 0)
-		{
-			CAN_TxMessages[i]->offset--;
-		}
+		CAN_TxMessages[0]->offset = (CAN_TxMessages[0]->period - 1);
+		loadTxMailbox(CANPORT_A, 31, CAN_TxMessages[0]->canData);
+		commitSendMailbox(CANPORT_A, 31);
 	}
-
+	else if(CAN_TxMessages[0]->offset > 0)
+	{
+		CAN_TxMessages[0]->offset--;
+	}
 }
 
 void CANTx_clearAll(void)

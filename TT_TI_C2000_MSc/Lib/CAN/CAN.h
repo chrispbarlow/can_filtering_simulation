@@ -27,7 +27,6 @@ typedef struct{
 	volatile union CANLAM_REG * LAMRegs; 			/* Local acceptance mask */
 	volatile Uint32 * 			ECanaMOTORegs;		/* Message Object Timeout */
 	volatile Uint32 * 			ECanaMOTSRegs;		/* Message Object Time Stamp */
-	volatile Uint16 			sequencePointer;	/* Pointer to message in sequence */
 } messageObject_t;
 
 
@@ -44,7 +43,7 @@ void CAN_Test(void);
 int16 findMailbox(canPort_t * port, messageObjectStates_t state);
 
 /* returns -1 if mailbox already enabled, 0 on successful configuration */
-int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char IDE, Uint32 canID, Uint16 dataLength, Uint16 newSequencePointer);
+int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char IDE, Uint32 canID, Uint16 dataLength);
 
 /* takes data from byte array and loads into selected mailbox (mbNum) */
 int16 loadTxMailbox(char port, char mbNum, Uint32 data[]);
@@ -58,6 +57,7 @@ int16 readRxMailbox(char port, char mbNum, Uint32 data[]);
 void updateMailboxes(char port); /* This will probably become the CANTx_update() task */
 
 messageObjectStates_t checkMailboxState(char port, char mbNum);
+Uint32 getMailboxID(char port, char mbNum);
 
 void InitCanA(Uint16 baud);		// Initialize eCAN-A module
 void InitCanB(Uint16 baud);		// Initialize eCAN-B module

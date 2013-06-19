@@ -7,29 +7,45 @@
 #include "CAN_Rx_global.h"
 
 
-union CAN_DATA_RX_7AB canData_Rx_7AB;
-canRxMessage_t canMessage_Rx_7AB = {
-		0x7AB,
-		canData_Rx_7AB.rawData,
-		8
-};
-
-
-union CAN_DATA_RX_651 canData_Rx_651;
-canRxMessage_t canMessage_Rx_651 = {
-		0x651,
-		canData_Rx_651.rawData,
-		6
-};
-
 /*******************************************************************************
  * CAN Rx Message array
  * Assigns messages to mailbox position (array index + CAN_RX_MBOFFSET)
  * *****************************************************************************/
 
-canRxMessage_t* CAN_RxMessages[] = {
-		&canMessage_Rx_7AB,
-		&canMessage_Rx_651
+canRxMessage_t CAN_RxMessages[] = {
+		{ 0x187 , {0,0}, 8, 0, 1},
+		{ 0x188 , {0,0}, 8, 0, 1},
+		{ 0x189 , {0,0}, 8, 0, 1},
+		{ 0x18A , {0,0}, 8, 0, 1},
+		{ 0x18B , {0,0}, 8, 0, 1},
+		{ 0x18C , {0,0}, 8, 0, 1},
+		{ 0x18D , {0,0}, 8, 0, 1},
+		{ 0x18E , {0,0}, 8, 0, 1},
+		{ 0x207 , {0,0}, 8, 0, 1},
+		{ 0x209 , {0,0}, 8, 0, 1},
+		{ 0x20B , {0,0}, 8, 0, 1},
+		{ 0x20D , {0,0}, 8, 0, 1},
+		{ 0x287 , {0,0}, 8, 0, 1},
+		{ 0x289 , {0,0}, 8, 0, 1},
+		{ 0x28B , {0,0}, 8, 0, 1},
+		{ 0x28D , {0,0}, 8, 0, 1},
+		{ 0x307 , {0,0}, 8, 0, 1},
+		{ 0x309 , {0,0}, 8, 0, 1},
+		{ 0x30B , {0,0}, 8, 0, 1},
+		{ 0x30D , {0,0}, 8, 0, 1},
+		{ 0x385 , {0,0}, 8, 0, 1},
+		{ 0x387 , {0,0}, 8, 0, 1},
+		{ 0x389 , {0,0}, 8, 0, 1},
+		{ 0x38B , {0,0}, 8, 0, 1},
+		{ 0x38D , {0,0}, 8, 0, 1},
+		{ 0x407 , {0,0}, 8, 0, 1},
+		{ 0x409 , {0,0}, 8, 0, 1},
+		{ 0x40B , {0,0}, 8, 0, 1},
+		{ 0x40D , {0,0}, 8, 0, 1},
+		{ 0x707 , {0,0}, 8, 0, 5},
+		{ 0x709 , {0,0}, 8, 0, 5},
+		{ 0x70B , {0,0}, 8, 0, 5},
+		{ 0x70D , {0,0}, 8, 0, 5}
 };
 
 const unsigned int numRxCANMsgs = (sizeof(CAN_RxMessages) / sizeof(CAN_RxMessages[0]));

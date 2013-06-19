@@ -13,5 +13,6 @@
 
 void receiveCAN_init(void);
 void receiveCAN_update(void);
+void updateFilter(unsigned int filterPointer);
 
 #endif /* REVCEIVECAN_H_ */

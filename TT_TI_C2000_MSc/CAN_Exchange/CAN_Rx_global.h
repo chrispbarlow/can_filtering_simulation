@@ -10,13 +10,7 @@
 
 #include <DSP2833x_Device.h>
 
-typedef struct {
-	Uint32 canID;			/* CAN ID */
-	Uint32* canData;		/* CAN Data */
-	Uint16 canDLC;			/* Message byte length */
-	int16 timer;
-	int16 timer_reload;
-} canRxMessage_t;
+
 
 /******************************************
  * The structures below define the CAN variables and their position in their respective CAN message
@@ -52,105 +46,25 @@ typedef struct {
 /*******************************************************************************/
 
 /* Specify variables for CAN Message */
-struct CAN_DATA_VARS_RX_7AB{
+struct CAN_DATA_VARS_RX{
 
 	/*byte variable examples */
 	Uint16 DB3:8;
 	Uint16 DB2:8;
 	Uint16 DB1:8;
+	Uint16 Db0:8;
 
-	/*bit variable examples */
-	Uint16 Db0_0:1;
-	Uint16 Db0_1:1;
-	Uint16 Db0_2:1;
-	Uint16 Db0_3:1;
-	Uint16 Db0_4:1;
-	Uint16 Db0_5:1;
-	Uint16 Db0_6:1;
-	Uint16 Db0_7:1;
-
-	/* 16 bit variable examples */
-	Uint16 DB7_6;						/* Low byte: DB7, High byte: DB6 */
-	Uint16 DB5_4;
+	Uint16 DB7:8;
+	Uint16 DB6:8;
+	Uint16 DB5:8;
+	Uint16 Db4:8;
 };
 
 /* Join CAN message with raw data array (2 x 32bit array) */
-union CAN_DATA_RX_7AB{
+typedef union {
 	Uint32 rawData[2];
-	struct CAN_DATA_VARS_RX_7AB dataVars;
-};
-extern union CAN_DATA_RX_7AB canData_Rx_7AB;
-
-/* Assign CAN ID to message */
-extern canRxMessage_t canMessage_Rx_7AB;
-
-
-/*******************************************************************************/
-/* Rx Message ID 0x651 */
-/*******************************************************************************/
-
-/* Specify variables for CAN Message */
-struct CAN_DATA_VARS_RX_651{
-
-	/* Byte 3 */
-	Uint32 vs_state:8;				/*B3*/
-
-	/* Byte 2 */
-	/* Byte 1 */
-	/* Byte 0 */
-	Uint32 vs_xcount:24;			/*B2,B1,B0*/
-
-	/* Byte 7 */
-	Uint16 VSO_TEN:1;
-	Uint16 Db7_1:1;					/*B7,b1 reserved*/
-	Uint16 Db7_2:1;					/*B7,b2 reserved*/
-	Uint16 Db7_3:1;					/*B7,b3 reserved*/
-	Uint16 Db7_4:1;					/*B7,b4 reserved*/
-	Uint16 VSO_WPMP:1;
-	Uint16 VSO_WFAN:1;
-	Uint16 VSO_PASINVSS:1;
-
-	/* Byte 6 */
-	Uint16 VSO_COMPINVSS:1;
-	Uint16 VSO_PASINVRST:1;
-	Uint16 VSO_COMPINRST:1;
-	Uint16 VSO_DCDC:1;
-	Uint16 VSO_BRKLAMP:1;
-	Uint16 VSO_HVOK1:1;
-	Uint16 VSO_HVOK2:1;
-	Uint16 Db6_7:1;					/*B6,b7 reserved*/
-
-	/* Byte 5 */
-	Uint16 VSI_DRVEN:1;
-	Uint16 VSI_BCEN:1;
-	Uint16 Db5_2:1;					/*B5,b2 reserved*/
-	Uint16 Db5_3:1;					/*B5,b3 reserved*/
-	Uint16 VSI_GSELFWD:1;
-	Uint16 VSI_GSELREV:1;
-	Uint16 VSI_REGENEN:1;
-	Uint16 VSI_BRAKESW:1;
-
-	/* Byte 4 */
-	Uint16 Db4_0:1;					/*B4,b0 reserved*/
-	Uint16 VSI_PASINVERR:1;
-	Uint16 VSI_COMPINVERR:1;
-	Uint16 VSI_ABSACTIV:1;
-	Uint16 Db4_4:1;					/*B4,b4 reserved*/
-	Uint16 Db4_5:1;					/*B4,b5 reserved*/
-	Uint16 VSI_BMSCORQ:1;
-	Uint16 VSI_CPOW:1;
-};
-
-/* Join CAN message with raw data array (2 x 32bit array) */
-union CAN_DATA_RX_651{
-	Uint32 rawData[2];
-	struct CAN_DATA_VARS_RX_651 dataVars;
-};
-extern union CAN_DATA_RX_651 canData_Rx_651;
-
-/* Assign CAN ID to message */
-extern canRxMessage_t canMessage_Rx_651;
-
+	struct CAN_DATA_VARS_RX dataBytes;
+}canData_t;
 
 
 /*******************************************************************************/
@@ -160,8 +74,15 @@ extern canRxMessage_t canMessage_Rx_651;
  * CAN Rx Message array
  * Assigns messages to mailbox position (array index + CAN_RX_MBOFFSET)
  * *****************************************************************************/
+typedef struct {
+	Uint32 canID;			/* CAN ID */
+	canData_t canData;		/* CAN Data */
+	Uint16 canDLC;			/* Message byte length */
+	int16 timer;
+	int16 timer_reload;
+} canRxMessage_t;
 
-extern canRxMessage_t* CAN_RxMessages[];
+extern canRxMessage_t CAN_RxMessages[];
 
 
 extern const unsigned int numRxCANMsgs;

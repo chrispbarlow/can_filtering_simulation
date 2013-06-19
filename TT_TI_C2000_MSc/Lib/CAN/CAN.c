@@ -121,35 +121,29 @@ canPort_t CAN_Ports[2] = {
 		}
 };
 
-void CAN_Init(Uint16 baudA, Uint16 baudB)
-{
-   if(baudA > 0)
-   {
+void CAN_Init(Uint16 baudA, Uint16 baudB){
+   if(baudA > 0){
 	   InitECanaGpio();
 	   InitCanA(baudA);		// Initialize eCAN-A module
    }
-   if(baudB > 0)
-   {
+   if(baudB > 0){
 	   InitECanbGpio();
 	   InitCanB(baudB);		// Initialize eCAN-B module
    }
 }
 
-void CAN_Test(void)
-{
-	configureMailbox(CANPORT_A, 25, CAN_TX, ID_EXT, 0x15555555, 8, 0);
+void CAN_Test(void){
+	configureMailbox(CANPORT_A, 25, CAN_TX, ID_EXT, 0x15555555, 8);
 
 	Uint32 canTxData[2] = {0x00010203, 0x04050607};
 	/* Write to the mailbox RAM field */
 	loadTxMailbox(CANPORT_A, 25, canTxData);
 
 	/* Begin transmitting */
-	for(i=0; i < TXCOUNT; i++)
-	{
+	for(i=0; i < TXCOUNT; i++){
        commitSendMailbox(CANPORT_A, 25);
 
-       do
-       {
+       do{
     	   updateMailboxes(CANPORT_A);
        } while(CAN_Ports[CANPORT_A].message_Objects[25].mailboxState != TX_FREE);
 
@@ -158,15 +152,12 @@ void CAN_Test(void)
 }
 
 /* find a mailbox of a given messageObjectState */
-int16 findMailbox(canPort_t * port, messageObjectStates_t state)
-{
+int16 findMailbox(canPort_t * port, messageObjectStates_t state){
 	Uint16 i;
 	int16 freePort = -1;
 
-	for(i = 0; i < 32; i++)
-	{
-		if((port->message_Objects[i].mailboxState = state) && (freePort == -1))
-		{
+	for(i = 0; i < 32; i++)	{
+		if((port->message_Objects[i].mailboxState = state) && (freePort == -1)){
 			freePort = i;
 		}
 	}
@@ -175,7 +166,7 @@ int16 findMailbox(canPort_t * port, messageObjectStates_t state)
 }
 
 /* Always returns 0  */
-int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char IDE, Uint32 canID, Uint16 dataLength, Uint16 newSequencePointer){
+int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char IDE, Uint32 canID, Uint16 dataLength){
 	int16 success = -1;
 
 	/*Read regs into shadow */
@@ -204,7 +195,6 @@ int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char
 
 	CAN_Ports[port].message_Objects[mbNum].mailbox->MSGID.all = canID;
 	CAN_Ports[port].message_Objects[mbNum].mailbox->MSGCTRL.bit.DLC = dataLength;
-	CAN_Ports[port].message_Objects[mbNum].sequencePointer = newSequencePointer;
 
 	/* Set direction & Initialise */
 	switch(direction){
@@ -376,6 +366,12 @@ void updateMailboxes(char port){ /* This will probably become the CANTx_update()
 messageObjectStates_t checkMailboxState(char port, char mbNum){
 	return CAN_Ports[port].message_Objects[mbNum].mailboxState;
 }
+
+Uint32 getMailboxID(char port, char mbNum){
+	return CAN_Ports[port].message_Objects[mbNum].mailbox->MSGID.all;
+}
+
+
 
 //---------------------------------------------------------------------------
 // InitCanx:
