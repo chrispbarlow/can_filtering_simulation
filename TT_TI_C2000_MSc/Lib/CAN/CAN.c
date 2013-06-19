@@ -137,7 +137,7 @@ void CAN_Init(Uint16 baudA, Uint16 baudB)
 
 void CAN_Test(void)
 {
-	configureMailbox(CANPORT_A, 25, CAN_TX, ID_EXT, 0x15555555, 8);
+	configureMailbox(CANPORT_A, 25, CAN_TX, ID_EXT, 0x15555555, 8, 0);
 
 	Uint32 canTxData[2] = {0x00010203, 0x04050607};
 	/* Write to the mailbox RAM field */

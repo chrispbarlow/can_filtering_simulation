@@ -10,13 +10,6 @@
 volatile task_t Tasks[] =
 {
 	{
-		tickCounter_update,		/* function pointer */
-		1,						/* period in ticks */
-		0,						/* initial offset in ticks */
-		IN_ISR
-	},
-
-	{
 		handleCAN_update,		/* function pointer */
 		5,						/* period in ticks */
 		125,					/* initial offset in ticks */
@@ -37,28 +30,12 @@ volatile task_t Tasks[] =
 		IN_SCHEDULER
 	},
 
-	{
-		flashingLED_update,		/* function pointer */
-		500,					/* period in ticks */
-		129,					/* initial offset in ticks */
-		IN_SCHEDULER
-	},
-
-	{
-		readADC_update,			/* function pointer */
-		10,					/* period in ticks */
-		128,					/* initial offset in ticks */
-		IN_SCHEDULER
-	},
-
 };
 
 const unsigned int tasksInSchedule = (sizeof(Tasks) / sizeof(Tasks[0]));
 
 void Tasks_Init(void)
 {
-	flashingLED_init();
 	sendCAN_init();
 	receiveCAN_init();
-	readADC_init();
 }

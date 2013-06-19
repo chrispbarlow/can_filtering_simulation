@@ -100,6 +100,7 @@ scheduler \
 Tasks/sendCAN \
 Tasks/receiveCAN \
 Tasks/newTask_Template \
+Tasks/handleCAN \
 Lib/TI \
 Lib/CAN \
 Lib/ADC \

@@ -31,6 +31,10 @@ scheduler/scheduler.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_
 scheduler/scheduler.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_DefaultISR.h
 scheduler/scheduler.obj: ../scheduler/../scheduler/scheduler.h
 scheduler/scheduler.obj: ../scheduler/schedulerConfig.h
+scheduler/scheduler.obj: ../scheduler/../Tasks/sendCAN/sendCAN.h
+scheduler/scheduler.obj: ../scheduler/../Tasks/sendCAN/../../Lib/CAN/CAN.h
+scheduler/scheduler.obj: ../scheduler/../Tasks/handleCAN/handleCAN.h
+scheduler/scheduler.obj: ../scheduler/../Tasks/receiveCAN/receiveCAN.h
 
 ../scheduler/scheduler.c: 
 ../scheduler/scheduler.h: 
@@ -63,3 +67,7 @@ C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_I
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_DefaultISR.h: 
 ../scheduler/../scheduler/scheduler.h: 
 ../scheduler/schedulerConfig.h: 
+../scheduler/../Tasks/sendCAN/sendCAN.h: 
+../scheduler/../Tasks/sendCAN/../../Lib/CAN/CAN.h: 
+../scheduler/../Tasks/handleCAN/handleCAN.h: 
+../scheduler/../Tasks/receiveCAN/receiveCAN.h: 

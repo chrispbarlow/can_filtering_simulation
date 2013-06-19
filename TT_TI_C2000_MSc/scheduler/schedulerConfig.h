@@ -12,14 +12,9 @@
 
 #define Sched_Config_HybridTasks FALSE
 
-#include "../Tasks/tickCounter/tickCounter.h"
-#include "../Tasks/printTick/printTick.h"
-#include "../Tasks/printTick2/printTick2.h"
 #include "../Tasks/sendCAN/sendCAN.h"
 #include "../Tasks/handleCAN/handleCAN.h"
 #include "../Tasks/receiveCAN/receiveCAN.h"
-#include "../Tasks/flashingLED/flashingLED.h"
-#include "../Tasks/readADC/readADC.h"
 
 
 /* Function pointer for task array */
