@@ -133,7 +133,7 @@ void CAN_Init(Uint16 baudA, Uint16 baudB){
 }
 
 void CAN_Test(void){
-	configureMailbox(CANPORT_A, 25, CAN_TX, ID_EXT, 0x15555555, 8);
+	configureTxMailbox(CANPORT_A, 25, ID_EXT, 0x15555555, 8);
 
 	Uint32 canTxData[2] = {0x00010203, 0x04050607};
 	/* Write to the mailbox RAM field */
@@ -165,9 +165,55 @@ int16 findMailbox(canPort_t * port, messageObjectStates_t state){
 	return freePort;
 }
 
+Uint32 getCANErrors(char port){
+	return CAN_Ports[port].canRegs->CANES.all;
+}
+
+
 /* Always returns 0  */
-int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char IDE, Uint32 canID, Uint16 dataLength){
-	int16 success = -1, counter;
+int16 configureRxMailbox(char port, char mbNum, char IDE, Uint32 canID, Uint16 dataLength){
+	int16 success = -1;
+
+	/*Read regs into shadow */
+	canRegsShadow.CANME.all = CAN_Ports[port].canRegs->CANME.all;
+	canRegsShadow.CANMD.all = CAN_Ports[port].canRegs->CANMD.all;
+	canRegsShadow.CANTRS.all = CAN_Ports[port].canRegs->CANTRS.all;
+	canRegsShadow.CANTRR.all = CAN_Ports[port].canRegs->CANTRR.all;
+
+
+	/* disable mailbox */
+	canRegsShadow.CANME.all &= ~(bitSelect_32<<mbNum);
+	CAN_Ports[port].canRegs->CANME.all = canRegsShadow.CANME.all;
+
+
+	if(IDE == ID_EXT){
+		canID |= (bitSelect_32<<31);
+	}
+	else{
+		canID <<= 18;
+	}
+
+	CAN_Ports[port].message_Objects[mbNum].mailbox->MSGID.all = canID;
+	CAN_Ports[port].message_Objects[mbNum].mailbox->MSGCTRL.bit.DLC = dataLength;
+
+	/* Set direction & Initialise */
+	canRegsShadow.CANMD.all |= (bitSelect_32<<mbNum);
+	CAN_Ports[port].message_Objects[mbNum].mailboxState = RX_FREE;
+
+	/* Enable mailbox */
+	canRegsShadow.CANME.all |= (bitSelect_32<<mbNum);
+
+	CAN_Ports[port].canRegs->CANMD.all = canRegsShadow.CANMD.all;
+	CAN_Ports[port].canRegs->CANME.all = canRegsShadow.CANME.all;
+
+	success = 0;
+
+	return success;
+}
+
+/* Always returns 0  */
+int16 configureTxMailbox(char port, char mbNum, char IDE, Uint32 canID, Uint16 dataLength){
+	int16 success = -1;
 
 	/*Read regs into shadow */
 	canRegsShadow.CANME.all = CAN_Ports[port].canRegs->CANME.all;
@@ -176,11 +222,10 @@ int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char
 	canRegsShadow.CANTRR.all = CAN_Ports[port].canRegs->CANTRR.all;
 
 	/* Make sure TRS bit is cleared by setting abort bit TODO: timeout on this while loop*/
-	while(canRegsShadow.CANTRS.all & (bitSelect_32<<mbNum) != 0){
+	while((canRegsShadow.CANTRS.all & (bitSelect_32<<mbNum)) != 0){
 		canRegsShadow.CANTRR.all |= (bitSelect_32<<mbNum);
 		CAN_Ports[port].canRegs->CANTRR.all = canRegsShadow.CANTRR.all;
-		printf("%u\n",counter);
-		counter++;
+		canRegsShadow.CANTRS.all = CAN_Ports[port].canRegs->CANTRS.all;
 	}
 
 	/* disable mailbox */
@@ -199,20 +244,8 @@ int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char
 	CAN_Ports[port].message_Objects[mbNum].mailbox->MSGCTRL.bit.DLC = dataLength;
 
 	/* Set direction & Initialise */
-	switch(direction){
-	case CAN_TX:
-		canRegsShadow.CANMD.all &= ~(bitSelect_32<<mbNum);
-		CAN_Ports[port].message_Objects[mbNum].mailboxState = TX_FREE;
-		break;
-
-	case CAN_RX:
-		canRegsShadow.CANMD.all |= (bitSelect_32<<mbNum);
-		CAN_Ports[port].message_Objects[mbNum].mailboxState = RX_FREE;
-		break;
-
-	default:
-		break;
-	}
+	canRegsShadow.CANMD.all &= ~(bitSelect_32<<mbNum);
+	CAN_Ports[port].message_Objects[mbNum].mailboxState = TX_FREE;
 
 	/* Enable mailbox */
 	canRegsShadow.CANME.all |= (bitSelect_32<<mbNum);
@@ -224,8 +257,6 @@ int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char
 
 	return success;
 }
-
-
 
 int16 loadTxMailbox(char port, char mbNum, Uint32 data[]){
 	int16 dataLength = 0;

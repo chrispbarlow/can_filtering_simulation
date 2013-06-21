@@ -11,7 +11,7 @@ Uint16 CANTimer;
 
 void sendCAN_init(void)
 {
-	configureMailbox(CANPORT_A, 31, CAN_TX, ID_STD, CAN_TxMessages[0]->canID, CAN_TxMessages[0]->canDLC);
+	configureTxMailbox(CANPORT_A, 31, ID_STD, CAN_TxMessages[0]->canID, CAN_TxMessages[0]->canDLC);
 
 	CANTimer = 10;
 

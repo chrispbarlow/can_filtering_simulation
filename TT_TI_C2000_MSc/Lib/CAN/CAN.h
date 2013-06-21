@@ -43,7 +43,8 @@ void CAN_Test(void);
 int16 findMailbox(canPort_t * port, messageObjectStates_t state);
 
 /* returns -1 if mailbox already enabled, 0 on successful configuration */
-int16 configureMailbox(char port, char mbNum, mailboxDirection_t direction, char IDE, Uint32 canID, Uint16 dataLength);
+int16 configureRxMailbox(char port, char mbNum, char IDE, Uint32 canID, Uint16 dataLength);
+int16 configureTxMailbox(char port, char mbNum, char IDE, Uint32 canID, Uint16 dataLength);
 
 /* takes data from byte array and loads into selected mailbox (mbNum) */
 int16 loadTxMailbox(char port, char mbNum, Uint32 data[]);
@@ -58,6 +59,7 @@ void updateMailboxes(char port); /* This will probably become the CANTx_update()
 
 messageObjectStates_t checkMailboxState(char port, char mbNum);
 Uint32 getMailboxID(char port, char mbNum);
+Uint32 getCANErrors(char port);
 
 void InitCanA(Uint16 baud);		// Initialize eCAN-A module
 void InitCanB(Uint16 baud);		// Initialize eCAN-B module

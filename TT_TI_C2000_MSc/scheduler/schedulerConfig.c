@@ -11,7 +11,7 @@ volatile task_t Tasks[] =
 {
 	{
 		handleCAN_update,		/* function pointer */
-		5,						/* period in ticks */
+		1,						/* period in ticks */
 		125,					/* initial offset in ticks */
 		IN_SCHEDULER
 	},
@@ -25,7 +25,7 @@ volatile task_t Tasks[] =
 
 	{
 		receiveCAN_update,		/* function pointer */
-		10,						/* period in ticks */
+		2,						/* period in ticks */
 		127,					/* initial offset in ticks */
 		IN_SCHEDULER
 	},
