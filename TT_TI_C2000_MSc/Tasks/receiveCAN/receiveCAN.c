@@ -28,13 +28,15 @@ void receiveCAN_init(void){
 
 void receiveCAN_update(void){
 	Uint16 mailBox, messagePointer;
-	static Uint32 heartbeat = 0;
+	static Uint32 heartbeat = 0, totalcounter = 0;
 
 	for(mailBox=0; mailBox<FILTERSIZE; mailBox++){
 		if(checkMailboxState(CANPORT_A, mailBox) == RX_PENDING){
 
 			messagePointer = mailBoxFilters[mailBox].messagePointer;
 			CAN_RxMessages[messagePointer].counter++;
+			totalcounter++;
+
 			readRxMailbox(CANPORT_A, mailBox, CAN_RxMessages[messagePointer].canData.rawData); /*TODO: read use sequence pointer for array index */
 
 			/*TODO: update mailBox pointer and ID */
@@ -43,7 +45,7 @@ void receiveCAN_update(void){
 	}
 	heartbeat++;
 	CAN_TxMessages[0]->canData[0] = CAN_RxMessages[0].counter;
-	CAN_TxMessages[0]->canData[1] = CAN_RxMessages[numRxCANMsgs-1].counter;
+	CAN_TxMessages[0]->canData[1] = totalcounter;
 }
 
 void updateFilter(unsigned int filterPointer){

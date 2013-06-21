@@ -8,7 +8,7 @@
 
 union CAN_DATA_TX_7AB canData_Tx_7AB;
 canTxMessage_t canMessage_Tx_7AB = {
-		0x7AB,
+		0x100,
 		canData_Tx_7AB.rawData,
 		8,
 		10,
