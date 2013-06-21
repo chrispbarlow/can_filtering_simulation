@@ -9,6 +9,8 @@
 #include "../../CAN_Exchange/CAN_Rx_global.h"
 #include "../../CAN_Exchange/CAN_Tx_global.h"
 
+#define FILTERSIZE (16)
+
 typedef enum{FALSE, TRUE}boolean_t;
 
 
@@ -18,7 +20,7 @@ void receiveCAN_init(void){
 	Uint16 mailBox;
 	printf("CAN Rx Config:\n");
 
-	for(mailBox=0; mailBox<31; mailBox++){
+	for(mailBox=0; mailBox<FILTERSIZE; mailBox++){
 		updateFilter(mailBox);
 		printf("0x%03X\n", (Uint16)CAN_RxMessages[mailBox].canID);
 	}
@@ -28,7 +30,7 @@ void receiveCAN_update(void){
 	Uint16 mailBox, messagePointer;
 	static Uint32 heartbeat = 0;
 
-	for(mailBox=0; mailBox<31; mailBox++){
+	for(mailBox=0; mailBox<FILTERSIZE; mailBox++){
 		if(checkMailboxState(CANPORT_A, mailBox) == RX_PENDING){
 
 			messagePointer = mailBoxFilters[mailBox].messagePointer;
@@ -41,7 +43,7 @@ void receiveCAN_update(void){
 	}
 	heartbeat++;
 	CAN_TxMessages[0]->canData[0] = CAN_RxMessages[0].counter;
-	CAN_TxMessages[0]->canData[1] = getCANErrors(CANPORT_A);
+	CAN_TxMessages[0]->canData[1] = CAN_RxMessages[numRxCANMsgs-1].counter;
 }
 
 void updateFilter(unsigned int filterPointer){
@@ -59,7 +61,7 @@ void updateFilter(unsigned int filterPointer){
 			i=0;
 		}
 
-		for(j = 0; j < 31; j++){
+		for(j = 0; j < FILTERSIZE; j++){
 			if(mailBoxFilters[j].canID == CAN_RxMessages[i].canID){
 				IDfound = TRUE;
 			}
