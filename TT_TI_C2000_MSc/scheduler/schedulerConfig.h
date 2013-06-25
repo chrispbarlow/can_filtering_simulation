@@ -15,6 +15,7 @@
 #include "../Tasks/sendCAN/sendCAN.h"
 #include "../Tasks/handleCAN/handleCAN.h"
 #include "../Tasks/receiveCAN/receiveCAN.h"
+#include "../Tasks/controlSCI/controlSCI.h"
 
 
 /* Function pointer for task array */

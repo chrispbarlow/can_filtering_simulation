@@ -76,6 +76,11 @@
 			<locationURI>INSTALLROOT_2833X_V132/DSP2833x_common/source/DSP2833x_PieVect.c</locationURI>
 		</link>
 		<link>
+			<name>Lib/TI/DSP2833x_Sci.c</name>
+			<type>1</type>
+			<location>C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/source/DSP2833x_Sci.c</location>
+		</link>
+		<link>
 			<name>Lib/TI/DSP2833x_SysCtrl.c</name>
 			<type>1</type>
 			<locationURI>INSTALLROOT_2833X_V132/DSP2833x_common/source/DSP2833x_SysCtrl.c</locationURI>

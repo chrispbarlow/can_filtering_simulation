@@ -32,6 +32,7 @@ scheduler/schedulerConfig.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP
 scheduler/schedulerConfig.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_DefaultISR.h
 scheduler/schedulerConfig.obj: ../scheduler/../Tasks/handleCAN/handleCAN.h
 scheduler/schedulerConfig.obj: ../scheduler/../Tasks/receiveCAN/receiveCAN.h
+scheduler/schedulerConfig.obj: ../scheduler/../Tasks/controlSCI/controlSCI.h
 
 ../scheduler/schedulerConfig.c: 
 ../scheduler/schedulerConfig.h: 
@@ -65,3 +66,4 @@ C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_I
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_DefaultISR.h: 
 ../scheduler/../Tasks/handleCAN/handleCAN.h: 
 ../scheduler/../Tasks/receiveCAN/receiveCAN.h: 
+../scheduler/../Tasks/controlSCI/controlSCI.h: 

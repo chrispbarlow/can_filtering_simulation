@@ -18,6 +18,7 @@ C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/source/DSP2833x_EC
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/source/DSP2833x_GlobalVariableDefs.c \
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/source/DSP2833x_PieCtrl.c \
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/source/DSP2833x_PieVect.c \
+C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/source/DSP2833x_Sci.c \
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/source/DSP2833x_SysCtrl.c 
 
 OBJS += \
@@ -29,6 +30,7 @@ OBJS += \
 ./Lib/TI/DSP2833x_GlobalVariableDefs.obj \
 ./Lib/TI/DSP2833x_PieCtrl.obj \
 ./Lib/TI/DSP2833x_PieVect.obj \
+./Lib/TI/DSP2833x_Sci.obj \
 ./Lib/TI/DSP2833x_SysCtrl.obj \
 ./Lib/TI/DSP2833x_usDelay.obj 
 
@@ -44,6 +46,7 @@ C_DEPS += \
 ./Lib/TI/DSP2833x_GlobalVariableDefs.pp \
 ./Lib/TI/DSP2833x_PieCtrl.pp \
 ./Lib/TI/DSP2833x_PieVect.pp \
+./Lib/TI/DSP2833x_Sci.pp \
 ./Lib/TI/DSP2833x_SysCtrl.pp 
 
 C_DEPS__QUOTED += \
@@ -53,6 +56,7 @@ C_DEPS__QUOTED += \
 "Lib\TI\DSP2833x_GlobalVariableDefs.pp" \
 "Lib\TI\DSP2833x_PieCtrl.pp" \
 "Lib\TI\DSP2833x_PieVect.pp" \
+"Lib\TI\DSP2833x_Sci.pp" \
 "Lib\TI\DSP2833x_SysCtrl.pp" 
 
 OBJS__QUOTED += \
@@ -64,6 +68,7 @@ OBJS__QUOTED += \
 "Lib\TI\DSP2833x_GlobalVariableDefs.obj" \
 "Lib\TI\DSP2833x_PieCtrl.obj" \
 "Lib\TI\DSP2833x_PieVect.obj" \
+"Lib\TI\DSP2833x_Sci.obj" \
 "Lib\TI\DSP2833x_SysCtrl.obj" \
 "Lib\TI\DSP2833x_usDelay.obj" 
 
@@ -84,6 +89,7 @@ C_SRCS__QUOTED += \
 "C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/source/DSP2833x_GlobalVariableDefs.c" \
 "C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/source/DSP2833x_PieCtrl.c" \
 "C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/source/DSP2833x_PieVect.c" \
+"C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/source/DSP2833x_Sci.c" \
 "C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/source/DSP2833x_SysCtrl.c" 
 
 
