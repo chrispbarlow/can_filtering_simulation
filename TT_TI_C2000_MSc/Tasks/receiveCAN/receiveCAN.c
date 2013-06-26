@@ -37,9 +37,8 @@ void receiveCAN_update(void){
 			CAN_RxMessages[messagePointer].counter++;
 			totalcounter++;
 
-			readRxMailbox(CANPORT_A, mailBox, CAN_RxMessages[messagePointer].canData.rawData); /*TODO: read use sequence pointer for array index */
+			readRxMailbox(CANPORT_A, mailBox, CAN_RxMessages[messagePointer].canData.rawData);
 
-			/*TODO: update mailBox pointer and ID */
 			updateFilter(mailBox);
 		}
 	}

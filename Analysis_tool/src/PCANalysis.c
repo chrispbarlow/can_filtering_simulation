@@ -14,7 +14,7 @@
 
 #define BUFFERSIZE 				(81)
 #define FILTERSIZE 				(200)
-#define MAX_TRACE_LINES			(100000)  /* Set to zero to analyse entire trace */
+#define MAX_TRACE_LINES			(0)  /* Set to zero to analyse entire trace */
 #define LOGGING_TASK_PERIOD_us 	(1000)
 
 
