@@ -10,7 +10,7 @@
 
 #define TICK_PERIOD_us (500)
 
-#define Sched_Config_HybridTasks FALSE
+#define Sched_Config_HybridTasks TRUE
 
 #include "../Tasks/sendCAN/sendCAN.h"
 #include "../Tasks/handleCAN/handleCAN.h"

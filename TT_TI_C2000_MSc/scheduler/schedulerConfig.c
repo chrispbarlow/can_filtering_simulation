@@ -11,39 +11,24 @@ volatile task_t Tasks[] =
 {
 	{
 		handleCAN_update,		/* function pointer */
-		1,						/* period in ticks */
+		2,						/* period in ticks */
 		125,					/* initial offset in ticks */
-		IN_SCHEDULER
+		IN_ISR
 	},
 
 	{
 		receiveCAN_update,		/* function pointer */
 		2,						/* period in ticks */
 		126,					/* initial offset in ticks */
-		IN_SCHEDULER
-	},
-
-	{
-		sendCAN_update,			/* function pointer */
-		10,						/* period in ticks */
-		127,					/* initial offset in ticks */
-		IN_SCHEDULER
-	},
-
-	{
-		sendCAN_update,			/* function pointer */
-		10,						/* period in ticks */
-		127,					/* initial offset in ticks */
-		IN_SCHEDULER
+		IN_ISR
 	},
 
 	{
 		controlSCI_update,			/* function pointer */
-		10,						/* period in ticks */
-		129,					/* initial offset in ticks */
+		50,						/* period in ticks */
+		125,					/* initial offset in ticks */
 		IN_SCHEDULER
 	},
-
 
 };
 

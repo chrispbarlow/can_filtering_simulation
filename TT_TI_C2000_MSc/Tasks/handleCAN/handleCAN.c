@@ -15,5 +15,9 @@ void handleCAN_init(void)
 
 void handleCAN_update(void)
 {
-	updateMailboxes(CANPORT_A);
+	Uint16 i;
+
+	for(i=0;i<2;i++){
+		updateMailboxes(CANPORT_A);
+	}
 }

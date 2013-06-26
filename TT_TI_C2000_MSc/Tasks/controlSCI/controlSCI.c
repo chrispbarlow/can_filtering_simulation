@@ -100,8 +100,18 @@ void controlSCI_update(void)
 	i++;
 	if(i>=numRxCANMsgs){
 		i = 0;
-		sprintf(msg,"%c[2J%c[;H\0",i);
-		scia_msg(msg);
+//		sprintf(msg,"%c[2J%c[;H\0",i);
+//		scia_msg(msg);
 	}
+
+//	sprintf(msg,"%u,%lu\n\0",i,CAN_RxMessages[i].counter);
+//	sret = scia_msg(msg);
+//
+//	if(sret == 2){
+//		i++;
+//		if(i>=numRxCANMsgs){
+//			i = 0;
+//		}
+//	}
 
 }
