@@ -69,22 +69,25 @@ void serialEvent(Serial myPort) {
     serialInArray[serialCount] = inByte;
     serialCount++;
   }
-  else if((serialInArray[1] == ',')&&(serialInArray[3] == ',')){
-    sequencePointer = serialInArray[2];
+  else if(serialInArray[0] == 'M'){
+    sequencePointer = serialInArray[1];
       
-    if(sequencePointer < 33){
-      messageCounter = ((serialInArray[4]<<8)|serialInArray[5]);
-      counters[sequencePointer] = messageCounter;
-      serialCount = 0;
-        seq_y[serialInArray[0]] = (d*sequencePointer)+d;
-        serialCount = 0;
+    if(sequencePointer < 16){
+        seq_y[sequencePointer] = (d*serialInArray[3])+d;
     }
+    serialCount = 0;
 
     redraw();
-    // Reset serialCount:
-//    for(j=0;j<50;j++){
-//      print(serialInArray[j]+" ");
-//    }
+  }
+  else if(serialInArray[0] == 'S'){
+    sequencePointer = serialInArray[1];
+      
+    if(sequencePointer < 33){
+      messageCounter = ((serialInArray[3]<<8)|serialInArray[4]);
+      counters[sequencePointer] = messageCounter;
+    }
+    serialCount = 0;
+    redraw();
   }
   else{
     serialCount = 0;

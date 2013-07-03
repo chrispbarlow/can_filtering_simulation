@@ -36,7 +36,7 @@ void controlSCI_update(void)
 {
 	static SCIstate_t SCIstate = NEW;
     char *msg = 0;
-    static Uint16 i = 0;
+    static Uint16 i = 0, j = 0;
     static Uint16 LoopCount = 0;
     Uint16 sret = 0;
     Uint16 ID1 = 0, ID2 = 0, ID3 = 0;
@@ -114,24 +114,35 @@ void controlSCI_update(void)
 	scia_xmit('~');
 
     for(i=0;i<16;i++){
+		j = mailBoxFilters[i].messagePointer;
+
+    	scia_xmit('M');
+
 		tempCharOut = (i & 0xff);
 		scia_xmit(tempCharOut);
 
 		scia_xmit(',');
 
-		tempCharOut = ((mailBoxFilters[i].messagePointer)&0xFF);
+		tempCharOut = ((j)&0xFF);
+		scia_xmit(tempCharOut);
+
+		scia_xmit('~');
+
+		scia_xmit('S');
+
+		tempCharOut = (j & 0xff);
 		scia_xmit(tempCharOut);
 
 		scia_xmit(',');
 
-		tempCharOut = ((CAN_RxMessages[mailBoxFilters[i].messagePointer].counter>>8)&0xFF);
+		tempCharOut = ((CAN_RxMessages[j].counter>>8)&0xFF);
 		scia_xmit(tempCharOut);
-		tempCharOut = ((CAN_RxMessages[mailBoxFilters[i].messagePointer].counter)&0xFF);
+		tempCharOut = ((CAN_RxMessages[j].counter)&0xFF);
 		scia_xmit(tempCharOut);
 
 		scia_xmit('~');
-    }
 
+   }
 
 //    for(i=0;i<numRxCANMsgs;i++){
 //		if(CAN_RxMessages[i].counter>0){

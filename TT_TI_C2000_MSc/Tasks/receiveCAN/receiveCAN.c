@@ -79,11 +79,11 @@ void updateFilter(unsigned int filterPointer){
 		/* ID not already in mailbox, decrement 'schedule' timer */
 		if(IDfound == FALSE){
 			CAN_RxMessages[sequencePointer].timer--;
-		}
 
-		/* ID ready to be inserted */
-		if(CAN_RxMessages[sequencePointer].timer<=0){
-			result = TRUE;
+			/* ID ready to be inserted */
+			if(CAN_RxMessages[sequencePointer].timer<=0){
+				result = TRUE;
+			}
 		}
 
 	}while((result == FALSE)&&(sequencePointer != last_sequencePointer));
