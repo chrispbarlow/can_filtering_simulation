@@ -15,11 +15,4 @@ void receiveCAN_init(void);
 void receiveCAN_update(void);
 void updateFilter(unsigned int filterPointer);
 
-typedef struct{
-	Uint32 canID;
-	Uint16 messagePointer;
-}filterShadow_t;
-
-extern filterShadow_t mailBoxFilters[];
-
 #endif /* REVCEIVECAN_H_ */

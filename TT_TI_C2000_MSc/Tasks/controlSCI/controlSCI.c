@@ -25,11 +25,11 @@ void controlSCI_init(void)
 	scia_fifo_init();	   // Initialize the SCI FIFO
 	scia_init();  // Initalize SCI for echoback
 
-	msg = "\r\n\n\nHello World!\0";
-	scia_msg(msg);
-
-	msg = "\r\nAll your CAN are tested with this\n\0";
-	scia_msg(msg);
+//	msg = "\r\n\n\nHello World!\0";
+//	scia_msg(msg);
+//
+//	msg = "\r\nAll your CAN are tested with this\n\0";
+//	scia_msg(msg);
 }
 
 void controlSCI_update(void)
@@ -40,6 +40,7 @@ void controlSCI_update(void)
     static Uint16 LoopCount = 0;
     Uint16 sret = 0;
     Uint16 ID1 = 0, ID2 = 0, ID3 = 0;
+    char tempCharOut;
 
 //    switch(SCIstate){
 //    case NEW:
@@ -93,14 +94,44 @@ void controlSCI_update(void)
 //    default:
 //    	break;
 //    }
+//    tempCharOut = (char)(i & 0xff);
+//    msg[0] = tempCharOut;
+//    msg[1] = (',');
+//    tempCharOut = (char)((CAN_RxMessages[i].canID>>8)&0xFF);
+//    msg[2] = tempCharOut;
+//    tempCharOut = (char)(CAN_RxMessages[i].canID&0xFF);
+//    msg[3] = tempCharOut;
+//    msg[4] = (',');
+//    tempCharOut = (char)((CAN_RxMessages[i].counter>>8)&0xFF);
+//    msg[5] = tempCharOut;
+//    tempCharOut = (char)(CAN_RxMessages[i].counter&0xFF);
+//    msg[6] = tempCharOut;
+//    msg[7] = ('\n');
+//    msg[8] = ('\0');
 
-	sprintf(msg,"%u,%lu\n\0",i,CAN_RxMessages[i].counter);
-	scia_msg(msg);
+	scia_xmit('~');
+	scia_xmit('~');
+	scia_xmit('~');
 
-	i++;
-	if(i>=numRxCANMsgs){
-		i = 0;
-	}
+    for(i=0;i<16;i++){
+		tempCharOut = (i & 0xff);
+		scia_xmit(tempCharOut);
+
+		scia_xmit(',');
+
+		tempCharOut = ((mailBoxFilters[i].messagePointer)&0xFF);
+		scia_xmit(tempCharOut);
+
+		scia_xmit(',');
+
+		tempCharOut = ((CAN_RxMessages[mailBoxFilters[i].messagePointer].counter>>8)&0xFF);
+		scia_xmit(tempCharOut);
+		tempCharOut = ((CAN_RxMessages[mailBoxFilters[i].messagePointer].counter)&0xFF);
+		scia_xmit(tempCharOut);
+
+		scia_xmit('~');
+    }
+
 
 //    for(i=0;i<numRxCANMsgs;i++){
 //		if(CAN_RxMessages[i].counter>0){

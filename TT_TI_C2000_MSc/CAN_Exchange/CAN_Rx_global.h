@@ -85,6 +85,13 @@ typedef struct {
 
 extern canRxMessage_t CAN_RxMessages[];
 
+typedef struct{
+	Uint32 canID;
+	Uint16 messagePointer;
+}filterShadow_t;
+
+extern filterShadow_t mailBoxFilters[];
+
 
 extern const unsigned int numRxCANMsgs;
 

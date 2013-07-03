@@ -25,7 +25,7 @@ volatile task_t Tasks[] =
 
 	{
 		controlSCI_update,			/* function pointer */
-		50,						/* period in ticks */
+		2,						/* period in ticks */
 		125,					/* initial offset in ticks */
 		IN_SCHEDULER
 	},

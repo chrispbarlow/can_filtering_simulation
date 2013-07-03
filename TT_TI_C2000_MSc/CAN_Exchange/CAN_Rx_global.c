@@ -6,6 +6,7 @@
  */
 #include "CAN_Rx_global.h"
 
+filterShadow_t mailBoxFilters[32];
 
 /*******************************************************************************
  * CAN Rx Message array
