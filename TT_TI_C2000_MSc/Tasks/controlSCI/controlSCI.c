@@ -134,10 +134,6 @@ void controlSCI_update(void)
     for(i=0;i<16;i++){
 		j = filtermap[i].mp;
 
-
-//		tempCharOut = (i & 0xff);
-//		scia_xmit(tempCharOut);
-
 		tempCharOut = ((filtermap[i].ID>>8) & 0xFF);
 		scia_xmit(tempCharOut);
 
@@ -153,8 +149,8 @@ void controlSCI_update(void)
 	scia_xmit('}');
 
 
-    for(i=0;i<=16;i++){
-    	j = (2*i)+pointerShift;
+    for(i=0;i<=5;i++){
+    	j = (6*i)+pointerShift;
 
     	if(j<33){
 			scia_xmit('{');
@@ -163,6 +159,10 @@ void controlSCI_update(void)
 			tempCharOut = (j & 0xff);
 			scia_xmit(tempCharOut);
 
+			tempCharOut = ((CAN_RxMessages[j].counter>>24)&0xFF);
+			scia_xmit(tempCharOut);
+			tempCharOut = ((CAN_RxMessages[j].counter>>16)&0xFF);
+			scia_xmit(tempCharOut);
 			tempCharOut = ((CAN_RxMessages[j].counter>>8)&0xFF);
 			scia_xmit(tempCharOut);
 			tempCharOut = ((CAN_RxMessages[j].counter)&0xFF);
@@ -174,10 +174,8 @@ void controlSCI_update(void)
 
    }
 
-	if(pointerShift == 0){
-		pointerShift = 1;
-	}
-	else{
+    pointerShift++;
+    if(pointerShift > 6){
 		pointerShift = 0;
 	}
 
