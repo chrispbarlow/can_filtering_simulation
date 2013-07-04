@@ -65,32 +65,46 @@ void serialEvent(Serial myPort) {
     }
   }
   
-  if(inByte != '~'){
+  if(inByte != '}'){
     serialInArray[serialCount] = inByte;
-    serialCount++;
-  }
-  else if(serialInArray[0] == 'M'){
-    sequencePointer = serialInArray[1];
-      
-    if(sequencePointer < 16){
-        seq_y[sequencePointer] = (d*serialInArray[3])+d;
+    if(serialInArray[0] == '{'){
+      serialCount++;
     }
-    serialCount = 0;
-
-    redraw();
   }
-  else if(serialInArray[0] == 'S'){
-    sequencePointer = serialInArray[1];
+  else { 
+    
+    switch(serialInArray[1]){      
+    case 'M': 
+      sequencePointer = serialInArray[2];
+        
+      if(sequencePointer < 16){
+          seq_y[sequencePointer] = (d*serialInArray[3])+d;
+      } 
+     
+//      println("M: "+sequencePointer+","+serialInArray[3]);
+//      redraw();
+      break;
       
-    if(sequencePointer < 33){
-      messageCounter = ((serialInArray[3]<<8)|serialInArray[4]);
-      counters[sequencePointer] = messageCounter;
+    case 'S':
+      sequencePointer = serialInArray[2];
+      
+      if(sequencePointer < 33){
+        messageCounter = ((serialInArray[3]<<8)|serialInArray[4]);
+        counters[sequencePointer] = messageCounter;
+      }
+//      redraw();
+      break;
+      
+    default:        
+      break;
     }
-    serialCount = 0;
-    redraw();
-  }
-  else{
-    serialCount = 0;
+    
+    if((serialCount>0)&&(serialInArray[serialCount-1] == '~')){
+      if(serialCount == 2){
+        redraw();
+      }  
+      serialCount = 0;
+    }
   }
 }
 

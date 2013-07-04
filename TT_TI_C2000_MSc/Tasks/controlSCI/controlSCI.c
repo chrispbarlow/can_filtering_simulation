@@ -14,7 +14,12 @@ typedef enum{NEW,WAITING,SEND}SCIstate_t;
 static char rxbuffer[200];
 Uint16 rxbufferSize = (sizeof(rxbuffer)/sizeof(rxbuffer[0]));
 
+typedef struct{
+	Uint16 mp;
+	Uint32 count;
+} tempShadow_t;
 
+tempShadow_t filtermap[16];
 
 void controlSCI_init(void)
 {
@@ -41,6 +46,7 @@ void controlSCI_update(void)
     Uint16 sret = 0;
     Uint16 ID1 = 0, ID2 = 0, ID3 = 0;
     char tempCharOut;
+    static Uint16 pointerShift = 0;
 
 //    switch(SCIstate){
 //    case NEW:
@@ -109,40 +115,64 @@ void controlSCI_update(void)
 //    msg[7] = ('\n');
 //    msg[8] = ('\0');
 
+	scia_xmit('{');
 	scia_xmit('~');
-	scia_xmit('~');
-	scia_xmit('~');
+	scia_xmit('}');
+	/* Take snapshot of filters (should prevent updates halfway through transmission)*/
+	for(i=0;i<16;i++){
+		j = mailBoxFilters[i].messagePointer;
+		filtermap[i].mp = j;
+		filtermap[i].count = CAN_RxMessages[j].counter;
+	}
+
+
+	scia_xmit('{');
+	scia_xmit('M');
 
     for(i=0;i<16;i++){
-		j = mailBoxFilters[i].messagePointer;
+		j = filtermap[i].mp;
 
-    	scia_xmit('M');
 
-		tempCharOut = (i & 0xff);
+//		tempCharOut = (i & 0xff);
+//		scia_xmit(tempCharOut);
+
+		tempCharOut = (j & 0xFF);
 		scia_xmit(tempCharOut);
-
-		scia_xmit(',');
-
-		tempCharOut = ((j)&0xFF);
-		scia_xmit(tempCharOut);
-
-		scia_xmit('~');
-
-		scia_xmit('S');
-
-		tempCharOut = (j & 0xff);
-		scia_xmit(tempCharOut);
-
-		scia_xmit(',');
-
-		tempCharOut = ((CAN_RxMessages[j].counter>>8)&0xFF);
-		scia_xmit(tempCharOut);
-		tempCharOut = ((CAN_RxMessages[j].counter)&0xFF);
-		scia_xmit(tempCharOut);
-
-		scia_xmit('~');
 
    }
+
+	scia_xmit('~');
+	scia_xmit('}');
+
+
+    for(i=0;i<=16;i++){
+    	j = (2*i)+pointerShift;
+
+    	if(j<33){
+			scia_xmit('{');
+			scia_xmit('S');
+
+			tempCharOut = (j & 0xff);
+			scia_xmit(tempCharOut);
+
+			tempCharOut = ((CAN_RxMessages[j].counter>>8)&0xFF);
+			scia_xmit(tempCharOut);
+			tempCharOut = ((CAN_RxMessages[j].counter)&0xFF);
+			scia_xmit(tempCharOut);
+
+			scia_xmit('~');
+			scia_xmit('}');
+    	}
+
+   }
+
+	if(pointerShift == 0){
+		pointerShift = 1;
+	}
+	else{
+		pointerShift = 0;
+	}
+
 
 //    for(i=0;i<numRxCANMsgs;i++){
 //		if(CAN_RxMessages[i].counter>0){

@@ -40,8 +40,8 @@ void receiveCAN_update(void){
 			CAN_RxMessages[messagePointer].counter++;
 			totalcounter++;
 
-			/* read the CAN data into buffer (nothing done with the data, but nice to do this for realistic timing */
-			readRxMailbox(CANPORT_A, mailBox, CAN_RxMessages[messagePointer].canData.rawData);
+//			/* read the CAN data into buffer (nothing done with the data, but nice to do this for realistic timing */
+//			readRxMailbox(CANPORT_A, mailBox, CAN_RxMessages[messagePointer].canData.rawData);
 
 			/* update the filter for next required ID */
 			updateFilter(mailBox);
@@ -91,6 +91,9 @@ void updateFilter(unsigned int filterPointer){
 
 	/* New ID found for mailbox */
 	if(result == TRUE){
+		/* read the CAN data into buffer (nothing done with the data, but nice to do this for realistic timing */
+		readRxMailbox(CANPORT_A, filterPointer, CAN_RxMessages[mailBoxFilters[filterPointer].messagePointer].canData.rawData);
+
 		last_sequencePointer = sequencePointer;
 
 		/* Message scheduling */
