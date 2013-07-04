@@ -40,8 +40,8 @@ void receiveCAN_update(void){
 			CAN_RxMessages[messagePointer].counter++;
 			totalcounter++;
 
-//			/* read the CAN data into buffer (nothing done with the data, but nice to do this for realistic timing */
-//			readRxMailbox(CANPORT_A, mailBox, CAN_RxMessages[messagePointer].canData.rawData);
+			/* read the CAN data into buffer (nothing done with the data, but nice to do this for realistic timing */
+			readRxMailbox(CANPORT_A, mailBox, CAN_RxMessages[messagePointer].canData.rawData);
 
 			/* update the filter for next required ID */
 			updateFilter(mailBox);
@@ -52,8 +52,7 @@ void receiveCAN_update(void){
 void updateFilter(unsigned int filterPointer){
 	static int16 last_sequencePointer = -1;
 	int16 sequencePointer;
-	char j;
-	boolean_t IDfound = FALSE, result = FALSE;
+	boolean_t result = FALSE;
 
 	/* Find next required CAN ID in sequence */
 	sequencePointer = last_sequencePointer;
@@ -66,44 +65,38 @@ void updateFilter(unsigned int filterPointer){
 			sequencePointer=0;
 		}
 
-		/* Check there is no mailbox already configured for this ID */
-		for(j = 0; j < FILTERSIZE; j++){
-			if(mailBoxFilters[j].canID == CAN_RxMessages[sequencePointer].canID){
-				IDfound = TRUE;
-			}
-			else{
-				IDfound = FALSE;
-			}
-		}
-
-		/* ID not already in mailbox, decrement 'schedule' timer */
-		if(IDfound == FALSE){
+		/* ID not already in mailbox, decrement 'schedule' timer (timer set to -1 whilst ID is in mailbox) */
+		if(CAN_RxMessages[sequencePointer].timer > 0){
 			CAN_RxMessages[sequencePointer].timer--;
-
-			/* ID ready to be inserted */
-			if(CAN_RxMessages[sequencePointer].timer<=0){
-				result = TRUE;
-			}
 		}
+
+		/* ID ready to be inserted */
+		if(CAN_RxMessages[sequencePointer].timer == 0){
+			result = TRUE;
+		}
+
 
 	}while((result == FALSE)&&(sequencePointer != last_sequencePointer));
 
 
 	/* New ID found for mailbox */
 	if(result == TRUE){
-		/* read the CAN data into buffer (nothing done with the data, but nice to do this for realistic timing */
-		readRxMailbox(CANPORT_A, filterPointer, CAN_RxMessages[mailBoxFilters[filterPointer].messagePointer].canData.rawData);
-
-		last_sequencePointer = sequencePointer;
 
 		/* Message scheduling */
-		CAN_RxMessages[sequencePointer].timer = CAN_RxMessages[sequencePointer].timer_reload;
+		last_sequencePointer = mailBoxFilters[filterPointer].messagePointer;
+		CAN_RxMessages[last_sequencePointer].timer = CAN_RxMessages[last_sequencePointer].timer_reload;
+
+		/* Real ID replacement */
+		configureRxMailbox(CANPORT_A, filterPointer, ID_STD, CAN_RxMessages[sequencePointer].canID, CAN_RxMessages[sequencePointer].canDLC);
 
 		/* ID replacement in shadow */
 		mailBoxFilters[filterPointer].canID = CAN_RxMessages[sequencePointer].canID;
 		mailBoxFilters[filterPointer].messagePointer = sequencePointer;
 
-		/* Real ID replacement */
-		configureRxMailbox(CANPORT_A, filterPointer, ID_STD, CAN_RxMessages[sequencePointer].canID, CAN_RxMessages[sequencePointer].canDLC);
+		/* Flag message as 'In Mailbox' */
+		CAN_RxMessages[sequencePointer].timer = -1;
 	}
+
+	last_sequencePointer = sequencePointer;
+
 }

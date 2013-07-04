@@ -7,7 +7,7 @@
  */
 import processing.serial.*;
 Serial myPort;                       // The serial port
-int[] serialInArray = new int[50];    // Where we'll put what we receive
+int[] serialInArray = new int[100];    // Where we'll put what we receive
 int serialCount = 0;                 // A count of how many bytes we receive
 
 int d = 20;
@@ -17,6 +17,7 @@ int w = 800;
 int[] mb_y = new int[16];
 int[] seq_y = new int[16];
 int[] counters = new int[33];
+int[] IDs = new int[16];
 int i,j;
 int testoffset;
 
@@ -39,14 +40,24 @@ void setup(){
 }
 
 void draw(){
+  String strg;
   background(0);
-  stroke(153);
+  stroke(255);
   for(i=0;i<16;i++){
+    stroke(255);
     line(s, mb_y[i], w, seq_y[i]);
-    text(i, (s-(2*d)), ((d*i)+d));
+    if(i<10){
+      strg = "0"+i;
+    }
+    else{
+      strg = str(i);
+    }
+    text(strg+": "+hex(IDs[i],3), (s-(3*d)), ((d*i)+d));
+    stroke(255);
     line(s, ((d*i)+d), (s-d), ((d*i)+d));
   }
-
+  
+  stroke(255);
   for(i=0;i<33;i++){
     text(i, (w+d), ((d*i)+d));
     text(counters[i], (w+(2*d)), ((d*i)+d));
@@ -60,7 +71,7 @@ void serialEvent(Serial myPort) {
   int inByte = myPort.read();
     // Add the latest byte from the serial port to array:
   if(serialCount == 0){
-    for(j=0;j<50;j++){
+    for(j=0;j<100;j++){
       serialInArray[j] = 0;
     }
   }
@@ -75,14 +86,16 @@ void serialEvent(Serial myPort) {
     
     switch(serialInArray[1]){      
     case 'M': 
-      sequencePointer = serialInArray[2];
-        
-      if(sequencePointer < 16){
-          seq_y[sequencePointer] = (d*serialInArray[3])+d;
-      } 
-     
+      for(sequencePointer=0;sequencePointer<16;sequencePointer++){
+ //       sequencePointer = serialInArray[2];
+          
+   //     if(sequencePointer < 16){
+            IDs[sequencePointer] = ((serialInArray[(3*sequencePointer)+2])<<8)|serialInArray[(3*sequencePointer)+3];
+            seq_y[sequencePointer] = (d*serialInArray[(3*sequencePointer)+4])+d;
+   //     } 
+      }
 //      println("M: "+sequencePointer+","+serialInArray[3]);
-//      redraw();
+      redraw();
       break;
       
     case 'S':
@@ -100,9 +113,9 @@ void serialEvent(Serial myPort) {
     }
     
     if((serialCount>0)&&(serialInArray[serialCount-1] == '~')){
-      if(serialCount == 2){
-        redraw();
-      }  
+//      if(serialCount == 2){
+//        redraw();
+//      }  
       serialCount = 0;
     }
   }

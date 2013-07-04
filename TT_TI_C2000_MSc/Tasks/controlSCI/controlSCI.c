@@ -16,6 +16,7 @@ Uint16 rxbufferSize = (sizeof(rxbuffer)/sizeof(rxbuffer[0]));
 
 typedef struct{
 	Uint16 mp;
+	Uint16 ID;
 	Uint32 count;
 } tempShadow_t;
 
@@ -123,6 +124,7 @@ void controlSCI_update(void)
 		j = mailBoxFilters[i].messagePointer;
 		filtermap[i].mp = j;
 		filtermap[i].count = CAN_RxMessages[j].counter;
+		filtermap[i].ID = mailBoxFilters[i].canID;
 	}
 
 
@@ -135,6 +137,12 @@ void controlSCI_update(void)
 
 //		tempCharOut = (i & 0xff);
 //		scia_xmit(tempCharOut);
+
+		tempCharOut = ((filtermap[i].ID>>8) & 0xFF);
+		scia_xmit(tempCharOut);
+
+		tempCharOut = (filtermap[i].ID & 0xFF);
+		scia_xmit(tempCharOut);
 
 		tempCharOut = (j & 0xFF);
 		scia_xmit(tempCharOut);
