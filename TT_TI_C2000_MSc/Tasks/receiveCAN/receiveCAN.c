@@ -10,13 +10,14 @@
 #include "../../CAN_Exchange/CAN_Tx_global.h"
 
 #define FILTERSIZE (16)
+#define DUPLICATES_ALLOWED (2)
 
 typedef enum{FALSE, TRUE}boolean_t;
 
 
 
 void receiveCAN_init(void){
-	Uint16 mailBox;
+//	Uint16 mailBox;
 	printf("CAN Rx Config:\n");
 
 //	for(mailBox=0; mailBox<FILTERSIZE; mailBox++){
@@ -75,12 +76,12 @@ void updateFilter(unsigned int filterPointer){
 		}
 
 		/* ID not already in mailbox, decrement 'schedule' timer (timer set to -1 whilst ID is in mailbox) */
-		if(CAN_RxMessages[sequencePointer].timer > 0){
+		if(CAN_RxMessages[sequencePointer].timer > (0-DUPLICATES_ALLOWED)){
 			CAN_RxMessages[sequencePointer].timer--;
 		}
 
 		/* ID ready to be inserted */
-		if(CAN_RxMessages[sequencePointer].timer == 0){
+		if((CAN_RxMessages[sequencePointer].timer > (0-DUPLICATES_ALLOWED))&&(CAN_RxMessages[sequencePointer].timer <= 0)){
 			result = TRUE;
 		}
 
@@ -102,8 +103,6 @@ void updateFilter(unsigned int filterPointer){
 		mailBoxFilters[filterPointer].canID = CAN_RxMessages[sequencePointer].canID;
 		mailBoxFilters[filterPointer].messagePointer = sequencePointer;
 
-		/* Flag message as 'In Mailbox' */
-		CAN_RxMessages[sequencePointer].timer = -1;
 	}
 
 	last_sequencePointer = sequencePointer;

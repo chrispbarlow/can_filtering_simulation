@@ -24,28 +24,17 @@ tempShadow_t filtermap[16];
 
 void controlSCI_init(void)
 {
-	char *msg;
-
 	// This function is found in the DSP2833x_Sci.c file.
 	InitSciaGpio();
 	scia_fifo_init();	   // Initialize the SCI FIFO
 	scia_init();  // Initalize SCI for echoback
-
-//	msg = "\r\n\n\nHello World!\0";
-//	scia_msg(msg);
-//
-//	msg = "\r\nAll your CAN are tested with this\n\0";
-//	scia_msg(msg);
 }
 
 void controlSCI_update(void)
 {
 	static SCIstate_t SCIstate = NEW;
-    char *msg = 0;
     static Uint16 i = 0, j = 0;
-    static Uint16 LoopCount = 0;
-    Uint16 sret = 0;
-    Uint32 ID1 = 0, ID2 = 0, ID3 = 0;
+    Uint32 ID1 = 0, ID2 = 0;
     char tempCharOut;
     static Uint16 pointerShift = 0;
     Uint16 sequenceNum = 0;
@@ -74,8 +63,7 @@ void controlSCI_update(void)
     		rxbuffer[i] = SciaRegs.SCIRXBUF.all;
     	}
 
- //   	printf("%02X\n",rxbuffer[i]);
-    	if(rxbuffer[i] != 0){
+     	if(rxbuffer[i] != 0){
 
 			if((i>0)&&(rxbuffer[i-1] == '~')&&(rxbuffer[i] == '}')){
 
