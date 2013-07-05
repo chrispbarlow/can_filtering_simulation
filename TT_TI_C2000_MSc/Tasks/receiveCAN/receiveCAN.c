@@ -19,32 +19,41 @@ void receiveCAN_init(void){
 	Uint16 mailBox;
 	printf("CAN Rx Config:\n");
 
-	for(mailBox=0; mailBox<FILTERSIZE; mailBox++){
-		updateFilter(mailBox);
-		printf("0x%03X\n", (Uint16)CAN_RxMessages[mailBox].canID);
-	}
+//	for(mailBox=0; mailBox<FILTERSIZE; mailBox++){
+//		updateFilter(mailBox);
+//		printf("0x%03X\n", (Uint16)CAN_RxMessages[mailBox].canID);
+//	}
 }
 
 void receiveCAN_update(void){
 	Uint16 mailBox, messagePointer;
 	static Uint32 totalcounter = 0;
 
-	/* look through mailboxes for pending messages */
-	for(mailBox=0; mailBox<FILTERSIZE; mailBox++){
-		if(checkMailboxState(CANPORT_A, mailBox) == RX_PENDING){
-
-			/* Find message pointer from mailbox shadow */
-			messagePointer = mailBoxFilters[mailBox].messagePointer;
-
-			/* Count message hits */
-			CAN_RxMessages[messagePointer].counter++;
-			totalcounter++;
-
-			/* read the CAN data into buffer (nothing done with the data, but nice to do this for realistic timing */
-			readRxMailbox(CANPORT_A, mailBox, CAN_RxMessages[messagePointer].canData.rawData);
-
-			/* update the filter for next required ID */
+	if(updateFilterRequired == 1){
+		for(mailBox=0; mailBox<FILTERSIZE; mailBox++){
 			updateFilter(mailBox);
+	//		printf("0x%03X\n", (Uint16)CAN_RxMessages[mailBox].canID);
+		}
+		updateFilterRequired = 0;
+	}
+	else{
+		/* look through mailboxes for pending messages */
+		for(mailBox=0; mailBox<FILTERSIZE; mailBox++){
+			if(checkMailboxState(CANPORT_A, mailBox) == RX_PENDING){
+
+				/* Find message pointer from mailbox shadow */
+				messagePointer = mailBoxFilters[mailBox].messagePointer;
+
+				/* Count message hits */
+				CAN_RxMessages[messagePointer].counter++;
+				totalcounter++;
+
+				/* read the CAN data into buffer (nothing done with the data, but nice to do this for realistic timing */
+				readRxMailbox(CANPORT_A, mailBox, CAN_RxMessages[messagePointer].canData.rawData);
+
+				/* update the filter for next required ID */
+				updateFilter(mailBox);
+			}
 		}
 	}
 }

@@ -10,6 +10,7 @@
 
 #include <DSP2833x_Device.h>
 
+extern char updateFilterRequired;
 
 
 /******************************************

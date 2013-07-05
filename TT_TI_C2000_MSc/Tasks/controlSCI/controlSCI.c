@@ -10,7 +10,7 @@
 #include "../../CAN_Exchange/CAN_Rx_global.h"
 
 
-typedef enum{NEW,WAITING,SEND}SCIstate_t;
+typedef enum{NEW,WAITING,RECEIVE,SEND}SCIstate_t;
 static char rxbuffer[200];
 Uint16 rxbufferSize = (sizeof(rxbuffer)/sizeof(rxbuffer[0]));
 
@@ -45,139 +45,134 @@ void controlSCI_update(void)
     static Uint16 i = 0, j = 0;
     static Uint16 LoopCount = 0;
     Uint16 sret = 0;
-    Uint16 ID1 = 0, ID2 = 0, ID3 = 0;
+    Uint32 ID1 = 0, ID2 = 0, ID3 = 0;
     char tempCharOut;
     static Uint16 pointerShift = 0;
+    Uint16 sequenceNum = 0;
 
-//    switch(SCIstate){
-//    case NEW:
-//    	msg = "\r\n\n\nEnter something: \0";
-//		scia_msg(msg);
-//		SCIstate = WAITING;
-//		break;
-//    case WAITING:
-//    	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
-//    		for(i=0;i<rxbufferSize;i++){
-//    			rxbuffer[i] = 0;
-//    		}
-//    		i=0;
-//    		SCIstate = SEND;
-//    	}
-//    	break;
-//    case SEND:
-//    	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
-//    		rxbuffer[i] = SciaRegs.SCIRXBUF.all;
-//    	}
-//
-//    	if((rxbuffer[i] == '\n')||(i>=rxbufferSize)){
-//
-//    		msg = "   Received: \0";
-//    		scia_msg(msg);
-//    		rxbuffer[i+1] = '\0'; /*scia_message() uses \0 to mark end of string*/
-//    		scia_msg(rxbuffer);
-//
-//    		sret = sscanf(rxbuffer,"%03X,%03X,%03X",&ID1, &ID2, &ID3);
-//
-//			sprintf(rxbuffer,"%u 1: %03X  \0",sret, ID1);
-//			scia_msg(rxbuffer);
-//
-//			sprintf(rxbuffer,"2: %03X  \0",ID2);
-//			scia_msg(rxbuffer);
-//
-//			sprintf(rxbuffer,"3: %03X  \0",ID3);
-//			scia_msg(rxbuffer);
-//
-//
-//    		if(SciaRegs.SCIFFRX.bit.RXFFST == 0){
-//    			SCIstate = NEW;
-//
-//    			i = 0;
-//    		}
-//    	}
-//    	else if(rxbuffer[i] != '\0'){ /*terminal sends \0 after each character typed*/
-//    		i++;
-//    	}
-//    	break;
-//    default:
-//    	break;
-//    }
-//    tempCharOut = (char)(i & 0xff);
-//    msg[0] = tempCharOut;
-//    msg[1] = (',');
-//    tempCharOut = (char)((CAN_RxMessages[i].canID>>8)&0xFF);
-//    msg[2] = tempCharOut;
-//    tempCharOut = (char)(CAN_RxMessages[i].canID&0xFF);
-//    msg[3] = tempCharOut;
-//    msg[4] = (',');
-//    tempCharOut = (char)((CAN_RxMessages[i].counter>>8)&0xFF);
-//    msg[5] = tempCharOut;
-//    tempCharOut = (char)(CAN_RxMessages[i].counter&0xFF);
-//    msg[6] = tempCharOut;
-//    msg[7] = ('\n');
-//    msg[8] = ('\0');
-
-	scia_xmit('{');
-	scia_xmit('~');
-	scia_xmit('}');
-	/* Take snapshot of filters (should prevent updates halfway through transmission)*/
-	for(i=0;i<16;i++){
-		j = mailBoxFilters[i].messagePointer;
-		filtermap[i].mp = j;
-		filtermap[i].count = CAN_RxMessages[j].counter;
-		filtermap[i].ID = mailBoxFilters[i].canID;
-	}
+    switch(SCIstate){
+    case NEW:
+    	/* This doesn't do anything anymore */
+ 		SCIstate = WAITING;
+		break;
 
 
-	scia_xmit('{');
-	scia_xmit('M');
-
-    for(i=0;i<16;i++){
-		j = filtermap[i].mp;
-
-		tempCharOut = ((filtermap[i].ID>>8) & 0xFF);
-		scia_xmit(tempCharOut);
-
-		tempCharOut = (filtermap[i].ID & 0xFF);
-		scia_xmit(tempCharOut);
-
-		tempCharOut = (j & 0xFF);
-		scia_xmit(tempCharOut);
-
-   }
-
-	scia_xmit('~');
-	scia_xmit('}');
+    case WAITING:
+      	scia_xmit('?');
+    	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
+    		for(i=0;i<rxbufferSize;i++){
+    			rxbuffer[i] = 0;
+    		}
+    		i=0;
+    		SCIstate = RECEIVE;
+    	}
+    	break;
 
 
-    for(i=0;i<=5;i++){
-    	j = (6*i)+pointerShift;
-
-    	if(j<33){
-			scia_xmit('{');
-			scia_xmit('S');
-
-			tempCharOut = (j & 0xff);
-			scia_xmit(tempCharOut);
-
-			tempCharOut = ((CAN_RxMessages[j].counter>>24)&0xFF);
-			scia_xmit(tempCharOut);
-			tempCharOut = ((CAN_RxMessages[j].counter>>16)&0xFF);
-			scia_xmit(tempCharOut);
-			tempCharOut = ((CAN_RxMessages[j].counter>>8)&0xFF);
-			scia_xmit(tempCharOut);
-			tempCharOut = ((CAN_RxMessages[j].counter)&0xFF);
-			scia_xmit(tempCharOut);
-
-			scia_xmit('~');
-			scia_xmit('}');
+    case RECEIVE:
+    	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
+    		rxbuffer[i] = SciaRegs.SCIRXBUF.all;
     	}
 
-   }
+ //   	printf("%02X\n",rxbuffer[i]);
+    	if(rxbuffer[i] != 0){
 
-    pointerShift++;
-    if(pointerShift > 6){
-		pointerShift = 0;
-	}
+			if((i>0)&&(rxbuffer[i-1] == '~')&&(rxbuffer[i] == '}')){
+
+				for(sequenceNum=0;sequenceNum<33;sequenceNum++){
+					ID1 = rxbuffer[(2*sequenceNum)+1];
+					ID2 = rxbuffer[(2*sequenceNum)+2];
+
+					ID1 <<= 8;
+
+					CAN_RxMessages[sequenceNum].canID = ID1|ID2;
+
+					CAN_RxMessages[sequenceNum].counter = 0;
+				}
+				updateFilterRequired = 1;
+				SCIstate = SEND;
+
+			}
+			else if(rxbuffer[0] == '{'){ /*terminal sends \0 after each character typed*/
+				i++;
+			}
+			scia_xmit('?');
+    	}
+    	break;
+
+
+    case SEND:
+    	scia_xmit('{');
+    	scia_xmit('~');
+    	scia_xmit('}');
+    	/* Take snapshot of filters (should prevent updates halfway through transmission)*/
+    	for(i=0;i<16;i++){
+    		j = mailBoxFilters[i].messagePointer;
+    		filtermap[i].mp = j;
+    		filtermap[i].count = CAN_RxMessages[j].counter;
+    		filtermap[i].ID = mailBoxFilters[i].canID;
+    	}
+
+
+    	scia_xmit('{');
+    	scia_xmit('M');
+
+        for(i=0;i<16;i++){
+    		j = filtermap[i].mp;
+
+    		tempCharOut = ((filtermap[i].ID>>8) & 0xFF);
+    		scia_xmit(tempCharOut);
+
+    		tempCharOut = (filtermap[i].ID & 0xFF);
+    		scia_xmit(tempCharOut);
+
+    		tempCharOut = (j & 0xFF);
+    		scia_xmit(tempCharOut);
+
+       }
+
+    	scia_xmit('~');
+    	scia_xmit('}');
+
+
+        for(i=0;i<=5;i++){
+        	j = (6*i)+pointerShift;
+
+        	if(j<33){
+    			scia_xmit('{');
+    			scia_xmit('S');
+
+    			tempCharOut = (j & 0xff);
+    			scia_xmit(tempCharOut);
+
+    			tempCharOut = ((CAN_RxMessages[j].counter>>24)&0xFF);
+    			scia_xmit(tempCharOut);
+    			tempCharOut = ((CAN_RxMessages[j].counter>>16)&0xFF);
+    			scia_xmit(tempCharOut);
+    			tempCharOut = ((CAN_RxMessages[j].counter>>8)&0xFF);
+    			scia_xmit(tempCharOut);
+    			tempCharOut = ((CAN_RxMessages[j].counter)&0xFF);
+    			scia_xmit(tempCharOut);
+
+    			scia_xmit('~');
+    			scia_xmit('}');
+        	}
+
+       }
+
+        pointerShift++;
+        if(pointerShift > 6){
+    		pointerShift = 0;
+    	}
+
+    	break;
+
+    default:
+    	break;
+    }
+
+
+
 
 
 //    for(i=0;i<numRxCANMsgs;i++){
