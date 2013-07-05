@@ -51,4 +51,4 @@ canRxMessage_t CAN_RxMessages[] = {
 		{ 0, {0,0}, 1, 0, 5, 0}
 };
 
-const unsigned int numRxCANMsgs = (sizeof(CAN_RxMessages) / sizeof(CAN_RxMessages[0]));
+unsigned int numRxCANMsgs = 0;

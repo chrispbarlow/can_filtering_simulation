@@ -20,7 +20,7 @@ typedef struct{
 	Uint32 count;
 } tempShadow_t;
 
-tempShadow_t filtermap[16];
+tempShadow_t filtermap[FILTERSIZE];
 
 void controlSCI_init(void)
 {
@@ -67,7 +67,11 @@ void controlSCI_update(void)
 
 			if((i>0)&&(rxbuffer[i-1] == '~')&&(rxbuffer[i] == '}')){
 
-				for(sequenceNum=0;sequenceNum<33;sequenceNum++){
+				numRxCANMsgs = (i-2)/2;
+
+				printf("%u\n", numRxCANMsgs);
+
+				for(sequenceNum=0;sequenceNum<numRxCANMsgs;sequenceNum++){
 					ID1 = rxbuffer[(2*sequenceNum)+1];
 					ID2 = rxbuffer[(2*sequenceNum)+2];
 
@@ -94,7 +98,7 @@ void controlSCI_update(void)
     	scia_xmit('~');
     	scia_xmit('}');
     	/* Take snapshot of filters (should prevent updates halfway through transmission)*/
-    	for(i=0;i<16;i++){
+    	for(i=0;i<FILTERSIZE;i++){
     		j = mailBoxFilters[i].messagePointer;
     		filtermap[i].mp = j;
     		filtermap[i].count = CAN_RxMessages[j].counter;
@@ -105,7 +109,7 @@ void controlSCI_update(void)
     	scia_xmit('{');
     	scia_xmit('M');
 
-        for(i=0;i<16;i++){
+        for(i=0;i<FILTERSIZE;i++){
     		j = filtermap[i].mp;
 
     		tempCharOut = ((filtermap[i].ID>>8) & 0xFF);

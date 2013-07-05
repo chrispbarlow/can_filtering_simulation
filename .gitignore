@@ -8,3 +8,6 @@ Documents/Reports/~$ogress report May13-Jun13.docx
 Documents/Results/~$Side-by-side_33IDs.xlsx
 Documents/~$System diagrams.xlsx
 Processing/PointsLines/log_output.txt
+*.png
+*.tmp
+*.mov
