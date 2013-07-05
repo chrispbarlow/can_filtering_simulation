@@ -10,7 +10,7 @@
 #include "../../CAN_Exchange/CAN_Tx_global.h"
 
 #define FILTERSIZE (16)
-#define DUPLICATES_ALLOWED (2)
+#define DUPLICATES_ALLOWED (1)
 
 typedef enum{FALSE, TRUE}boolean_t;
 
@@ -76,12 +76,12 @@ void updateFilter(unsigned int filterPointer){
 		}
 
 		/* ID not already in mailbox, decrement 'schedule' timer (timer set to -1 whilst ID is in mailbox) */
-		if(CAN_RxMessages[sequencePointer].timer > (0-DUPLICATES_ALLOWED)){
+		if(CAN_RxMessages[sequencePointer].timer > ((-1)-DUPLICATES_ALLOWED)){
 			CAN_RxMessages[sequencePointer].timer--;
 		}
 
 		/* ID ready to be inserted */
-		if((CAN_RxMessages[sequencePointer].timer > (0-DUPLICATES_ALLOWED))&&(CAN_RxMessages[sequencePointer].timer <= 0)){
+		if((CAN_RxMessages[sequencePointer].timer > ((-1)-DUPLICATES_ALLOWED))&&(CAN_RxMessages[sequencePointer].timer <= 0)){
 			result = TRUE;
 		}
 
