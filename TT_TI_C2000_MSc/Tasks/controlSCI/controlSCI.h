@@ -12,4 +12,6 @@
 void controlSCI_init(void);
 void controlSCI_update(void);
 
+void buildSequence(Uint16 listSize);
+
 #endif /* CONTROLSCI_H_ */

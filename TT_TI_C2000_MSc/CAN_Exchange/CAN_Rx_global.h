@@ -97,6 +97,6 @@ typedef struct{
 extern filterShadow_t mailBoxFilters[];
 
 
-extern unsigned int numRxCANMsgs;
-
+extern Uint16 numRxCANMsgs;
+extern Uint16 filterSize;
 #endif /* CAN_RX_GLOBAL_H_ */
