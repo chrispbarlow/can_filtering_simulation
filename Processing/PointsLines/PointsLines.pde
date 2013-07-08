@@ -18,59 +18,60 @@ int d = 20;
 int s = 100;
 int w = 800;
 
-int[] mb_y = new int[FILTERSIZE];
-int[] seq_y = new int[FILTERSIZE];
-int[] IDs = new int[FILTERSIZE];
+int[] mb_y = new int[32];
+int[] seq_y = new int[32];
+int[] IDs = new int[32];
 int i,j;
 int testoffset;
 int txPointer = 0;
 
 boolean allRefresh = false;
 
-int[] sequence = {
-  0x187,
-  0x188,
-  0x189,
-  0x18A,
-  0x18B,
-  0x18C,
-  0x18D,
-  0x18E,
-  0x207,
-  0x209,
-  0x20B,
-  0x20D,
-  0x287,
-  0x289,
-  0x28B,
-  0x28D,
-  0x307,
-  0x309,
-  0x30B,
-  0x30D,
-  0x385,
-//  0x387,
-//  0x389,
-//  0x38B,
-//  0x38D,
-//  0x407,
-//  0x409,
-//  0x40B,
-//  0x40D,
-//  0x707,
-//  0x709,
-//  0x70B,
-//  0x70D
+int[][] sequence = {
+  {0x187,8,20},
+  {0x188,8,20},
+  {0x189,8,20},
+  {0x18A,8,20},
+  {0x18B,8,20},
+  {0x18C,8,20},
+  {0x18D,8,20},
+  {0x18E,8,20},
+  {0x207,8,20},
+  {0x209,8,20},
+  {0x20B,8,20},
+  {0x20D,8,20},
+  {0x287,8,20},
+  {0x289,8,20},
+  {0x28B,8,20},
+  {0x28D,8,20},
+  {0x307,8,20},
+  {0x309,8,20},
+  {0x30B,8,20},
+  {0x30D,8,20},
+  {0x385,8,20},
+  {0x387,8,20},
+  {0x389,8,20},
+  {0x38B,8,20},
+  {0x38D,8,20},
+  {0x407,8,20},
+  {0x409,8,20},
+  {0x40B,8,20},
+  {0x40D,8,20},
+  {0x707,1,100},
+  {0x709,1,100},
+  {0x70B,1,100},
+  {0x70D,1,100}
 };  
 
 long[] counters = new long[sequence.length];
 long[] countersTemp = new long[sequence.length];
 
+int filterSize = 0;
 
 void setup(){
   size(1000, 700);
   background(0);
-  for(i=0;i<FILTERSIZE;i++){
+  for(i=0;i<filterSize;i++){
     mb_y[i] = (d*i)+(2*d);
     seq_y[i] = (d*i)+(2*d);    
   }
@@ -92,7 +93,9 @@ void draw(){
   text("Filter", (s-(4*d)+3), (d+6));
   text("Buffer Hits", (w+d+5), (d+6));
 
-  for(i=0;i<FILTERSIZE;i++){
+  for(i=0;i<filterSize;i++){
+    mb_y[i] = (d*i)+(2*d);
+
     stroke(255);
     line(s, mb_y[i], w, seq_y[i]);
     if(i<10){
@@ -117,7 +120,7 @@ void draw(){
     if(allRefresh == true){
       counters[i] = countersTemp[i];
     }
-    text(strg+": "+hex(sequence[i],3)+" = "+counters[i], (w+d+5), ((d*i)+(2*d)+6));
+    text(strg+": "+hex(sequence[i][0],3)+" = "+counters[i], (w+d+5), ((d*i)+(2*d)+6));
     line(w, ((d*i)+(2*d)), (w+d), ((d*i)+(2*d)));
   }
   allRefresh = false;
@@ -135,9 +138,9 @@ void serialEvent(Serial myPort) {
     }
   }
   serialInArray[serialCount] = inByte;
-    if(serialInArray[serialCount] == '?'){
-       print("HS ");
-    }
+  if(serialInArray[serialCount] == '?'){
+     print("HS ");
+  }
   
   if(readyState==true){
     /* Request from TI chip to send CAN IDs */
@@ -153,9 +156,12 @@ void serialEvent(Serial myPort) {
         println("{");
       }
       else if(txPointer <= sequence.length){      
-        myPort.write((sequence[txPointer-1]>>8)&0x07);
-        myPort.write(sequence[txPointer-1]&0xFF);
-        println(hex((sequence[txPointer-1]>>8)&0xFF,1)+" "+hex(sequence[txPointer-1]&0xFF,2));
+        myPort.write((sequence[txPointer-1][0]>>8)&0x07);
+        myPort.write(sequence[txPointer-1][0]&0xFF);
+        myPort.write(sequence[txPointer-1][1]&0xFF);
+        myPort.write(sequence[txPointer-1][2]&0xFF);
+
+        println(hex((sequence[txPointer-1][0]>>8)&0xFF,1)+" "+hex(sequence[txPointer-1][0]&0xFF,2)+" "+hex(sequence[txPointer-1][1]&0xFF,2)+" "+hex(sequence[txPointer-1][2]&0xFF,2));
       }
       else if(txPointer == (sequence.length+1)){
         myPort.write('~');
@@ -174,7 +180,9 @@ void serialEvent(Serial myPort) {
       switch(serialInArray[1]){ 
       /* Data packet contains mailbox information */     
       case 'M': 
-        for(sequencePointer=0;sequencePointer<FILTERSIZE;sequencePointer++){
+        filterSize = (serialCount-2)/3;
+        println(filterSize);
+        for(sequencePointer=0;sequencePointer<filterSize;sequencePointer++){
               IDs[sequencePointer] = ((serialInArray[(3*sequencePointer)+2])<<8)|serialInArray[(3*sequencePointer)+3];
               seq_y[sequencePointer] = (d*serialInArray[(3*sequencePointer)+4])+(2*d);
         }
@@ -229,7 +237,7 @@ void keyPressed() { // Press a key to save the data
   if((key == 'r')||(key == 'R')){
      readyState = !readyState;
      println(readyState);
-     for(k=0;k<FILTERSIZE;k++){
+     for(k=0;k<filterSize;k++){
         IDs[k] = 0x000;
         seq_y[k] = (d*k)+(2*d);
      }
