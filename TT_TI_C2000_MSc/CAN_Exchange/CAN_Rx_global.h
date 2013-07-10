@@ -9,11 +9,9 @@
 #define CAN_RX_GLOBAL_H_
 
 
-#define FILTERSIZE (16)
-
 #include <DSP2833x_Device.h>
 
-extern char updateFilterRequired;
+extern char updateFilterRequired_G;
 
 
 /******************************************
@@ -97,6 +95,6 @@ typedef struct{
 extern filterShadow_t mailBoxFilters[];
 
 
-extern Uint16 numRxCANMsgs;
-extern Uint16 filterSize;
+extern Uint16 numRxCANMsgs_G;
+extern Uint16 filterSize_G;
 #endif /* CAN_RX_GLOBAL_H_ */

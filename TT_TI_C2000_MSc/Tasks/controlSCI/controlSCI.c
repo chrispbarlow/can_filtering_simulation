@@ -11,7 +11,7 @@
 
 
 typedef enum{NEW,WAITING,RECEIVE,SEND}SCIstate_t;
-static char rxbuffer[200];
+static char rxbuffer[300];
 Uint16 rxbufferSize = (sizeof(rxbuffer)/sizeof(rxbuffer[0]));
 
 typedef struct{
@@ -30,7 +30,7 @@ typedef struct{
 
 logging_list_t loggingList[64];
 
-tempShadow_t filtermap[FILTERSIZE];
+tempShadow_t filtermap[64];
 
 void controlSCI_init(void)
 {
@@ -77,11 +77,11 @@ void controlSCI_update(void)
 
 			if((i>0)&&(rxbuffer[i-1] == '~')&&(rxbuffer[i] == '}')){
 
-				numRxCANMsgs = (i-2)/4;
+				numRxCANMsgs_G = (i-2)/4;
 
-				printf("%u\n", numRxCANMsgs);
+				printf("%u\n", numRxCANMsgs_G);
 
-				for(sequenceNum=0;sequenceNum<numRxCANMsgs;sequenceNum++){
+				for(sequenceNum=0;sequenceNum<numRxCANMsgs_G;sequenceNum++){
 					ID1 = rxbuffer[(4*sequenceNum)+1];
 					ID1 <<= 8;
 					ID2 = rxbuffer[(4*sequenceNum)+2];
@@ -91,9 +91,9 @@ void controlSCI_update(void)
 					loggingList[sequenceNum].cycleTime = rxbuffer[(4*sequenceNum)+4];
 				}
 
-				buildSequence(numRxCANMsgs);
+				buildSequence(numRxCANMsgs_G);
 
-				updateFilterRequired = 1;
+				updateFilterRequired_G = 1;
 				SCIstate = SEND;
 
 			}
@@ -110,7 +110,7 @@ void controlSCI_update(void)
     	scia_xmit('~');
     	scia_xmit('}');
     	/* Take snapshot of filters (should prevent updates halfway through transmission)*/
-    	for(i=0;i<filterSize;i++){
+    	for(i=0;i<filterSize_G;i++){
     		j = mailBoxFilters[i].messagePointer;
     		filtermap[i].mp = j;
     		filtermap[i].count = CAN_RxMessages[j].counter;
@@ -121,7 +121,7 @@ void controlSCI_update(void)
     	scia_xmit('{');
     	scia_xmit('M');
 
-        for(i=0;i<filterSize;i++){
+        for(i=0;i<filterSize_G;i++){
     		j = filtermap[i].mp;
 
     		tempCharOut = ((filtermap[i].ID>>8) & 0xFF);
@@ -138,10 +138,10 @@ void controlSCI_update(void)
     	scia_xmit('}');
 
 
-        for(i=0;i<=5;i++){
+        for(i=0;i<=10;i++){
         	j = (6*i)+pointerShift;
 
-        	if(j<33){
+        	if(j<=numRxCANMsgs_G){
     			scia_xmit('{');
     			scia_xmit('S');
 
@@ -172,13 +172,6 @@ void controlSCI_update(void)
     default:
     	break;
     }
-//    for(i=0;i<numRxCANMsgs;i++){
-//		if(CAN_RxMessages[i].counter>0){
-//			sprintf(msg,"{%03X}\n\0",(Uint16)CAN_RxMessages[i].canID);
-//			scia_msg(msg);
-//			CAN_RxMessages[i].counter--;
-//		}
-//    }
 }
 
 void buildSequence(Uint16 listSize){

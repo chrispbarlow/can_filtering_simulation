@@ -16,8 +16,7 @@
 Uint32 tickCount_G;
 
 
-void main(void)
-{
+void main(void){
 	tickCount_G = 0;
 
 	cpuInit();
@@ -28,15 +27,13 @@ void main(void)
 	Tasks_Init();
 	timerStart();
 
-	while(EVERY_TICK)
-	{
+	while(EVERY_TICK){
 		scheduler_taskDispatcher();
 	}
 }
 
 
-interrupt void cpu_timer0_isr(void)
-{
+interrupt void cpu_timer0_isr(void){
 	// Acknowledge this interrupt to receive more interrupts from group 1
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
 
@@ -44,8 +41,7 @@ interrupt void cpu_timer0_isr(void)
 }
 
 
-void cpuInit(void)
-{
+void cpuInit(void){
 	InitSysCtrl();
 
 	/* Disable CPU interrupts */
@@ -73,8 +69,7 @@ void cpuInit(void)
 
 	/* Write the LPM code value */
 	EALLOW;
-	if (SysCtrlRegs.PLLSTS.bit.MCLKSTS != 1) 	/* Only enter Idle mode when PLL is not in limp mode. */
-	{
+	if (SysCtrlRegs.PLLSTS.bit.MCLKSTS != 1){ 	/* Only enter Idle mode when PLL is not in limp mode. */
 		SysCtrlRegs.LPMCR0.bit.LPM = 0x0000;  	/* LPM mode = Idle - can be woken by timer interrupt */
 	}
 
@@ -82,8 +77,7 @@ void cpuInit(void)
 	EDIS;
 }
 
-void timerStart(void)
-{
+void timerStart(void){
 	// Configure CPU-Timer 0. 1 ms ticks.
 	ConfigCpuTimer(&CpuTimer0, 150, TICK_PERIOD_us);
 
@@ -109,8 +103,7 @@ void timerStart(void)
 	ERTM;   // Enable Global realtime interrupt DBGM
 }
 
-void gpioInit(void)
-{
+void gpioInit(void){
 	/* Task - specific GPIO initialisations should be in the relevant task_init() function. */
 
 	/* GPIOs reserved for CAN:

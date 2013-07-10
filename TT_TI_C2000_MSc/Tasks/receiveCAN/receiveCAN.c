@@ -29,17 +29,23 @@ void receiveCAN_update(void){
 	Uint16 mailBox, messagePointer;
 	static Uint32 totalcounter = 0;
 
-	if(updateFilterRequired == 1){
-		filterSize = numRxCANMsgs/2;
-		for(mailBox=0; mailBox<filterSize; mailBox++){
+	if(updateFilterRequired_G == 1){
+		if(numRxCANMsgs_G == 1){
+			filterSize_G = 1;
+		}
+		else{
+			filterSize_G = numRxCANMsgs_G/2;
+		}
+
+		for(mailBox=0; mailBox<filterSize_G; mailBox++){
 			updateFilter(mailBox);
 	//		printf("0x%03X\n", (Uint16)CAN_RxMessages[mailBox].canID);
 		}
-		updateFilterRequired = 0;
+		updateFilterRequired_G = 0;
 	}
 	else{
 		/* look through mailboxes for pending messages */
-		for(mailBox=0; mailBox<filterSize; mailBox++){
+		for(mailBox=0; mailBox<filterSize_G; mailBox++){
 			if(checkMailboxState(CANPORT_A, mailBox) == RX_PENDING){
 
 				/* Find message pointer from mailbox shadow */
@@ -68,7 +74,7 @@ void updateFilter(unsigned int filterPointer){
 	sequencePointer = last_sequencePointer;
 	do{
 		/* Wrap search */
-		if(sequencePointer<(numRxCANMsgs-1)){
+		if(sequencePointer<(numRxCANMsgs_G-1)){
 			sequencePointer++;
 		}
 		else{

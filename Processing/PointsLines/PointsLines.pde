@@ -12,22 +12,25 @@ int serialCount = 0;                 // A count of how many bytes we receive
 boolean readyState = false;
 long lastTime = 0;
 
+
+PFont font;
+
 int FILTERSIZE = 16;
 
-int d = 20;
+int d = 15;
 int s = 100;
-int w = 800;
+int w = 900;
 
-int[] mb_y = new int[32];
-int[] seq_y = new int[32];
-int[] IDs = new int[32];
+//int[] mb_y = new int[64];
+int[] seq_y = new int[64];
+int[] IDs = new int[64];
 int i,j;
 int testoffset;
 int txPointer = 0;
 
 boolean allRefresh = false;
 
-int[][] sequence = {
+int[][] loggingList = {
   {0x187,8,20},
   {0x188,8,20},
   {0x189,8,20},
@@ -60,173 +63,230 @@ int[][] sequence = {
   {0x707,1,100},
   {0x709,1,100},
   {0x70B,1,100},
-  {0x70D,1,100}
+  {0x70D,1,100},  
+  {0x187,8,20},
+  {0x188,8,20},
+  {0x189,8,20},
+  {0x18A,8,20},
+  {0x18B,8,20},
+  {0x18C,8,20},
+  {0x18D,8,20},
+  {0x18E,8,20},
+  {0x207,8,20},
+  {0x209,8,20},
+  {0x20B,8,20},
+  {0x20D,8,20},
+  {0x287,8,20},
+  {0x289,8,20},
+  {0x28B,8,20},
+  {0x28D,8,20},
+  {0x307,8,20},
+  {0x309,8,20},
+  {0x30B,8,20},
+  {0x30D,8,20},
+  {0x385,8,20},
+  {0x387,8,20},
+  {0x389,8,20},
+  {0x38B,8,20},
+  {0x38D,8,20},
+  {0x407,8,20},
+  {0x409,8,20},
+  {0x40B,8,20},
+  {0x40D,8,20},
+  {0x707,1,100},
+  {0x709,1,100},
+//  {0x70B,1,100},
+//  {0x70D,1,100},
 };  
 
-long[] counters = new long[sequence.length];
-long[] countersTemp = new long[sequence.length];
+long[] counters = new long[loggingList.length];
+long[] countersTemp = new long[loggingList.length];
 
 int filterSize = 0;
 
 void setup(){
-  size(1000, 700);
+  size(1200, 1000);
   background(0);
-  for(i=0;i<filterSize;i++){
-    mb_y[i] = (d*i)+(2*d);
-    seq_y[i] = (d*i)+(2*d);    
+  font = loadFont("Consolas-16.vlw");
+  textFont(font, 12);
+  
+  /* Serial port will be Serial.list()[0] when nothing else connected */
+  try{
+    println(Serial.list());
+    String portName = Serial.list()[0];
+    myPort = new Serial(this, portName, 9600);
   }
-  // Print a list of the serial ports, for debugging purposes:
-  println(Serial.list());
-  String portName = Serial.list()[0];
-  myPort = new Serial(this, portName, 9600);
+  catch(Exception e){
+    /* App will close if no serial ports are found */
+    println("No serial ports found. Use your dongle!");
+    exit();
+  }
   
-  stroke(153);  
-
-  
+  stroke(153);    
   noLoop();
 }
 
 void draw(){
   String strg;
-  background(0);
-  stroke(255);
-  text("Filter", (s-(4*d)+3), (d+6));
-  text("Buffer Hits", (w+d+5), (d+6));
-
-  for(i=0;i<filterSize;i++){
-    mb_y[i] = (d*i)+(2*d);
-
+  try{
+    background(0);
     stroke(255);
-    line(s, mb_y[i], w, seq_y[i]);
-    if(i<10){
-      strg = "0"+i;
-    }
-    else{
-      strg = str(i);
-    }
-    text(strg+":   "+hex(IDs[i],3), (s-(4*d)+3), ((d*i)+(2*d)+6));
-    stroke(255);
-    line(s, ((d*i)+(2*d)), (s-d), ((d*i)+(2*d)));
-  }
+    text("Filter in Device", (s-((4*d)+4)), (d+6));
+    text(" Logging List      Hits", (w+d+5), (d+6));
   
-  stroke(255);
-  for(i=0;i<sequence.length;i++){
-    if(i<10){
-      strg = "0"+i;
+    /* Draws logging list details */
+    stroke(255);
+    for(i=0;i<loggingList.length;i++){
+      if(i<10){
+        strg = (" 0"+i);
+      }
+      else{
+        strg = (" "+str(i));
+      }
+      if(allRefresh == true){
+        counters[i] = countersTemp[i];
+      }
+      text(strg+": "+hex(loggingList[i][0],3)+"           "+counters[i], (w+d+5), ((d*i)+(2*d)+6));
+      line(w, ((d*i)+(2*d)), (w+d), ((d*i)+(2*d)));
     }
-    else{
-      strg = str(i);
-    }
-    if(allRefresh == true){
-      counters[i] = countersTemp[i];
-    }
-    text(strg+": "+hex(sequence[i][0],3)+" = "+counters[i], (w+d+5), ((d*i)+(2*d)+6));
-    line(w, ((d*i)+(2*d)), (w+d), ((d*i)+(2*d)));
+  
+    /* Draws device filter information and mapping lines */
+    for(i=0;i<filterSize;i++){
+      /* Text and leader lines */
+     if(i<10){
+        strg = "0"+i;
+      }
+      else{
+        strg = str(i);
+      }
+      text(strg+": "+hex(IDs[i],3), (s-((4*d)+4)), ((d*i)+(2*d)+6));
+      stroke(255);
+      line(s, ((d*i)+(2*d)), (s-d), ((d*i)+(2*d)));
+      
+      /* Mapping lines */    
+      line(s, ((d*i)+(2*d)), w, seq_y[i]);
+   
+    } 
+  
+    allRefresh = false;  
   }
-  allRefresh = false;
+  catch(Exception e){
+    exit();
+  }
 }
 
 void serialEvent(Serial myPort) {
   long messageCounter = 0; 
-  int sequencePointer = 0;
+  int loggingListPointer = 0;
   // read a byte from the serial port:
   int inByte = myPort.read();
     // Add the latest byte from the serial port to array:
-  if(serialCount == 0){
-    for(j=0;j<1000;j++){
-      serialInArray[j] = 0;
+  try{
+    
+    if(serialCount == 0){
+      for(j=0;j<1000;j++){
+        serialInArray[j] = 0;
+      }
     }
-  }
-  serialInArray[serialCount] = inByte;
-  if(serialInArray[serialCount] == '?'){
-     print("HS ");
-  }
-  
-  if(readyState==true){
-    /* Request from TI chip to send CAN IDs */
-    if((serialCount == 0)&&(serialInArray[0] == '?')){
+    serialInArray[serialCount] = inByte;
+    if(serialInArray[serialCount] == '?'){
        print("HS ");
-     
-     /* this delay is necesssary to all the TI chip to keep up when it receives erroneous null characters */ 
-      lastTime = millis();
-      while (millis()-lastTime < 5);
-      
-      if(txPointer == 0){
-        myPort.write('{');
-        println("{");
-      }
-      else if(txPointer <= sequence.length){      
-        myPort.write((sequence[txPointer-1][0]>>8)&0x07);
-        myPort.write(sequence[txPointer-1][0]&0xFF);
-        myPort.write(sequence[txPointer-1][1]&0xFF);
-        myPort.write(sequence[txPointer-1][2]&0xFF);
-
-        println(hex((sequence[txPointer-1][0]>>8)&0xFF,1)+" "+hex(sequence[txPointer-1][0]&0xFF,2)+" "+hex(sequence[txPointer-1][1]&0xFF,2)+" "+hex(sequence[txPointer-1][2]&0xFF,2));
-      }
-      else if(txPointer == (sequence.length+1)){
-        myPort.write('~');
-        println("~");
-      }
-      else if(txPointer == (sequence.length+2)){
-        myPort.write('}');
-        println("}");
-      }
-      
-      txPointer++;
-    }    
-    /* End of data packet - update data arrays */
-    else if((serialCount>0)&&(serialInArray[serialCount-1] == '~')&&(serialInArray[serialCount] == '}')){
-      
-      switch(serialInArray[1]){ 
-      /* Data packet contains mailbox information */     
-      case 'M': 
-        filterSize = (serialCount-2)/3;
-        println(filterSize);
-        for(sequencePointer=0;sequencePointer<filterSize;sequencePointer++){
-              IDs[sequencePointer] = ((serialInArray[(3*sequencePointer)+2])<<8)|serialInArray[(3*sequencePointer)+3];
-              seq_y[sequencePointer] = (d*serialInArray[(3*sequencePointer)+4])+(2*d);
-        }
-        break;
-        
-      /* Data packet contains sequence information */  
-      case 'S':
-        sequencePointer = serialInArray[2];
-        
-        if(sequencePointer < sequence.length){
-          messageCounter = ((serialInArray[3]&0xFF)<<24);
-          messageCounter |= ((serialInArray[4]&0xFF)<<16);
-          messageCounter |= ((serialInArray[5]&0xFF)<<8);
-          messageCounter |= ((serialInArray[6])&0xFF);
-           
-          countersTemp[sequencePointer] = messageCounter;
-          
-          /* Only refresh sequence counters on screen when all counters have been received (takes several packets) */
-          if(sequencePointer == (sequence.length-1)){
-            allRefresh = true;
-
-          }
-        }
-  
-        break;
-        
-      case '~':
-        redraw();
-        break;
-        
-      default:        
-        break;
-      }
-              
-      serialCount = 0;
-    }      
-    /* Receiving data packet from TI chip */
-    else if((serialInArray[0] == '{')&&serialCount < (999)){
-        serialCount++;
     }
-  }
-  else{
-    serialCount = 0;
-    txPointer = 0;
+    
+    if(readyState==true){
+      /* Request from TI chip to send CAN IDs */
+      if((serialCount == 0)&&(serialInArray[0] == '?')){       
+       
+       /* this delay is necesssary to all the TI chip to keep up when it receives erroneous null characters */ 
+        lastTime = millis();
+        while (millis()-lastTime < 5);
+        
+        if(txPointer == 0){
+          myPort.write('{');
+          println("{");
+        }
+        else if(txPointer <= loggingList.length){      
+          myPort.write((loggingList[txPointer-1][0]>>8)&0x07);
+          myPort.write(loggingList[txPointer-1][0]&0xFF);
+          myPort.write(loggingList[txPointer-1][1]&0xFF);
+          myPort.write(loggingList[txPointer-1][2]&0xFF);
+  
+          println(hex((loggingList[txPointer-1][0]>>8)&0xFF,1)+" "+hex(loggingList[txPointer-1][0]&0xFF,2)+" "+hex(loggingList[txPointer-1][1]&0xFF,2)+" "+hex(loggingList[txPointer-1][2]&0xFF,2));
+        }
+        else if(txPointer == (loggingList.length+1)){
+          myPort.write('~');
+          println("~");
+        }
+        else if(txPointer == (loggingList.length+2)){
+          myPort.write('}');
+          println("}");
+        }
+        
+        txPointer++;
+      }    
+      /* End of data packet - update data arrays */
+      else if((serialCount>0)&&(serialInArray[serialCount-1] == '~')&&(serialInArray[serialCount] == '}')){
+        
+        switch(serialInArray[1]){ 
+        /* Data packet contains mailbox information */     
+        case 'M': 
+          if(serialCount-3 == 1){
+            filterSize = 1;
+          }
+          else{
+            filterSize = (serialCount-3)/3;
+          }
+  //        println(serialCount+": "+filterSize);
+          
+          for(loggingListPointer=0;loggingListPointer<filterSize;loggingListPointer++){
+                IDs[loggingListPointer] = ((serialInArray[(3*loggingListPointer)+2])<<8)|serialInArray[(3*loggingListPointer)+3];
+                seq_y[loggingListPointer] = (d*serialInArray[(3*loggingListPointer)+4])+(2*d);
+          }
+          break;
+          
+        /* Data packet contains loggingList information */  
+        case 'S':
+          loggingListPointer = serialInArray[2];
+          println(loggingListPointer);
+          
+          if(loggingListPointer < loggingList.length){
+            messageCounter = ((serialInArray[3]&0xFF)<<24);
+            messageCounter |= ((serialInArray[4]&0xFF)<<16);
+            messageCounter |= ((serialInArray[5]&0xFF)<<8);
+            messageCounter |= ((serialInArray[6])&0xFF);
+             
+            countersTemp[loggingListPointer] = messageCounter;
+            
+            /* Only refresh loggingList counters on screen when all counters have been received (takes several packets) */
+            if(loggingListPointer == (loggingList.length-1)){
+              allRefresh = true;
+            }
+          }
+    
+          break;
+          
+        case '~':
+          redraw();
+          break;
+          
+        default:        
+          break;
+        }
+                
+        serialCount = 0;
+      }      
+      /* Receiving data packet from TI chip */
+      else if((serialInArray[0] == '{')&&serialCount < (999)){
+          serialCount++;
+      }
+    }
+    else{
+      serialCount = 0;
+      txPointer = 0;
+    }
+    }
+  catch(Exception e){
+    exit();
   }
 }
 
@@ -242,7 +302,7 @@ void keyPressed() { // Press a key to save the data
         seq_y[k] = (d*k)+(2*d);
      }
      
-     for (k = 0; k < sequence.length; k++) {
+     for (k = 0; k < loggingList.length; k++) {
       counters[k] = 0;
     }
 
@@ -266,9 +326,9 @@ void keyPressed() { // Press a key to save the data
 }
 
 void saveCounters(){
-  String[] lines = new String[sequence.length];
+  String[] lines = new String[loggingList.length];
   
-  for (int k = 0; k < sequence.length; k++) {
+  for (int k = 0; k < loggingList.length; k++) {
       lines[k] = str(counters[k]);
   }
   saveStrings("log_output.txt", lines);

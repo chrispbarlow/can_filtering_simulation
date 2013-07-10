@@ -6,9 +6,9 @@
  */
 #include "CAN_Rx_global.h"
 
-filterShadow_t mailBoxFilters[32];
+filterShadow_t mailBoxFilters[64];
 
-char updateFilterRequired = 0;
+char updateFilterRequired_G = 0;
 
 /*******************************************************************************
  * CAN Rx Message array
@@ -17,7 +17,7 @@ char updateFilterRequired = 0;
 
 canRxMessage_t CAN_RxMessages[64];
 
-Uint16 numRxCANMsgs = 0;
-Uint16 filterSize = 0;
+Uint16 numRxCANMsgs_G = 0;
+Uint16 filterSize_G = 0;
 
 
