@@ -11,7 +11,7 @@ int[] serialInArray = new int[1000];    // Where we'll put what we receive
 int serialCount = 0;                 // A count of how many bytes we receive
 boolean readyState = false;
 long lastTime = 0;
-
+int status = 0;
 
 PFont font;
 
@@ -127,7 +127,7 @@ void setup(){
 }
 
 void draw(){
-  String strg;
+  String strg = "";
   try{
     background(0);
     stroke(255);
@@ -167,6 +167,30 @@ void draw(){
       line(s, ((d*i)+(2*d)), w, seq_y[i]);
    
     } 
+    
+    switch(status){
+     case 0:
+      strg = "offline";
+       break;
+      case 1:
+        strg = "device waiting - press 'R' to begin";
+      break;
+      case 2:
+        strg = "Transmitting logging list";
+        for(i=0;i<txPointer;i++){
+          if(i%10 == 0){
+            strg += ".";
+          }
+        }
+      break;
+      case 3:
+        strg = "Online";
+      break;
+      default:
+     break; 
+    }
+    
+    text("Status: "+strg, (s-((4*d)+4)), 981);
   
     allRefresh = false;  
   }
@@ -190,13 +214,14 @@ void serialEvent(Serial myPort) {
     }
     serialInArray[serialCount] = inByte;
     if(serialInArray[serialCount] == '?'){
+       status = 1;
        print("HS ");
     }
     
     if(readyState==true){
       /* Request from TI chip to send CAN IDs */
       if((serialCount == 0)&&(serialInArray[0] == '?')){       
-       
+        status = 2;
        /* this delay is necesssary to all the TI chip to keep up when it receives erroneous null characters */ 
         lastTime = millis();
         while (millis()-lastTime < 5);
@@ -223,10 +248,11 @@ void serialEvent(Serial myPort) {
         }
         
         txPointer++;
+        redraw();
       }    
       /* End of data packet - update data arrays */
       else if((serialCount>0)&&(serialInArray[serialCount-1] == '~')&&(serialInArray[serialCount] == '}')){
-        
+        status = 3;
         switch(serialInArray[1]){ 
         /* Data packet contains mailbox information */     
         case 'M': 
@@ -284,7 +310,7 @@ void serialEvent(Serial myPort) {
       serialCount = 0;
       txPointer = 0;
     }
-    }
+  }
   catch(Exception e){
     exit();
   }
@@ -305,10 +331,9 @@ void keyPressed() { // Press a key to save the data
      for (k = 0; k < loggingList.length; k++) {
       counters[k] = 0;
     }
-
-    
+    filterSize = 0;
+    status = 0;
     redraw();
-
   }
   
   if((key == 's')||(key == 'S')){
