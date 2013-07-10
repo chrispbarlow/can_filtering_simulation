@@ -167,6 +167,8 @@ void controlSCI_update(void)
     		pointerShift = 0;
     	}
 
+        scia_xmit('?');
+
     	break;
 
     default:

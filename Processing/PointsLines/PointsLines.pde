@@ -12,21 +12,22 @@ int serialCount = 0;                 // A count of how many bytes we receive
 boolean readyState = false;
 long lastTime = 0;
 int status = 0;
-
+int hsCount;
 PFont font;
 
 int FILTERSIZE = 16;
 
-int d = 15;
+int d = 15;  
 int s = 100;
 int w = 900;
 
-//int[] mb_y = new int[64];
-int[] seq_y = new int[64];
+int[] mapLineEnd = new int[64];
 int[] IDs = new int[64];
 int i,j;
 int testoffset;
 int txPointer = 0;
+long total = 0;
+
 
 boolean allRefresh = false;
 
@@ -126,14 +127,37 @@ void setup(){
   noLoop();
 }
 
+int standardSpacingY(int mult, int offset){
+  return ((d*mult)+(2*d)+offset);
+}
+
 void draw(){
   String strg = "";
+  long countersTotal = 0;
   try{
     background(0);
     stroke(255);
     text("Filter in Device", (s-((4*d)+4)), (d+6));
     text(" Logging List      Hits", (w+d+5), (d+6));
   
+    /* Draws device filter information and mapping lines */
+    for(i=0;i<filterSize;i++){
+      /* Text and leader lines */
+     if(i<10){
+        strg = "0"+i;
+      }
+      else{
+        strg = str(i);
+      }
+      text(strg+": "+hex(IDs[i],3), (s-((4*d)+4)), standardSpacingY(i,6));
+      stroke(255);
+      line(s, standardSpacingY(i,0), (s-d), standardSpacingY(i,0));
+      
+      /* Mapping lines */    
+      line(s, standardSpacingY(i,0), w, mapLineEnd[i]);   
+    } 
+    
+    
     /* Draws logging list details */
     stroke(255);
     for(i=0;i<loggingList.length;i++){
@@ -145,52 +169,43 @@ void draw(){
       }
       if(allRefresh == true){
         counters[i] = countersTemp[i];
+        countersTotal += counters[i];
+        total = countersTotal;
       }
-      text(strg+": "+hex(loggingList[i][0],3)+"           "+counters[i], (w+d+5), ((d*i)+(2*d)+6));
-      line(w, ((d*i)+(2*d)), (w+d), ((d*i)+(2*d)));
+      text(strg+": "+hex(loggingList[i][0],3)+"           "+counters[i], (w+d+5), standardSpacingY(i,6));
+      line(w, standardSpacingY(i,0), (w+d), standardSpacingY(i,0));
     }
-  
-    /* Draws device filter information and mapping lines */
-    for(i=0;i<filterSize;i++){
-      /* Text and leader lines */
-     if(i<10){
-        strg = "0"+i;
-      }
-      else{
-        strg = str(i);
-      }
-      text(strg+": "+hex(IDs[i],3), (s-((4*d)+4)), ((d*i)+(2*d)+6));
-      stroke(255);
-      line(s, ((d*i)+(2*d)), (s-d), ((d*i)+(2*d)));
-      
-      /* Mapping lines */    
-      line(s, ((d*i)+(2*d)), w, seq_y[i]);
-   
-    } 
     
     switch(status){
-     case 0:
-      strg = "offline";
-       break;
-      case 1:
-        strg = "device waiting - press 'R' to begin";
+    case 0:
+      strg = "Offline";
+      break;      
+    case 1:
+      strg = "Device waiting - press 'R' to begin.";
       break;
-      case 2:
-        strg = "Transmitting logging list";
-        for(i=0;i<txPointer;i++){
-          if(i%10 == 0){
-            strg += ".";
-          }
+    case 2:
+      strg = "Transmitting logging list";
+      for(i=0;i<txPointer;i++){
+        if(i%10 == 0){
+          strg += ".";
         }
+      }
       break;
-      case 3:
-        strg = "Online";
+    case 3:
+      strg = "Online - press 'S' to save hit counts, 'C' to save and close. Total hits: ";
+      strg += total;
       break;
-      default:
-     break; 
+    case 4:
+      strg = "Connection lost - press 'R' to reset";
+    default:
+      break; 
     }
     
-    text("Status: "+strg, (s-((4*d)+4)), 981);
+    text("Dynamic Filter Mapping Visualisation", (s-((4*d)+4)), standardSpacingY(59,6));
+    text("This application displays the CAN mailbox to logging list mapping.", (s-((4*d)+4)), standardSpacingY(60,6));
+    text("Logging list is sent to the device on connection", (s-((4*d)+4)), standardSpacingY(61,6));
+    
+    text("Status: "+strg, (s-((4*d)+4)), standardSpacingY(63,6));
   
     allRefresh = false;  
   }
@@ -200,22 +215,39 @@ void draw(){
 }
 
 void serialEvent(Serial myPort) {
+  int inByte;
   long messageCounter = 0; 
   int loggingListPointer = 0;
-  // read a byte from the serial port:
-  int inByte = myPort.read();
-    // Add the latest byte from the serial port to array:
-  try{
+  int IDhPointer,IDlPointer,lineEndPointer, txListPointer;
     
+  try{
+
     if(serialCount == 0){
-      for(j=0;j<1000;j++){
+      for(j=0;j<serialInArray.length;j++){
         serialInArray[j] = 0;
       }
     }
-    serialInArray[serialCount] = inByte;
+    
+    /* read a byte from the serial port: */
+    serialInArray[serialCount] = myPort.read();
+    
+    /* Device sents '?' character as a handshake / logging list request */
     if(serialInArray[serialCount] == '?'){
-       status = 1;
-       print("HS ");
+      
+      /* Prevents '63' values in data stream from being misinterpreted as a handshake request */ 
+      if(hsCount < 5){
+        hsCount++;
+      }
+      else{     
+        if(serialCount == 0){
+           status = 1;
+         }
+         else{
+           status = 4;
+         }
+         print("HS ");
+         redraw();
+       }
     }
     
     if(readyState==true){
@@ -230,13 +262,19 @@ void serialEvent(Serial myPort) {
           myPort.write('{');
           println("{");
         }
-        else if(txPointer <= loggingList.length){      
-          myPort.write((loggingList[txPointer-1][0]>>8)&0x07);
-          myPort.write(loggingList[txPointer-1][0]&0xFF);
-          myPort.write(loggingList[txPointer-1][1]&0xFF);
-          myPort.write(loggingList[txPointer-1][2]&0xFF);
+        else if(txPointer <= loggingList.length){  
+          txListPointer =  txPointer-1;
+          
+          /* CAN ID high byte */
+          myPort.write((loggingList[txListPointer][0]>>8)&0x07);
+          /* CAN ID low byte */
+          myPort.write (loggingList[txListPointer][0]&0xFF);
+          /* Message length in bytes */
+          myPort.write (loggingList[txListPointer][1]&0xFF);
+          /* Message cycle time */
+          myPort.write (loggingList[txListPointer][2]&0xFF);
   
-          println(hex((loggingList[txPointer-1][0]>>8)&0xFF,1)+" "+hex(loggingList[txPointer-1][0]&0xFF,2)+" "+hex(loggingList[txPointer-1][1]&0xFF,2)+" "+hex(loggingList[txPointer-1][2]&0xFF,2));
+          println(hex((loggingList[txListPointer][0]>>8)&0xFF,1)+" "+hex(loggingList[txListPointer][0]&0xFF,2)+" "+hex(loggingList[txListPointer][1]&0xFF,2)+" "+hex(loggingList[txListPointer][2]&0xFF,2));
         }
         else if(txPointer == (loggingList.length+1)){
           myPort.write('~');
@@ -248,43 +286,54 @@ void serialEvent(Serial myPort) {
         }
         
         txPointer++;
-        redraw();
       }    
       /* End of data packet - update data arrays */
       else if((serialCount>0)&&(serialInArray[serialCount-1] == '~')&&(serialInArray[serialCount] == '}')){
+        hsCount = 0;
         status = 3;
+        
+        /* First character of packet after { indicates packet type */
         switch(serialInArray[1]){ 
-        /* Data packet contains mailbox information */     
+             
         case 'M': 
+        /* Data packet contains mailbox information */
+        
           if(serialCount-3 == 1){
             filterSize = 1;
           }
           else{
             filterSize = (serialCount-3)/3;
           }
-  //        println(serialCount+": "+filterSize);
+//        println(serialCount+": "+filterSize);
           
           for(loggingListPointer=0;loggingListPointer<filterSize;loggingListPointer++){
-                IDs[loggingListPointer] = ((serialInArray[(3*loggingListPointer)+2])<<8)|serialInArray[(3*loggingListPointer)+3];
-                seq_y[loggingListPointer] = (d*serialInArray[(3*loggingListPointer)+4])+(2*d);
+            IDhPointer = (3*loggingListPointer)+2;
+            IDlPointer = (3*loggingListPointer)+3;
+            lineEndPointer = (3*loggingListPointer)+4;
+            
+            IDs[loggingListPointer] = ((serialInArray[IDhPointer]<<8) | serialInArray[IDlPointer]);
+            mapLineEnd[loggingListPointer] = standardSpacingY(serialInArray[lineEndPointer],0);
           }
           break;
-          
-        /* Data packet contains loggingList information */  
+                 
         case 'S':
+        /* Data packet contains loggingList information */ 
+         
           loggingListPointer = serialInArray[2];
           println(loggingListPointer);
           
           if(loggingListPointer < loggingList.length){
-            messageCounter = ((serialInArray[3]&0xFF)<<24);
+            /* Unpack 32 bit counter */
+            messageCounter  = ((serialInArray[3]&0xFF)<<24);
             messageCounter |= ((serialInArray[4]&0xFF)<<16);
             messageCounter |= ((serialInArray[5]&0xFF)<<8);
-            messageCounter |= ((serialInArray[6])&0xFF);
+            messageCounter |=  (serialInArray[6]&0xFF);
              
+            /* counters stored in temp array until refresh required */
             countersTemp[loggingListPointer] = messageCounter;
             
             /* Only refresh loggingList counters on screen when all counters have been received (takes several packets) */
-            if(loggingListPointer == (loggingList.length-1)){
+            if(loggingListPointer >= (loggingList.length-1)){
               allRefresh = true;
             }
           }
@@ -292,6 +341,7 @@ void serialEvent(Serial myPort) {
           break;
           
         case '~':
+        /* Empty serial packet instructs screen refresh */
           redraw();
           break;
           
@@ -302,11 +352,12 @@ void serialEvent(Serial myPort) {
         serialCount = 0;
       }      
       /* Receiving data packet from TI chip */
-      else if((serialInArray[0] == '{')&&serialCount < (999)){
+      else if((serialInArray[0] == '{') && (serialCount < 999)){
           serialCount++;
       }
     }
     else{
+      /* App offline */
       serialCount = 0;
       txPointer = 0;
     }
@@ -325,7 +376,7 @@ void keyPressed() { // Press a key to save the data
      println(readyState);
      for(k=0;k<filterSize;k++){
         IDs[k] = 0x000;
-        seq_y[k] = (d*k)+(2*d);
+        mapLineEnd[k] = standardSpacingY(k,0);
      }
      
      for (k = 0; k < loggingList.length; k++) {
