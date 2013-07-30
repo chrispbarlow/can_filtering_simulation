@@ -145,13 +145,27 @@ int standardSpacingY(int mult, int offset){
   return ((d*mult)+(2*d)+offset);
 }
 
+String intToStr_02(int num){
+  String returnStrg;
+  
+  if(i<10){
+    returnStrg = (" 0"+num);
+  }
+  else{
+    returnStrg = (" "+str(num));
+  }
+  
+  return returnStrg;
+}
+
 void draw(){
   int barLength = 0;
   String strg = "";
   long countersTotal = 0;
+  
   try{
-    background(10);
-    
+    /* Mailbox and logging list blocks */
+    background(10);    
     stroke(255);
     fill(20);
     rect((s-((4*d)+110)), 2, s-d-(s-((4*d)+110)), 25+(filterSize*d),10);
@@ -166,33 +180,25 @@ void draw(){
     
     /* Draws logging list details */
     for(i=0;i<loggingList.length;i++){
-      if(i<10){
-        strg = (" 0"+i);
-      }
-      else{
-        strg = (" "+str(i));
-      }
+        
       if(allRefresh == true){
         counters[i] = countersTemp[i];
         countersTotal += counters[i];
       }
+      
       stroke(45);
       line(0, standardSpacingY(i,d/2), 1200, standardSpacingY(i,d/2));   
       stroke(255);
+      strg = intToStr_02(i);
       text(strg+": "+hex(loggingList[i][0],3)+"           "+counters[i], (w+d+5), standardSpacingY(i,6));
       line(w, standardSpacingY(i,0), (w+d), standardSpacingY(i,0));
     }
     
-    textFont(fontBold, 12);    
     /* Draws device filter information and mapping lines */
+    textFont(fontBold, 12);    
     for(i=0;i<filterSize;i++){
       /* Text and leader lines */
-     if(i<10){
-        strg = "0"+i;
-      }
-      else{
-        strg = str(i);
-      }
+      strg = intToStr_02(i);
       text(strg+": "+hex(IDs[i],3), (s-((4*d)+4)), standardSpacingY(i,6));
       stroke(255);
       line(s, standardSpacingY(i,0), (s-d), standardSpacingY(i,0));
@@ -201,12 +207,12 @@ void draw(){
       line(s, standardSpacingY(i,0), w, mapLineEnd[i]);   
     } 
 
-    
+    /* Title and status block */
     fill(0);
     rect((s-((4*d)+110)), standardSpacingY(56,6), 700, 110, 10);
-    fill(255);
-    
 
+    fill(255);    
+    
     switch(status){
     case 0:
       strg = "Offline - Can't see device";
@@ -232,8 +238,6 @@ void draw(){
       break; 
     }
     
-
-
     textFont(fontBold, 16);
     text("Dynamic Filter Mapping Visualisation", (s-((4*d)+100)), standardSpacingY(57,6));
     textFont(font, 14);
@@ -379,7 +383,7 @@ void serialEvent(Serial myPort) {
           break;
           
         case '~':
-        /* Empty serial packet instructs screen refresh */
+          /* Empty serial packet instructs screen refresh */
           redraw();
           break;
           
@@ -399,11 +403,8 @@ void serialEvent(Serial myPort) {
       serialCount = 0;
       txPointer = 0;
       
-//      lastTime = millis();
-//      while (millis()-lastTime < 5);
-//      
-        myPort.write('?');
-//   //   println("connecting");
+      /* Handshake signals device to wait for new filter information */
+      myPort.write('?');
     }
   }
   catch(Exception e){
@@ -411,10 +412,11 @@ void serialEvent(Serial myPort) {
   }
 }
 
-void keyPressed() { // Press a key to save the data
-  
+/* keyboard controls */
+void keyPressed() {  
   int k;
   
+  /* Reset */
   if((key == 'r')||(key == 'R')){
      readyState = !readyState;
      println(readyState);
@@ -431,26 +433,31 @@ void keyPressed() { // Press a key to save the data
     redraw();
   }
   
+  /* Save */
   if((key == 's')||(key == 'S')){
     saveCounters();
   } 
-
+  
+  /* Close and save */
   if((key == 'c')||(key == 'C')){
     saveCounters();
     exit(); // Stop the program
   } 
   
+  /* Exit without saving */
   if((key == 'x')||(key == 'X')){
     saveCounters();
     exit(); // Stop the program
   } 
 
-  
+  /* save frame image */
   if((key == 'f')||(key == 'F')){
     saveFrame("output/frames####.png");
   }
 }
 
+
+/* Save counters to text file */
 void saveCounters(){
   String[] lines = new String[loggingList.length];
   
