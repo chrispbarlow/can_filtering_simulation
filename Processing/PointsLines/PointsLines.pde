@@ -110,21 +110,26 @@ void setup(){
   background(0);
   font = loadFont("Consolas-16.vlw");
   textFont(font, 12);
-  
-  /* Serial port will be Serial.list()[0] when nothing else connected */
-  try{
-    println(Serial.list());
-    String portName = Serial.list()[0];
-    myPort = new Serial(this, portName, 9600);
-  }
-  catch(Exception e){
-    /* App will close if no serial ports are found */
-    println("No serial ports found. Use your dongle!");
+  if(loggingList.length > 64){
+    println("Logging list too long: Max 64 IDs. Cannot continue.");
     exit();
   }
-  
-  stroke(153);    
-  noLoop();
+  else{
+    /* Serial port will be Serial.list()[0] when nothing else connected */
+    try{
+      println(Serial.list());
+      String portName = Serial.list()[0];
+      myPort = new Serial(this, portName, 9600);
+    }
+    catch(Exception e){
+      /* App will close if no serial ports are found */
+      println("No serial ports found. Use your dongle!");
+      exit();
+    }
+    
+    stroke(153);    
+    noLoop();
+  }
 }
 
 int standardSpacingY(int mult, int offset){
@@ -192,7 +197,7 @@ void draw(){
       }
       break;
     case 3:
-      strg = "Online - press 'S' to save hit counts, 'C' to save and close. Total hits: ";
+      strg = "Online - press 'R' to reset, 'S' to save hit counts, 'C' to save and close. Total hits: ";
       strg += total;
       break;
     case 4:
@@ -231,7 +236,7 @@ void serialEvent(Serial myPort) {
     /* read a byte from the serial port: */
     serialInArray[serialCount] = myPort.read();
     
-    /* Device sents '?' character as a handshake / logging list request */
+    /* Device sends '?' character as a handshake / logging list request */
     if(serialInArray[serialCount] == '?'){
       
       /* Prevents '63' values in data stream from being misinterpreted as a handshake request */ 
@@ -360,6 +365,12 @@ void serialEvent(Serial myPort) {
       /* App offline */
       serialCount = 0;
       txPointer = 0;
+      
+//      lastTime = millis();
+//      while (millis()-lastTime < 5);
+//      
+        myPort.write('?');
+//   //   println("connecting");
     }
   }
   catch(Exception e){

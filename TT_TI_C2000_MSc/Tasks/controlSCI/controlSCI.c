@@ -74,12 +74,15 @@ void controlSCI_update(void)
     	}
 
      	if(rxbuffer[i] != 0){
+         	if((rxbuffer[i] == '?')&&(rxbuffer[i-1] == '?')&&(rxbuffer[i-2] == '?')){
+         		SCIstate = WAITING;
+         	}
 
 			if((i>0)&&(rxbuffer[i-1] == '~')&&(rxbuffer[i] == '}')){
 
 				numRxCANMsgs_G = (i-2)/4;
 
-				printf("%u\n", numRxCANMsgs_G);
+				//printf("%u\n", numRxCANMsgs_G);
 
 				for(sequenceNum=0;sequenceNum<numRxCANMsgs_G;sequenceNum++){
 					ID1 = rxbuffer[(4*sequenceNum)+1];
@@ -106,69 +109,78 @@ void controlSCI_update(void)
 
 
     case SEND:
-    	scia_xmit('{');
-    	scia_xmit('~');
-    	scia_xmit('}');
-    	/* Take snapshot of filters (should prevent updates halfway through transmission)*/
-    	for(i=0;i<filterSize_G;i++){
-    		j = mailBoxFilters[i].messagePointer;
-    		filtermap[i].mp = j;
-    		filtermap[i].count = CAN_RxMessages[j].counter;
-    		filtermap[i].ID = mailBoxFilters[i].canID;
+    	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
+    		rxbuffer[0] = SciaRegs.SCIRXBUF.all;
     	}
 
-
-    	scia_xmit('{');
-    	scia_xmit('M');
-
-        for(i=0;i<filterSize_G;i++){
-    		j = filtermap[i].mp;
-
-    		tempCharOut = ((filtermap[i].ID>>8) & 0xFF);
-    		scia_xmit(tempCharOut);
-
-    		tempCharOut = (filtermap[i].ID & 0xFF);
-    		scia_xmit(tempCharOut);
-
-    		tempCharOut = (j & 0xFF);
-    		scia_xmit(tempCharOut);
-       }
-
-    	scia_xmit('~');
-    	scia_xmit('}');
+     	if(rxbuffer[0] == '?'){
+     		SCIstate = WAITING;
+     		rxbuffer[0] = ' ';
+     	}
+     	else{
+			scia_xmit('{');
+			scia_xmit('~');
+			scia_xmit('}');
+			/* Take snapshot of filters (should prevent updates halfway through transmission)*/
+			for(i=0;i<filterSize_G;i++){
+				j = mailBoxFilters[i].messagePointer;
+				filtermap[i].mp = j;
+				filtermap[i].count = CAN_RxMessages[j].counter;
+				filtermap[i].ID = mailBoxFilters[i].canID;
+			}
 
 
-        for(i=0;i<=10;i++){
-        	j = (6*i)+pointerShift;
+			scia_xmit('{');
+			scia_xmit('M');
 
-        	if(j<=numRxCANMsgs_G){
-    			scia_xmit('{');
-    			scia_xmit('S');
+			for(i=0;i<filterSize_G;i++){
+				j = filtermap[i].mp;
 
-    			tempCharOut = (j & 0xff);
-    			scia_xmit(tempCharOut);
+				tempCharOut = ((filtermap[i].ID>>8) & 0xFF);
+				scia_xmit(tempCharOut);
 
-    			tempCharOut = ((CAN_RxMessages[j].counter>>24)&0xFF);
-    			scia_xmit(tempCharOut);
-    			tempCharOut = ((CAN_RxMessages[j].counter>>16)&0xFF);
-    			scia_xmit(tempCharOut);
-    			tempCharOut = ((CAN_RxMessages[j].counter>>8)&0xFF);
-    			scia_xmit(tempCharOut);
-    			tempCharOut = ((CAN_RxMessages[j].counter)&0xFF);
-    			scia_xmit(tempCharOut);
+				tempCharOut = (filtermap[i].ID & 0xFF);
+				scia_xmit(tempCharOut);
 
-    			scia_xmit('~');
-    			scia_xmit('}');
-        	}
-       }
+				tempCharOut = (j & 0xFF);
+				scia_xmit(tempCharOut);
+		   }
 
-        pointerShift++;
-        if(pointerShift > 6){
-    		pointerShift = 0;
-    	}
+			scia_xmit('~');
+			scia_xmit('}');
 
-        scia_xmit('?');
 
+			for(i=0;i<=10;i++){
+				j = (6*i)+pointerShift;
+
+				if(j<=numRxCANMsgs_G){
+					scia_xmit('{');
+					scia_xmit('S');
+
+					tempCharOut = (j & 0xff);
+					scia_xmit(tempCharOut);
+
+					tempCharOut = ((CAN_RxMessages[j].counter>>24)&0xFF);
+					scia_xmit(tempCharOut);
+					tempCharOut = ((CAN_RxMessages[j].counter>>16)&0xFF);
+					scia_xmit(tempCharOut);
+					tempCharOut = ((CAN_RxMessages[j].counter>>8)&0xFF);
+					scia_xmit(tempCharOut);
+					tempCharOut = ((CAN_RxMessages[j].counter)&0xFF);
+					scia_xmit(tempCharOut);
+
+					scia_xmit('~');
+					scia_xmit('}');
+				}
+		   }
+
+			pointerShift++;
+			if(pointerShift > 6){
+				pointerShift = 0;
+			}
+
+			scia_xmit('?'); /*TODO: check if this is needed now */
+     	}
     	break;
 
     default:

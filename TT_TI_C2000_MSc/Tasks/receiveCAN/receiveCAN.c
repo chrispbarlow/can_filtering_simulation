@@ -30,18 +30,18 @@ void receiveCAN_update(void){
 	static Uint32 totalcounter = 0;
 
 	if(updateFilterRequired_G == 1){
-		if(numRxCANMsgs_G == 1){
-			filterSize_G = 1;
-		}
-		else{
-			filterSize_G = numRxCANMsgs_G/2;
+
+		filterSize_G = numRxCANMsgs_G/2;
+
+		if((numRxCANMsgs_G%2)!=0){
+			filterSize_G += 1;
 		}
 
 		for(mailBox=0; mailBox<filterSize_G; mailBox++){
 			updateFilter(mailBox);
 	//		printf("0x%03X\n", (Uint16)CAN_RxMessages[mailBox].canID);
+			updateFilterRequired_G = 0;
 		}
-		updateFilterRequired_G = 0;
 	}
 	else{
 		/* look through mailboxes for pending messages */
@@ -70,6 +70,9 @@ void updateFilter(unsigned int filterPointer){
 	int16 sequencePointer;
 	boolean_t result = FALSE;
 
+	if(updateFilterRequired_G == 1){
+		last_sequencePointer = -1;
+	}
 	/* Find next required CAN ID in sequence */
 	sequencePointer = last_sequencePointer;
 	do{
