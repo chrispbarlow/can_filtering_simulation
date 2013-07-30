@@ -1,36 +1,44 @@
 /**
- * Points and Lines. 
+ * Filter Mapping Visualisation
  * 
- * Points and lines can be used to draw basic geometry.
- * Change the value of the variable 'd' to scale the form.
- * The four variables set the positions based on the value of 'd'. 
+ * A close-to-realtime visualisation of the mapping between 
+ * the device's mailboxes and the logging list.
+ *
+ * Also transmits the logging list to the device over RS232
+ * as a form of remote configuration
+ *
  */
+
+/* Serial port definitions */ 
 import processing.serial.*;
-Serial myPort;                       // The serial port
-int[] serialInArray = new int[1000];    // Where we'll put what we receive
-int serialCount = 0;                 // A count of how many bytes we receive
+Serial myPort;                       
+int[] serialInArray = new int[1000];    
+int serialCount = 0;
+
+/* Global state flags */
 boolean readyState = false;
-long lastTime = 0;
 int status = 0;
-int hsCount;
+boolean allRefresh = false;
+
+/* fonts */
 PFont font, fontBold;
 
-int FILTERSIZE = 16;
-
+/* standard positioning values and indexing vars */
 int d = 15;  
 int s = 200;
 int w = 900;
-
-int[] mapLineEnd = new int[64];
-int[] IDs = new int[64];
 int i,j;
-int testoffset;
+
+/* This array holds the variable end positions for the mapping lines (logging list end) */
+int[] mapLineEnd = new int[64];
+
+/* This array holds the variable ID's in the device mailboxes */
+int[] IDs = new int[64];
+
+/* logging list transmission progress */
 int txPointer = 0;
-long total = 0;
 
-
-boolean allRefresh = false;
-
+/* The logging list. This is transmitted to the device for filter configuration */
 int[][] loggingList = {
   {0x187,8,20},
   {0x188,8,20},
@@ -98,17 +106,14 @@ int[][] loggingList = {
 //  {0x407,8,20},
 };  
 
+/* counters for counting */
 long[] counters = new long[loggingList.length];
 long[] countersTemp = new long[loggingList.length];
 
+/* the number of mailboxes used for the filter (this should be half the number of IDs in the logging list */
 int filterSize = 0;
 
 void setup(){
-  size(1200, 1000);
-  background(0);
-  font = loadFont("Consolas-16.vlw");
-  fontBold = loadFont("Consolas-Bold-16.vlw");
-  textFont(font, 12);
   if(loggingList.length > 64){
     println("Logging list too long: Max 64 IDs. Cannot continue.");
     exit();
@@ -126,6 +131,11 @@ void setup(){
       exit();
     }
     
+    size(1200, 1000);
+    background(0);
+    font = loadFont("Consolas-16.vlw");
+    fontBold = loadFont("Consolas-Bold-16.vlw");
+    textFont(font, 12);    
     stroke(153);    
     noLoop();
   }
@@ -165,7 +175,6 @@ void draw(){
       if(allRefresh == true){
         counters[i] = countersTemp[i];
         countersTotal += counters[i];
-        total = countersTotal;
       }
       stroke(45);
       line(0, standardSpacingY(i,d/2), 1200, standardSpacingY(i,d/2));   
@@ -215,7 +224,7 @@ void draw(){
       break;
     case 3:
       strg = "Online - press 'R' to reset, 'S' to save hit counts, 'C' to save and close.\nTotal hits: ";
-      strg += total;
+      strg += countersTotal;
       break;
     case 4:
       strg = "Connection lost - press 'R' to reset";
@@ -245,7 +254,9 @@ void serialEvent(Serial myPort) {
   long messageCounter = 0; 
   int loggingListPointer = 0;
   int IDhPointer,IDlPointer,lineEndPointer, txListPointer;
-    
+  long lastTime = 0;
+  int hsCount = 0;
+
   try{
 
     if(serialCount == 0){
