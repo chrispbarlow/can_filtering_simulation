@@ -13,12 +13,12 @@ boolean readyState = false;
 long lastTime = 0;
 int status = 0;
 int hsCount;
-PFont font;
+PFont font, fontBold;
 
 int FILTERSIZE = 16;
 
 int d = 15;  
-int s = 100;
+int s = 200;
 int w = 900;
 
 int[] mapLineEnd = new int[64];
@@ -65,39 +65,37 @@ int[][] loggingList = {
   {0x709,1,100},
   {0x70B,1,100},
   {0x70D,1,100},  
-  {0x187,8,20},
-  {0x188,8,20},
-  {0x189,8,20},
-  {0x18A,8,20},
-  {0x18B,8,20},
-  {0x18C,8,20},
-  {0x18D,8,20},
-  {0x18E,8,20},
-  {0x207,8,20},
-  {0x209,8,20},
-  {0x20B,8,20},
-  {0x20D,8,20},
-  {0x287,8,20},
-  {0x289,8,20},
-  {0x28B,8,20},
-  {0x28D,8,20},
-  {0x307,8,20},
-  {0x309,8,20},
-  {0x30B,8,20},
-  {0x30D,8,20},
-  {0x385,8,20},
-  {0x387,8,20},
-  {0x389,8,20},
-  {0x38B,8,20},
-  {0x38D,8,20},
-  {0x407,8,20},
-  {0x409,8,20},
-  {0x40B,8,20},
-  {0x40D,8,20},
-  {0x707,1,100},
-  {0x709,1,100},
-//  {0x70B,1,100},
-//  {0x70D,1,100},
+//  {0x187,8,20},
+//  {0x188,8,20},
+//  {0x189,8,20},
+//  {0x18A,8,20},
+//  {0x18B,8,20},
+//  {0x18C,8,20},
+//  {0x18D,8,20},
+//  {0x18E,8,20},
+//  {0x207,8,20},
+//  {0x209,8,20},
+//  {0x20B,8,20},
+//  {0x20D,8,20},
+//  {0x287,8,20},
+//  {0x289,8,20},
+//  {0x28B,8,20},
+//  {0x28D,8,20},
+//  {0x307,8,20},
+//  {0x309,8,20},
+//  {0x30B,8,20},
+//  {0x30D,8,20},
+//  {0x385,8,20},
+//  {0x387,8,20},
+//  {0x389,8,20},
+//  {0x38B,8,20},
+//  {0x38D,8,20},
+//  {0x407,8,20},
+//  {0x409,8,20},
+//  {0x40B,8,20},
+//  {0x40D,8,20},
+//  {0x38D,8,20},
+//  {0x407,8,20},
 };  
 
 long[] counters = new long[loggingList.length];
@@ -109,6 +107,7 @@ void setup(){
   size(1200, 1000);
   background(0);
   font = loadFont("Consolas-16.vlw");
+  fontBold = loadFont("Consolas-Bold-16.vlw");
   textFont(font, 12);
   if(loggingList.length > 64){
     println("Logging list too long: Max 64 IDs. Cannot continue.");
@@ -137,14 +136,45 @@ int standardSpacingY(int mult, int offset){
 }
 
 void draw(){
+  int barLength = 0;
   String strg = "";
   long countersTotal = 0;
   try{
-    background(0);
+    background(10);
+    
     stroke(255);
-    text("Filter in Device", (s-((4*d)+4)), (d+6));
-    text(" Logging List      Hits", (w+d+5), (d+6));
-  
+    fill(20);
+    rect((s-((4*d)+110)), 2, s-d-(s-((4*d)+110)), 25+(filterSize*d),10);
+    rect(w+d, 2, 250, 2*d+(loggingList.length*d),10);
+    
+    stroke(255);
+    fill(255);
+    textFont(fontBold, 14);
+    text("Device Mailboxes", (s-((4*d)+100)), (d+4));
+    text(" Logging List      Hits", (w+d+3), (d+4));
+
+    
+    /* Draws logging list details */
+    for(i=0;i<loggingList.length;i++){
+      if(i<10){
+        strg = (" 0"+i);
+      }
+      else{
+        strg = (" "+str(i));
+      }
+      if(allRefresh == true){
+        counters[i] = countersTemp[i];
+        countersTotal += counters[i];
+        total = countersTotal;
+      }
+      stroke(45);
+      line(0, standardSpacingY(i,d/2), 1200, standardSpacingY(i,d/2));   
+      stroke(255);
+      text(strg+": "+hex(loggingList[i][0],3)+"           "+counters[i], (w+d+5), standardSpacingY(i,6));
+      line(w, standardSpacingY(i,0), (w+d), standardSpacingY(i,0));
+    }
+    
+    textFont(fontBold, 12);    
     /* Draws device filter information and mapping lines */
     for(i=0;i<filterSize;i++){
       /* Text and leader lines */
@@ -161,43 +191,30 @@ void draw(){
       /* Mapping lines */    
       line(s, standardSpacingY(i,0), w, mapLineEnd[i]);   
     } 
+
     
+    fill(0);
+    rect((s-((4*d)+110)), standardSpacingY(56,6), 700, 110, 10);
+    fill(255);
     
-    /* Draws logging list details */
-    stroke(255);
-    for(i=0;i<loggingList.length;i++){
-      if(i<10){
-        strg = (" 0"+i);
-      }
-      else{
-        strg = (" "+str(i));
-      }
-      if(allRefresh == true){
-        counters[i] = countersTemp[i];
-        countersTotal += counters[i];
-        total = countersTotal;
-      }
-      text(strg+": "+hex(loggingList[i][0],3)+"           "+counters[i], (w+d+5), standardSpacingY(i,6));
-      line(w, standardSpacingY(i,0), (w+d), standardSpacingY(i,0));
-    }
-    
+
     switch(status){
     case 0:
-      strg = "Offline";
+      strg = "Offline - Can't see device";
       break;      
     case 1:
       strg = "Device waiting - press 'R' to begin.";
       break;
     case 2:
-      strg = "Transmitting logging list";
-      for(i=0;i<txPointer;i++){
-        if(i%10 == 0){
-          strg += ".";
-        }
+      strg = "Transmitting logging list: ";
+
+      if(txPointer>4){
+        strg += txPointer-3;
+        rect((s-((4*d)+100)), standardSpacingY(62,10), 680/(loggingList.length/(txPointer-4)), 6);
       }
       break;
     case 3:
-      strg = "Online - press 'R' to reset, 'S' to save hit counts, 'C' to save and close. Total hits: ";
+      strg = "Online - press 'R' to reset, 'S' to save hit counts, 'C' to save and close.\nTotal hits: ";
       strg += total;
       break;
     case 4:
@@ -206,12 +223,16 @@ void draw(){
       break; 
     }
     
-    text("Dynamic Filter Mapping Visualisation", (s-((4*d)+4)), standardSpacingY(59,6));
-    text("This application displays the CAN mailbox to logging list mapping.", (s-((4*d)+4)), standardSpacingY(60,6));
-    text("Logging list is sent to the device on connection", (s-((4*d)+4)), standardSpacingY(61,6));
+
+
+    textFont(fontBold, 16);
+    text("Dynamic Filter Mapping Visualisation", (s-((4*d)+100)), standardSpacingY(57,6));
+    textFont(font, 14);
+    text("This application displays the CAN mailbox to logging list mapping.", (s-((4*d)+100)), standardSpacingY(59,6));
+    text("Logging list is sent to the device on connection", (s-((4*d)+100)), standardSpacingY(60,6));
+    textFont(fontBold, 14);
+    text("Status: "+strg, (s-((4*d)+100)), standardSpacingY(62,6));
     
-    text("Status: "+strg, (s-((4*d)+4)), standardSpacingY(63,6));
-  
     allRefresh = false;  
   }
   catch(Exception e){
@@ -266,6 +287,7 @@ void serialEvent(Serial myPort) {
         if(txPointer == 0){
           myPort.write('{');
           println("{");
+          txPointer++;
         }
         else if(txPointer <= loggingList.length){  
           txListPointer =  txPointer-1;
@@ -280,17 +302,18 @@ void serialEvent(Serial myPort) {
           myPort.write (loggingList[txListPointer][2]&0xFF);
   
           println(hex((loggingList[txListPointer][0]>>8)&0xFF,1)+" "+hex(loggingList[txListPointer][0]&0xFF,2)+" "+hex(loggingList[txListPointer][1]&0xFF,2)+" "+hex(loggingList[txListPointer][2]&0xFF,2));
+          txPointer++;
         }
         else if(txPointer == (loggingList.length+1)){
           myPort.write('~');
           println("~");
+          txPointer++;
         }
         else if(txPointer == (loggingList.length+2)){
           myPort.write('}');
           println("}");
+          txPointer++;
         }
-        
-        txPointer++;
       }    
       /* End of data packet - update data arrays */
       else if((serialCount>0)&&(serialInArray[serialCount-1] == '~')&&(serialInArray[serialCount] == '}')){
@@ -309,7 +332,6 @@ void serialEvent(Serial myPort) {
           else{
             filterSize = (serialCount-3)/3;
           }
-//        println(serialCount+": "+filterSize);
           
           for(loggingListPointer=0;loggingListPointer<filterSize;loggingListPointer++){
             IDhPointer = (3*loggingListPointer)+2;
@@ -406,6 +428,12 @@ void keyPressed() { // Press a key to save the data
     saveCounters();
     exit(); // Stop the program
   } 
+  
+  if((key == 'x')||(key == 'X')){
+    saveCounters();
+    exit(); // Stop the program
+  } 
+
   
   if((key == 'f')||(key == 'F')){
     saveFrame("output/frames####.png");
