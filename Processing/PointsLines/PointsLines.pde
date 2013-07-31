@@ -185,10 +185,13 @@ void draw(){
     text("Device Mailboxes", (s-((4*d)+100)), (d+4));
     text(" Logging List      Hits", (w+d+3), (d+4));
 
+    if(allRefresh == true){
+      countersTotal = 0;
+    }
     
     /* Draws logging list details */
     for(i=0;i<loggingList.length;i++){
-      countersTotal = 0;  
+      
       if(allRefresh == true){
         counters[i] = countersTemp[i];
         countersTotal += counters[i];

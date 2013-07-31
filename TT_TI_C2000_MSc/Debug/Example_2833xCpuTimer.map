@@ -1,7 +1,7 @@
 ******************************************************************************
              TMS320C2000 Linker PC v6.1.0                      
 ******************************************************************************
->> Linked Wed Jul 31 15:17:10 2013
+>> Linked Wed Jul 31 15:58:21 2013
 
 OUTPUT FILE NAME:   <Example_2833xCpuTimer.out>
 ENTRY POINT SYMBOL: "code_start"  address: 0033fff6
@@ -25,7 +25,7 @@ PAGE 0:
   FLASHE                00318000   00008000  00000000  00008000  RWIX
   FLASHD                00320000   00008000  0000001f  00007fe1  RWIX
   FLASHC                00328000   00008000  00000000  00008000  RWIX
-  FLASHA                00338000   00007f80  00001796  000067ea  RWIX
+  FLASHA                00338000   00007f80  000017b3  000067cd  RWIX
   CSM_RSVD              0033ff80   00000076  00000000  00000076  RWIX
   BEGIN                 0033fff6   00000002  00000002  00000000  RWIX
   CSM_PWL               0033fff8   00000008  00000000  00000008  RWIX
@@ -111,57 +111,57 @@ ramfuncs   0    00320000    0000001f     RUN ADDR = 00008000
                   00320000    0000001b     DSP2833x_SysCtrl.obj (ramfuncs)
                   0032001b    00000004     DSP2833x_usDelay.obj (ramfuncs)
 
-.text      0    00338000    0000131f     
+.text      0    00338000    0000133c     
                   00338000    00000510     CAN.obj (.text)
                   00338510    00000316     DSP2833x_DefaultIsr.obj (.text:retain)
                   00338826    0000024a     controlSCI.obj (.text)
                   00338a70    000001ac     ADC.obj (.text)
                   00338c1c    00000132     DSP2833x_ECan.obj (.text)
-                  00338d4e    000000f3     DSP2833x_SysCtrl.obj (.text)
-                  00338e41    000000e8     receiveCAN.obj (.text)
-                  00338f29    000000ab     scheduler.obj (.text)
-                  00338fd4    0000009a     sendCAN.obj (.text)
-                  0033906e    00000074     DSP2833x_CpuTimers.obj (.text)
-                  003390e2    00000067     SCI.obj (.text)
-                  00339149    00000056     TT_Main.obj (.text)
-                  0033919f    00000048     DSP2833x_Sci.obj (.text)
-                  003391e7    00000046     rts2800_fpu32.lib : boot.obj (.text)
-                  0033922d    00000030     TT_Main.obj (.text:retain)
-                  0033925d    00000028     DSP2833x_PieCtrl.obj (.text)
-                  00339285    00000020     DSP2833x_PieVect.obj (.text)
-                  003392a5    00000019     rts2800_fpu32.lib : args_main.obj (.text)
-                  003392be    00000019                       : exit.obj (.text)
-                  003392d7    00000014     DSP2833x_Adc.obj (.text)
-                  003392eb    0000000f     handleCAN.obj (.text)
-                  003392fa    0000000b     rts2800_fpu32.lib : u_div.obj (.text)
-                  00339305    00000009                       : _lock.obj (.text)
-                  0033930e    00000008     DSP2833x_CodeStartBranch.obj (.text)
-                  00339316    00000007     schedulerConfig.obj (.text)
-                  0033931d    00000002     newTask.obj (.text)
+                  00338d4e    00000105     receiveCAN.obj (.text)
+                  00338e53    000000f3     DSP2833x_SysCtrl.obj (.text)
+                  00338f46    000000ab     scheduler.obj (.text)
+                  00338ff1    0000009a     sendCAN.obj (.text)
+                  0033908b    00000074     DSP2833x_CpuTimers.obj (.text)
+                  003390ff    00000067     SCI.obj (.text)
+                  00339166    00000056     TT_Main.obj (.text)
+                  003391bc    00000048     DSP2833x_Sci.obj (.text)
+                  00339204    00000046     rts2800_fpu32.lib : boot.obj (.text)
+                  0033924a    00000030     TT_Main.obj (.text:retain)
+                  0033927a    00000028     DSP2833x_PieCtrl.obj (.text)
+                  003392a2    00000020     DSP2833x_PieVect.obj (.text)
+                  003392c2    00000019     rts2800_fpu32.lib : args_main.obj (.text)
+                  003392db    00000019                       : exit.obj (.text)
+                  003392f4    00000014     DSP2833x_Adc.obj (.text)
+                  00339308    0000000f     handleCAN.obj (.text)
+                  00339317    0000000b     rts2800_fpu32.lib : u_div.obj (.text)
+                  00339322    00000009                       : _lock.obj (.text)
+                  0033932b    00000008     DSP2833x_CodeStartBranch.obj (.text)
+                  00339333    00000007     schedulerConfig.obj (.text)
+                  0033933a    00000002     newTask.obj (.text)
 
-.cinit     0    0033931f    0000034f     
-                  0033931f    0000028c     CAN.obj (.cinit)
-                  003395ab    0000004b     ADC.obj (.cinit)
-                  003395f6    00000019     CAN_Tx_global.obj (.cinit)
-                  0033960f    00000014     controlSCI.obj (.cinit)
-                  00339623    00000014     schedulerConfig.obj (.cinit)
-                  00339637    0000000c     CAN_Rx_global.obj (.cinit)
-                  00339643    0000000a     rts2800_fpu32.lib : _lock.obj (.cinit)
-                  0033964d    0000000a                       : exit.obj (.cinit)
-                  00339657    00000009     receiveCAN.obj (.cinit)
-                  00339660    00000008     scheduler.obj (.cinit)
-                  00339668    00000004     SCI.obj (.cinit)
-                  0033966c    00000002     --HOLE-- [fill = 0]
+.cinit     0    0033933c    0000034f     
+                  0033933c    0000028c     CAN.obj (.cinit)
+                  003395c8    0000004b     ADC.obj (.cinit)
+                  00339613    00000019     CAN_Tx_global.obj (.cinit)
+                  0033962c    00000014     controlSCI.obj (.cinit)
+                  00339640    00000014     schedulerConfig.obj (.cinit)
+                  00339654    0000000c     CAN_Rx_global.obj (.cinit)
+                  00339660    0000000a     rts2800_fpu32.lib : _lock.obj (.cinit)
+                  0033966a    0000000a                       : exit.obj (.cinit)
+                  00339674    00000009     receiveCAN.obj (.cinit)
+                  0033967d    00000008     scheduler.obj (.cinit)
+                  00339685    00000004     SCI.obj (.cinit)
+                  00339689    00000002     --HOLE-- [fill = 0]
 
-.econst    0    0033966e    00000108     
-                  0033966e    00000100     DSP2833x_PieVect.obj (.econst)
-                  0033976e    00000004     CAN.obj (.econst:_$P$T0$1)
-                  00339772    00000002     CAN.obj (.econst)
-                  00339774    00000001     CAN_Tx_global.obj (.econst)
-                  00339775    00000001     schedulerConfig.obj (.econst)
+.econst    0    0033968c    00000108     
+                  0033968c    00000100     DSP2833x_PieVect.obj (.econst)
+                  0033978c    00000004     CAN.obj (.econst:_$P$T0$1)
+                  00339790    00000002     CAN.obj (.econst)
+                  00339792    00000001     CAN_Tx_global.obj (.econst)
+                  00339793    00000001     schedulerConfig.obj (.econst)
 
-.switch    0    00339776    00000020     
-                  00339776    00000020     ADC.obj (.switch:_ADC_ConfigurePort)
+.switch    0    00339794    00000020     
+                  00339794    00000020     ADC.obj (.switch:_ADC_ConfigurePort)
 
 codestart 
 *          0    0033fff6    00000002     
@@ -400,9 +400,9 @@ GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name
 address    name
 --------   ----
 00338000   .text
-003392be   C$$EXIT
-003392fa   U$$DIV
-003392ff   U$$MOD
+003392db   C$$EXIT
+00339317   U$$DIV
+0033931c   U$$MOD
 003385f6   _ADCINT_ISR
 00338bcf   _ADC_CheckPortState
 00338aa0   _ADC_ConfigurePort
@@ -415,13 +415,13 @@ address    name
 00000b00   _AdcMirror
 00007100   _AdcRegs
 0000cb05   _CANTimer
-0033900c   _CANTx_clearAll
+00339029   _CANTx_clearAll
 00338000   _CAN_Init
 0000c7c0   _CAN_Ports
 0000c140   _CAN_RxMessages
 00338013   _CAN_Test
 0000ca44   _CAN_TxMessages
-003390a7   _ConfigCpuTimer
+003390c4   _ConfigCpuTimer
 0000ca6e   _CpuTimer0
 00000c00   _CpuTimer0Regs
 0000ca5e   _CpuTimer1
@@ -430,7 +430,7 @@ address    name
 00000c10   _CpuTimer2Regs
 0033fff8   _CsmPwl
 00000ae0   _CsmRegs
-00338e10   _CsmUnlock
+00338f15   _CsmUnlock
 00338524   _DATALOG_ISR
 00338718   _DINTCH1_ISR
 00338722   _DINTCH2_ISR
@@ -440,7 +440,7 @@ address    name
 0033874a   _DINTCH6_ISR
 0000801b   _DSP28x_usDelay
 00000880   _DevEmuRegs
-00338d61   _DisableDog
+00338e66   _DisableDog
 00001000   _DmaRegs
 003387a4   _ECAN0INTA_ISR
 003387b8   _ECAN0INTB_ISR
@@ -491,7 +491,7 @@ address    name
 003386d2   _EQEP2_INT_ISR
 00006b00   _EQep1Regs
 00006b40   _EQep2Regs
-0033927c   _EnableInterrupts
+00339299   _EnableInterrupts
 00000a80   _FlashRegs
 00006f80   _GpioCtrlRegs
 00006fc0   _GpioDataRegs
@@ -502,10 +502,10 @@ address    name
 0033854c   _ILLEGAL_ISR
 00338510   _INT13_ISR
 0033851a   _INT14_ISR
-003392d7   _InitAdc
+003392f4   _InitAdc
 00338406   _InitCanA
 0033848b   _InitCanB
-0033906e   _InitCpuTimers
+0033908b   _InitCpuTimers
 00338c1c   _InitECan
 00338d1f   _InitECanGpio
 00338c21   _InitECana
@@ -513,16 +513,16 @@ address    name
 00338ca0   _InitECanb
 00338d3a   _InitECanbGpio
 00008000   _InitFlash
-00338db5   _InitPeripheralClocks
-0033925d   _InitPieCtrl
-00339285   _InitPieVectTable
-00338d69   _InitPll
-0033919f   _InitSci
-003391a0   _InitSciGpio
-003391a7   _InitSciaGpio
-003391bd   _InitScibGpio
-003391d1   _InitScicGpio
-00338d4e   _InitSysCtrl
+00338eba   _InitPeripheralClocks
+0033927a   _InitPieCtrl
+003392a2   _InitPieVectTable
+00338e6e   _InitPll
+003391bc   _InitSci
+003391bd   _InitSciGpio
+003391c4   _InitSciaGpio
+003391da   _InitScibGpio
+003391ee   _InitScicGpio
+00338e53   _InitSysCtrl
 00338808   _LUF_ISR
 003387fe   _LVF_ISR
 00338704   _MRINTA_ISR
@@ -536,7 +536,7 @@ address    name
 00380090   _PartIdRegs
 00000ce0   _PieCtrlRegs
 00000d00   _PieVectTable
-0033966e   _PieVectTableInit
+0033968c   _PieVectTableInit
 0033852e   _RTOSINT_ISR
 0032001f   _RamfuncsLoadEnd
 00320000   _RamfuncsLoadStart
@@ -554,12 +554,12 @@ address    name
 00007050   _SciaRegs
 00007750   _ScibRegs
 00007770   _ScicRegs
-00338d57   _ServiceDog
+00338e5c   _ServiceDog
 00007040   _SpiaRegs
 00007010   _SysCtrlRegs
 00338600   _TINT0_ISR
 0000c76c   _Tasks
-00339316   _Tasks_Init
+00339333   _Tasks_Init
 003385b0   _USER10_ISR
 003385ba   _USER11_ISR
 003385c4   _USER12_ISR
@@ -587,23 +587,23 @@ address    name
 00000001   __TI_args_main
 ffffffff   ___binit__
 ffffffff   ___c_args__
-0033931f   ___cinit__
-0033931f   ___etext__
+0033933c   ___cinit__
+0033933c   ___etext__
 ffffffff   ___pinit__
 00338000   ___text__
-003392a5   __args_main
+003392c2   __args_main
 0000cb00   __cleanup_ptr
 0000cb02   __dtors_ptr
 0000ca7c   __lock
-0033930d   __nop
-00339309   __register_lock
-00339305   __register_unlock
+0033932a   __nop
+00339326   __register_lock
+00339322   __register_unlock
 00000400   __stack
 0000ca7a   __unlock
-003392be   _abort
+003392db   _abort
 0000cac0   _adcPorts
 003389fd   _buildSequence
-003391e7   _c_int00
+00339204   _c_int00
 0000ca46   _canData_Tx_651
 0000ca4a   _canData_Tx_7AB
 0000ca56   _canMessage_Tx_651
@@ -614,57 +614,57 @@ ffffffff   ___pinit__
 0033811c   _configureTxMailbox
 00338826   _controlSCI_init
 0033882d   _controlSCI_update
-00339161   _cpuInit
-0033922d   _cpu_timer0_isr
-003392c0   _exit
+0033917e   _cpuInit
+0033924a   _cpu_timer0_isr
+003392dd   _exit
 0000c000   _filterSize_G
 0000c540   _filtermap
 0033804d   _findMailbox
 0033806c   _getCANErrors
 003383f5   _getMailboxID
-00338fd1   _goIdle
-0033919e   _gpioInit
-003392eb   _handleCAN_init
-003392ec   _handleCAN_update
+00338fee   _goIdle
+003391bb   _gpioInit
+00339308   _handleCAN_init
+00339309   _handleCAN_update
 0000c782   _i
-00338fcb   _interruptDisable
-00338fc1   _interruptEnable
+00338fe8   _interruptDisable
+00338fde   _interruptEnable
 003381e5   _loadTxMailbox
 0000c480   _loggingList
 0000c780   _loopcount
 0000c040   _mailBoxFilters
-00339149   _main
-0033931d   _newTask_init
-0033931e   _newTask_update
+00339166   _main
+0033933a   _newTask_init
+0033933b   _newTask_update
 0000c001   _numRxCANMsgs_G
-00339774   _numTxCANMsgs
+00339792   _numTxCANMsgs
 0000ca81   _portState_Master
 00338274   _readRxMailbox
-00338e41   _receiveCAN_init
-00338e42   _receiveCAN_update
+00338d4e   _receiveCAN_init
+00338d4f   _receiveCAN_update
 0033881c   _rsvd_ISR
 0000c441   _rxbufferSize
-00338f29   _scheduler_Init
-00338f3e   _scheduler_onTick
-00338f7a   _scheduler_taskDispatcher
-00339141   _scia_fifo_init
-003390e2   _scia_init
-00339103   _scia_msg
-00339128   _scia_msgTT
-003390f7   _scia_xmit
-00339118   _scia_xmitTT
-00338fd4   _sendCAN_init
-00338fe9   _sendCAN_update
-00339775   _tasksInSchedule
+00338f46   _scheduler_Init
+00338f5b   _scheduler_onTick
+00338f97   _scheduler_taskDispatcher
+0033915e   _scia_fifo_init
+003390ff   _scia_init
+00339120   _scia_msg
+00339145   _scia_msgTT
+00339114   _scia_xmit
+00339135   _scia_xmitTT
+00338ff1   _sendCAN_init
+00339006   _sendCAN_update
+00339793   _tasksInSchedule
 0000c77e   _tickCount_G
-00339184   _timerStart
-00338e9f   _updateFilter
+003391a1   _timerStart
+00338dc9   _updateFilter
 003382e4   _updateMailboxes
 0000c002   _updateSequenceRequired_G
 ffffffff   binit
-0033931f   cinit
+0033933c   cinit
 0033fff6   code_start
-0033931f   etext
+0033933c   etext
 ffffffff   pinit
 
 
@@ -868,68 +868,68 @@ address    name
 00338d1f   _InitECanGpio
 00338d24   _InitECanaGpio
 00338d3a   _InitECanbGpio
-00338d4e   _InitSysCtrl
-00338d57   _ServiceDog
-00338d61   _DisableDog
-00338d69   _InitPll
-00338db5   _InitPeripheralClocks
-00338e10   _CsmUnlock
-00338e41   _receiveCAN_init
-00338e42   _receiveCAN_update
-00338e9f   _updateFilter
-00338f29   _scheduler_Init
-00338f3e   _scheduler_onTick
-00338f7a   _scheduler_taskDispatcher
-00338fc1   _interruptEnable
-00338fcb   _interruptDisable
-00338fd1   _goIdle
-00338fd4   _sendCAN_init
-00338fe9   _sendCAN_update
-0033900c   _CANTx_clearAll
-0033906e   _InitCpuTimers
-003390a7   _ConfigCpuTimer
-003390e2   _scia_init
-003390f7   _scia_xmit
-00339103   _scia_msg
-00339118   _scia_xmitTT
-00339128   _scia_msgTT
-00339141   _scia_fifo_init
-00339149   _main
-00339161   _cpuInit
-00339184   _timerStart
-0033919e   _gpioInit
-0033919f   _InitSci
-003391a0   _InitSciGpio
-003391a7   _InitSciaGpio
-003391bd   _InitScibGpio
-003391d1   _InitScicGpio
-003391e7   _c_int00
-0033922d   _cpu_timer0_isr
-0033925d   _InitPieCtrl
-0033927c   _EnableInterrupts
-00339285   _InitPieVectTable
-003392a5   __args_main
-003392be   C$$EXIT
-003392be   _abort
-003392c0   _exit
-003392d7   _InitAdc
-003392eb   _handleCAN_init
-003392ec   _handleCAN_update
-003392fa   U$$DIV
-003392ff   U$$MOD
-00339305   __register_unlock
-00339309   __register_lock
-0033930d   __nop
-00339316   _Tasks_Init
-0033931d   _newTask_init
-0033931e   _newTask_update
-0033931f   ___cinit__
-0033931f   ___etext__
-0033931f   cinit
-0033931f   etext
-0033966e   _PieVectTableInit
-00339774   _numTxCANMsgs
-00339775   _tasksInSchedule
+00338d4e   _receiveCAN_init
+00338d4f   _receiveCAN_update
+00338dc9   _updateFilter
+00338e53   _InitSysCtrl
+00338e5c   _ServiceDog
+00338e66   _DisableDog
+00338e6e   _InitPll
+00338eba   _InitPeripheralClocks
+00338f15   _CsmUnlock
+00338f46   _scheduler_Init
+00338f5b   _scheduler_onTick
+00338f97   _scheduler_taskDispatcher
+00338fde   _interruptEnable
+00338fe8   _interruptDisable
+00338fee   _goIdle
+00338ff1   _sendCAN_init
+00339006   _sendCAN_update
+00339029   _CANTx_clearAll
+0033908b   _InitCpuTimers
+003390c4   _ConfigCpuTimer
+003390ff   _scia_init
+00339114   _scia_xmit
+00339120   _scia_msg
+00339135   _scia_xmitTT
+00339145   _scia_msgTT
+0033915e   _scia_fifo_init
+00339166   _main
+0033917e   _cpuInit
+003391a1   _timerStart
+003391bb   _gpioInit
+003391bc   _InitSci
+003391bd   _InitSciGpio
+003391c4   _InitSciaGpio
+003391da   _InitScibGpio
+003391ee   _InitScicGpio
+00339204   _c_int00
+0033924a   _cpu_timer0_isr
+0033927a   _InitPieCtrl
+00339299   _EnableInterrupts
+003392a2   _InitPieVectTable
+003392c2   __args_main
+003392db   C$$EXIT
+003392db   _abort
+003392dd   _exit
+003392f4   _InitAdc
+00339308   _handleCAN_init
+00339309   _handleCAN_update
+00339317   U$$DIV
+0033931c   U$$MOD
+00339322   __register_unlock
+00339326   __register_lock
+0033932a   __nop
+00339333   _Tasks_Init
+0033933a   _newTask_init
+0033933b   _newTask_update
+0033933c   ___cinit__
+0033933c   ___etext__
+0033933c   cinit
+0033933c   etext
+0033968c   _PieVectTableInit
+00339792   _numTxCANMsgs
+00339793   _tasksInSchedule
 0033fff6   code_start
 0033fff8   _CsmPwl
 00380080   _ADC_cal
