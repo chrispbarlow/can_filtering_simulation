@@ -82,8 +82,6 @@ void controlSCI_update(void)
 
 				numRxCANMsgs_G = (i-2)/4;
 
-				//printf("%u\n", numRxCANMsgs_G);
-
 				for(sequenceNum=0;sequenceNum<numRxCANMsgs_G;sequenceNum++){
 					ID1 = rxbuffer[(4*sequenceNum)+1];
 					ID1 <<= 8;
@@ -100,8 +98,12 @@ void controlSCI_update(void)
 				SCIstate = SEND;
 
 			}
-			else if(rxbuffer[0] == '{'){ /*terminal sends \0 after each character typed*/
+			else if(rxbuffer[0] == '{'){
 				i++;
+				/* Reset state if buffer overflows - can happen if data loss occurs */
+				if(i >= (sizeof(rxbuffer)/sizeof(rxbuffer[0]))){
+					SCIstate = WAITING;
+				}
 			}
 			scia_xmit('?');
     	}

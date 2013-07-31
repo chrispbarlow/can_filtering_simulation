@@ -19,6 +19,7 @@ int serialCount = 0;
 boolean readyState = false;
 int status = 0;
 boolean allRefresh = false;
+int hsCount = 0;
 
 /* fonts */
 PFont font, fontBold;
@@ -199,7 +200,7 @@ void draw(){
     for(i=0;i<filterSize;i++){
       /* Text and leader lines */
       strg = intToStr_02(i);
-      text(strg+": "+hex(IDs[i],3), (s-((4*d)+4)), standardSpacingY(i,6));
+      text(strg+": "+hex(IDs[i],3), (s-((4*d)+20)), standardSpacingY(i,6));
       stroke(255);
       line(s, standardSpacingY(i,0), (s-d), standardSpacingY(i,0));
       
@@ -209,7 +210,7 @@ void draw(){
 
     /* Title and status block */
     fill(0);
-    rect((s-((4*d)+110)), standardSpacingY(56,6), 700, 110, 10);
+    rect((s-((4*d)+110)), standardSpacingY(54,15), 700, 130, 10);
 
     fill(255);    
     
@@ -225,7 +226,7 @@ void draw(){
 
       if(txPointer>4){
         strg += txPointer-3;
-        rect((s-((4*d)+100)), standardSpacingY(62,10), 680/(loggingList.length/(txPointer-4)), 6);
+        rect((s-((4*d)+100)), standardSpacingY(62,10), (680/(loggingList.length/(txPointer-4))), 6);
       }
       break;
     case 3:
@@ -239,7 +240,9 @@ void draw(){
     }
     
     textFont(fontBold, 16);
-    text("Dynamic Filter Mapping Visualisation", (s-((4*d)+100)), standardSpacingY(57,6));
+    text("Dynamic CAN Filter Mapping Visualisation", (s-((4*d)+100)), standardSpacingY(56,6));
+    textFont(fontBold, 14);
+    text("Chris Barlow, MSc Reliable Embedded Systems 2013, University of Leicester", (s-((4*d)+100)), standardSpacingY(57,8));
     textFont(font, 14);
     text("This application displays the CAN mailbox to logging list mapping.", (s-((4*d)+100)), standardSpacingY(59,6));
     text("Logging list is sent to the device on connection", (s-((4*d)+100)), standardSpacingY(60,6));
@@ -259,7 +262,6 @@ void serialEvent(Serial myPort) {
   int loggingListPointer = 0;
   int IDhPointer,IDlPointer,lineEndPointer, txListPointer;
   long lastTime = 0;
-  int hsCount = 0;
 
   try{
 
