@@ -375,35 +375,45 @@ void serialEvent(Serial myPort) {
     /* read a byte from the serial port: */
     serialInArray[serialCount] = myPort.read();
     println(serialInArray[serialCount]);
+    
+    /* Device sends '?' character as a handshake / logging list request */
+    if(serialInArray[serialCount] == '?'){
+    
+      /* Prevents '63' values in data stream from being misinterpreted as a handshake request */ 
+      if(hsCount < 5){
+        hsCount++;
+      }
+      else{
+        hsCount = 0; 
+        if(status == 0){ 
+          status = 1;
+        }
+        /* if we are in online state, we know that the device has been reset */
+        else if(status == 3){
+          status = 4;
+        }
+        print("HS ");
+      }    
+    }
+    else{
+      hsCount = 0;
+    }
+    
+    
     switch(status){
     /* Offline */
     case 0:
+    case 4:
       /* App offline */
-//      serialCount = 0;
+      serialCount = 0;
       txPointer = 0;
       delay_ms(5);
       /* Handshake signals device to wait for new filter information */
       myPort.write('?');
-      
-      /* Device sends '?' character as a handshake / logging list request */
-      if(serialInArray[serialCount] == '?'){
-      
-        /* Prevents '63' values in data stream from being misinterpreted as a handshake request */ 
-        if(hsCount < 5){
-          hsCount++;
-        }
-        else{
-          hsCount = 0;  
-          status = 1;
-        }
-
-        print("HS ");
-        redraw();
+      if(readyState==false){
+        status = 0;
       }
-      else{
-        hsCount = 0;
-      }
-      
+      redraw();
      break;
           
     /* Offline but Device found */
@@ -413,6 +423,7 @@ void serialEvent(Serial myPort) {
           txPointer = 0;        
           status = 2;   
       }
+      redraw();
       break;
     /* Transmitting logging list */
     case 2:
@@ -451,9 +462,6 @@ void serialEvent(Serial myPort) {
         status = 0;
         redraw();
       }
-      break;
-    /* Reset required */
-    case 4:
       break;
       
     default:
