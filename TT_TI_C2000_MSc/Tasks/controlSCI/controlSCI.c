@@ -135,7 +135,7 @@ void controlSCI_update(void)
 
 
     case SEND:
-    	/* check for reset request from desktop app */
+		/* check for reset request from desktop app */
     	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
     		rxbuffer[0] = SciaRegs.SCIRXBUF.all;
     	}
@@ -207,13 +207,11 @@ void controlSCI_update(void)
 				pointerShift = 0;
 			}
 
+			/* Instruct desktop app to refresh screen */
+			scia_xmit('{');
+			scia_xmit('~');
+			scia_xmit('}');
     	}
-
-		/* Instruct desktop app to refresh screen */
-		scia_xmit('{');
-		scia_xmit('~');
-		scia_xmit('}');
-
     	break;
 
     default:
@@ -222,6 +220,7 @@ void controlSCI_update(void)
 
     /* ? symbol acts as a handshake request with the desktop app */
 	scia_xmit('?');
+
 
 }
 
