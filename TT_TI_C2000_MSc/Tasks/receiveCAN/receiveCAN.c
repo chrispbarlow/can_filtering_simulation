@@ -16,20 +16,15 @@ typedef enum{FALSE, TRUE}boolean_t;
 
 
 void receiveCAN_init(void){
-//	Uint16 mailBox;
-	printf("CAN Rx Config:\n");
 
-//	for(mailBox=0; mailBox<FILTERSIZE; mailBox++){
-//		updateFilter(mailBox);
-//		printf("0x%03X\n", (Uint16)CAN_RxMessages[mailBox].canID);
-//	}
+	/* mailboxes are configured when first logging list is received from desktop app */
 }
 
 void receiveCAN_update(void){
 	Uint16 mailBox, messagePointer;
 	static Uint32 totalcounter = 0;
 
-	if(updateFilterRequired_G == 1){
+	if(updateSequenceRequired_G == 1){
 
 		filterSize_G = numRxCANMsgs_G/2;
 
@@ -39,8 +34,7 @@ void receiveCAN_update(void){
 
 		for(mailBox=0; mailBox<filterSize_G; mailBox++){
 			updateFilter(mailBox);
-	//		printf("0x%03X\n", (Uint16)CAN_RxMessages[mailBox].canID);
-			updateFilterRequired_G = 0;
+			updateSequenceRequired_G = 0;
 		}
 	}
 	else{
@@ -70,7 +64,7 @@ void updateFilter(unsigned int filterPointer){
 	int16 sequencePointer;
 	boolean_t result = FALSE;
 
-	if(updateFilterRequired_G == 1){
+	if(updateSequenceRequired_G == 1){
 		last_sequencePointer = -1;
 	}
 	/* Find next required CAN ID in sequence */

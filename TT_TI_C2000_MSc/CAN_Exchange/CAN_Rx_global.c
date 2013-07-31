@@ -8,7 +8,7 @@
 
 filterShadow_t mailBoxFilters[64];
 
-char updateFilterRequired_G = 0;
+char updateSequenceRequired_G = 0;
 
 /*******************************************************************************
  * CAN Rx Message array

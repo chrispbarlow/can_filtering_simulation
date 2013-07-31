@@ -10,7 +10,7 @@
 #include "../../CAN_Exchange/CAN_Rx_global.h"
 
 
-typedef enum{NEW,WAITING,RECEIVE,SEND}SCIstate_t;
+typedef enum{WAITING,RECEIVE,SEND}SCIstate_t;
 static char rxbuffer[300];
 Uint16 rxbufferSize = (sizeof(rxbuffer)/sizeof(rxbuffer[0]));
 
@@ -26,6 +26,12 @@ typedef struct{
 	Uint16 cycleTime;
 } logging_list_t;
 
+enum {
+	IDH_DATAPOSITION = 1,
+	IDL_DATAPOSITION = 2,
+	DLC_DATAPOSITION = 3,
+	CYT_DATAPOSITION = 4
+};
 
 
 logging_list_t loggingList[64];
@@ -34,30 +40,30 @@ tempShadow_t filtermap[64];
 
 void controlSCI_init(void)
 {
-	// This function is found in the DSP2833x_Sci.c file.
+	/* This TI function is found in the DSP2833x_Sci.c file. */
 	InitSciaGpio();
-	scia_fifo_init();	   // Initialize the SCI FIFO
-	scia_init();  // Initalize SCI for echoback
+	scia_fifo_init();	  	/* Initialize the SCI FIFO */
+	scia_init();  			/* Initalize SCI for echoback */
 }
 
 void controlSCI_update(void)
 {
-	static SCIstate_t SCIstate = NEW;
+	static SCIstate_t SCIstate = WAITING;
     static Uint16 i = 0, j = 0;
-    Uint32 ID1 = 0, ID2 = 0;
+    Uint32 IDH = 0, IDL = 0;
     char tempCharOut;
     static Uint16 pointerShift = 0;
     Uint16 sequenceNum = 0;
 
-    switch(SCIstate){
-    case NEW:
-    	/* This doesn't do anything anymore */
- 		SCIstate = WAITING;
-		break;
 
+    /*
+     * state machine controls whether the device is transmitting or receiving logging list information
+     * will always receive until first logging list is received
+     * */
+    switch(SCIstate){
 
     case WAITING:
-      	scia_xmit('?');
+      	/* First character received induces RECEIVE state */
     	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
     		for(i=0;i<rxbufferSize;i++){
     			rxbuffer[i] = 0;
@@ -67,50 +73,69 @@ void controlSCI_update(void)
     	}
     	break;
 
-
     case RECEIVE:
+
+    	/* Checks SCI receive flag for new character */
     	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
     		rxbuffer[i] = SciaRegs.SCIRXBUF.all;
     	}
 
+    	/* safeguard against null characters received mid-packet (happens with terminals) */
      	if(rxbuffer[i] != 0){
+
+     		/* "???" sent by desktop app indicates that a reset is required (someone pressed the 'R' key */
          	if((rxbuffer[i] == '?')&&(rxbuffer[i-1] == '?')&&(rxbuffer[i-2] == '?')){
          		SCIstate = WAITING;
          	}
 
+         	/* *
+         	 * Data packet looks like this:
+         	 *                 11111
+         	 * 		 012345678901234
+         	 * 		"{aaAXbbBYccCZ~}" where:
+         	 *  	aa is two byte CAN ID
+         	 * 		A is the CAN data length
+         	 *  	X is the CAN message cycle time
+         	 *  	etc
+         	 * */
 			if((i>0)&&(rxbuffer[i-1] == '~')&&(rxbuffer[i] == '}')){
 
+				/* In above eg, i = 14 at end of packet, numRxCANMsgs_G = 3 */
 				numRxCANMsgs_G = (i-2)/4;
 
+				/* Unpackaging logging list info from data packet */
 				for(sequenceNum=0;sequenceNum<numRxCANMsgs_G;sequenceNum++){
-					ID1 = rxbuffer[(4*sequenceNum)+1];
-					ID1 <<= 8;
-					ID2 = rxbuffer[(4*sequenceNum)+2];
+					IDH = rxbuffer[(4*sequenceNum)+IDH_DATAPOSITION];
+					IDH <<= 8;
+					IDL = rxbuffer[(4*sequenceNum)+IDL_DATAPOSITION];
 
-					loggingList[sequenceNum].canID = (ID1|ID2);
-					loggingList[sequenceNum].canDLC = rxbuffer[(4*sequenceNum)+3];
-					loggingList[sequenceNum].cycleTime = rxbuffer[(4*sequenceNum)+4];
+					loggingList[sequenceNum].canID = (IDH|IDL);
+					loggingList[sequenceNum].canDLC = rxbuffer[(4*sequenceNum)+DLC_DATAPOSITION];
+					loggingList[sequenceNum].cycleTime = rxbuffer[(4*sequenceNum)+CYT_DATAPOSITION];
 				}
 
+				/* Initialise sequence */
 				buildSequence(numRxCANMsgs_G);
 
-				updateFilterRequired_G = 1;
-				SCIstate = SEND;
+				/* flag tells receiveCAN to update the logging sequence */
+				updateSequenceRequired_G = 1;
 
+				SCIstate = SEND;
 			}
 			else if(rxbuffer[0] == '{'){
+				/* data packet reception still in progress */
 				i++;
 				/* Reset state if buffer overflows - can happen if data loss occurs */
 				if(i >= (sizeof(rxbuffer)/sizeof(rxbuffer[0]))){
 					SCIstate = WAITING;
 				}
 			}
-			scia_xmit('?');
     	}
     	break;
 
 
     case SEND:
+    	/* check for reset request from desktop app */
     	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
     		rxbuffer[0] = SciaRegs.SCIRXBUF.all;
     	}
@@ -120,9 +145,6 @@ void controlSCI_update(void)
      		rxbuffer[0] = ' ';
      	}
      	else{
-			scia_xmit('{');
-			scia_xmit('~');
-			scia_xmit('}');
 			/* Take snapshot of filters (should prevent updates halfway through transmission)*/
 			for(i=0;i<filterSize_G;i++){
 				j = mailBoxFilters[i].messagePointer;
@@ -131,7 +153,7 @@ void controlSCI_update(void)
 				filtermap[i].ID = mailBoxFilters[i].canID;
 			}
 
-
+			/* Transmit mailbox data */
 			scia_xmit('{');
 			scia_xmit('M');
 
@@ -151,14 +173,16 @@ void controlSCI_update(void)
 			scia_xmit('~');
 			scia_xmit('}');
 
-
+			/* Transmit message counts */
 			for(i=0;i<=10;i++){
+				/* Due to the large amount of data for the message counts
+				 * Data is transmitted as max 10 values, 6 apart, offset by pointerShift*/
 				j = (6*i)+pointerShift;
 
 				if(j<=numRxCANMsgs_G){
 					scia_xmit('{');
 					scia_xmit('S');
-
+					/* Need to tell the desktop app the array index for this value */
 					tempCharOut = (j & 0xff);
 					scia_xmit(tempCharOut);
 
@@ -174,25 +198,38 @@ void controlSCI_update(void)
 					scia_xmit('~');
 					scia_xmit('}');
 				}
+
 		   }
 
+			/* Increment pointerShift to inter-space next set of values next time */
 			pointerShift++;
 			if(pointerShift > 6){
 				pointerShift = 0;
 			}
 
-			scia_xmit('?'); /*TODO: check if this is needed now */
-     	}
+    	}
+
+		/* Instruct desktop app to refresh screen */
+		scia_xmit('{');
+		scia_xmit('~');
+		scia_xmit('}');
+
     	break;
 
     default:
     	break;
     }
+
+    /* ? symbol acts as a handshake request with the desktop app */
+	scia_xmit('?');
+
 }
 
+/* Iterates through logging sequence (CAN_Rx_global.c) and updates / resets values */
 void buildSequence(Uint16 listSize){
 	Uint16 i, cycleTime_min;
 
+	/* Finds the minimum cycle time in the logging list */
  	cycleTime_min = 0xFFFF;
  	for(i=0;i<listSize;i++){
  		if(loggingList[i].cycleTime<cycleTime_min){
@@ -205,6 +242,7 @@ void buildSequence(Uint16 listSize){
 		CAN_RxMessages[i].canData.rawData[0] = 0;
 		CAN_RxMessages[i].canData.rawData[1] = 0;
 		CAN_RxMessages[i].canDLC = loggingList[i].canDLC;
+		/* timer_reload set proportionally to weight the filter in favour of more frequent IDs */
 		CAN_RxMessages[i].timer_reload = loggingList[i].cycleTime/cycleTime_min;
 		CAN_RxMessages[i].timer = 0;
 		CAN_RxMessages[i].counter = 0;

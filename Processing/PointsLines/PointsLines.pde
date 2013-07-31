@@ -137,9 +137,15 @@ void setup(){
     font = loadFont("Consolas-16.vlw");
     fontBold = loadFont("Consolas-Bold-16.vlw");
     textFont(font, 12);    
-    stroke(153);    
+    stroke(153);
+    /* draw handled manually by RS232 reception */    
     noLoop();
   }
+}
+
+void delay_ms(int ms){
+  long lastTime = millis();
+  while (millis()-lastTime < ms);
 }
 
 int standardSpacingY(int mult, int offset){
@@ -261,7 +267,6 @@ void serialEvent(Serial myPort) {
   long messageCounter = 0; 
   int loggingListPointer = 0;
   int IDhPointer,IDlPointer,lineEndPointer, txListPointer;
-  long lastTime = 0;
 
   try{
 
@@ -274,6 +279,23 @@ void serialEvent(Serial myPort) {
     /* read a byte from the serial port: */
     serialInArray[serialCount] = myPort.read();
     
+    switch(status){
+    case 0:
+      break;
+    case 1:
+      break;
+    case 2:
+      break;
+    case 3:
+      break;
+    case 4:
+      break;
+      
+    default:
+      break;
+    }
+    
+    
     /* Device sends '?' character as a handshake / logging list request */
     if(serialInArray[serialCount] == '?'){
       
@@ -281,7 +303,8 @@ void serialEvent(Serial myPort) {
       if(hsCount < 5){
         hsCount++;
       }
-      else{     
+      else{
+        hsCount = 0;     
         if(serialCount == 0){
            status = 1;
          }
@@ -292,14 +315,16 @@ void serialEvent(Serial myPort) {
          redraw();
        }
     }
+    else{
+      hsCount = 0;
+    }
     
     if(readyState==true){
       /* Request from TI chip to send CAN IDs */
       if((serialCount == 0)&&(serialInArray[0] == '?')){       
         status = 2;
-       /* this delay is necesssary to all the TI chip to keep up when it receives erroneous null characters */ 
-        lastTime = millis();
-        while (millis()-lastTime < 5);
+        /* this delay is necesssary for the TI chip to keep up when it receives erroneous null characters */ 
+        delay_ms(5);
         
         if(txPointer == 0){
           myPort.write('{');
@@ -404,7 +429,6 @@ void serialEvent(Serial myPort) {
       /* App offline */
       serialCount = 0;
       txPointer = 0;
-      
       /* Handshake signals device to wait for new filter information */
       myPort.write('?');
     }

@@ -11,7 +11,7 @@
 
 #include <DSP2833x_Device.h>
 
-extern char updateFilterRequired_G;
+extern char updateSequenceRequired_G;
 
 
 /******************************************
