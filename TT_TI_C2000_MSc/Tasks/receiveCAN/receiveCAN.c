@@ -21,7 +21,7 @@ void receiveCAN_init(void){
 }
 
 void receiveCAN_update(void){
-	Uint16 mailBox, messagePointer, updateBox;
+	Uint16 mailBox, messagePointer;
 	static Uint32 totalcounter = 0;
 
 	if(updateSequenceRequired_G == 1){
@@ -52,12 +52,8 @@ void receiveCAN_update(void){
 				/* read the CAN data into buffer (nothing done with the data, but nice to do this for realistic timing */
 				readRxMailbox(CANPORT_A, mailBox, CAN_RxMessages[messagePointer].canData.rawData);
 
-				for(updateBox = 0; updateBox <filterSize_G; updateBox++){
-					if(mailBoxFilters[updateBox].canID == CAN_RxMessages[messagePointer].canID){
-						/* update the filter for next required ID */
-						updateFilter(updateBox);
-					}
-				}
+				/* update the filter for next required ID */
+				updateFilter(mailBox);
 			}
 		}
 	}
