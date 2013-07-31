@@ -110,7 +110,8 @@ int[][] loggingList = {
 /* counters for counting */
 long[] counters = new long[loggingList.length];
 long[] countersTemp = new long[loggingList.length];
-
+long countersTotal = 0;
+  
 /* the number of mailboxes used for the filter (this should be half the number of IDs in the logging list */
 int filterSize = 0;
 
@@ -168,7 +169,7 @@ String intToStr_02(int num){
 void draw(){
   int barLength = 0;
   String strg = "";
-  long countersTotal = 0;
+
   
   try{
     /* Mailbox and logging list blocks */
@@ -187,7 +188,7 @@ void draw(){
     
     /* Draws logging list details */
     for(i=0;i<loggingList.length;i++){
-        
+      countersTotal = 0;  
       if(allRefresh == true){
         counters[i] = countersTemp[i];
         countersTotal += counters[i];
@@ -262,8 +263,8 @@ void draw(){
   }
 }
 
-int transmitLoggingList(){
-  int txListPointer, success = 0;
+void transmitLoggingList(){
+  int txListPointer;
 
   if(txPointer == 0){
     myPort.write('{');
@@ -293,16 +294,75 @@ int transmitLoggingList(){
   else if(txPointer == (loggingList.length+2)){
     myPort.write('}');
     println("}");
+    txPointer++;
   } 
-  
-  return success;
+}
+
+void receiveLoggingDetails(){
+  int loggingListPointer = 0;
+  int IDhPointer,IDlPointer,lineEndPointer, txListPointer;
+  long messageCounter = 0; 
+          
+          /* First character of packet after { indicates packet type */
+          switch(serialInArray[1]){ 
+               
+          case 'M': 
+          /* Data packet contains mailbox information */
+          
+            if(serialCount-3 == 1){
+              filterSize = 1;
+            }
+            else{
+              filterSize = (serialCount-3)/3;
+            }
+            
+            for(loggingListPointer=0;loggingListPointer<filterSize;loggingListPointer++){
+              IDhPointer = (3*loggingListPointer)+2;
+              IDlPointer = (3*loggingListPointer)+3;
+              lineEndPointer = (3*loggingListPointer)+4;
+              
+              IDs[loggingListPointer] = ((serialInArray[IDhPointer]<<8) | serialInArray[IDlPointer]);
+              mapLineEnd[loggingListPointer] = standardSpacingY(serialInArray[lineEndPointer],0);
+            }
+            break;
+                   
+          case 'S':
+          /* Data packet contains loggingList information */ 
+           
+            loggingListPointer = serialInArray[2];
+            println(loggingListPointer);
+            
+            if(loggingListPointer < loggingList.length){
+              /* Unpack 32 bit counter */
+              messageCounter  = ((serialInArray[3]&0xFF)<<24);
+              messageCounter |= ((serialInArray[4]&0xFF)<<16);
+              messageCounter |= ((serialInArray[5]&0xFF)<<8);
+              messageCounter |=  (serialInArray[6]&0xFF);
+               
+              /* counters stored in temp array until refresh required */
+              countersTemp[loggingListPointer] = messageCounter;
+              
+              /* Only refresh loggingList counters on screen when all counters have been received (takes several packets) */
+              if(loggingListPointer >= (loggingList.length-1)){
+                allRefresh = true;
+              }
+            }
+      
+            break;
+            
+          case '~':
+            /* Empty serial packet instructs screen refresh */
+            redraw();
+            break;
+            
+          default:        
+            break;
+          }
+                  
+
 }
 
 void serialEvent(Serial myPort) {
-  int inByte;
-  long messageCounter = 0; 
-  int loggingListPointer = 0;
-  int IDhPointer,IDlPointer,lineEndPointer, txListPointer;
 
   try{
 
@@ -314,13 +374,14 @@ void serialEvent(Serial myPort) {
 
     /* read a byte from the serial port: */
     serialInArray[serialCount] = myPort.read();
-        
+    println(serialInArray[serialCount]);
     switch(status){
     /* Offline */
     case 0:
       /* App offline */
 //      serialCount = 0;
       txPointer = 0;
+      delay_ms(5);
       /* Handshake signals device to wait for new filter information */
       myPort.write('?');
       
@@ -349,10 +410,8 @@ void serialEvent(Serial myPort) {
     case 1:
       myPort.write('?');
       if(readyState==true){
-        /* Request from TI chip to send CAN IDs */
-        if((serialCount == 0)&&(serialInArray[0] == '?')){ 
-          status = 2;
-        }    
+          txPointer = 0;        
+          status = 2;   
       }
       break;
     /* Transmitting logging list */
@@ -371,16 +430,26 @@ void serialEvent(Serial myPort) {
       else{
         serialCount = 0;
         status = 0;
+        redraw();
       }
       break;
     /* Online */
     case 3:
       if(readyState==true){
-        redraw();
+      /* End of data packet - update data arrays */
+        if((serialCount>0)&&(serialInArray[serialCount-1] == '~')&&(serialInArray[serialCount] == '}')){
+          receiveLoggingDetails();
+          serialCount = 0;
+        }      
+        /* Receiving data packet from TI chip */
+        else if((serialInArray[0] == '{') && (serialCount < 999)){
+            serialCount++;
+        }  
       }
       else{
         serialCount = 0;
         status = 0;
+        redraw();
       }
       break;
     /* Reset required */
@@ -391,153 +460,10 @@ void serialEvent(Serial myPort) {
       break;
     }
     
-    if(serialInArray[0] == '{'){
-      serialCount++;
-    }
-    else{
-      serialCount = 0;
-    }
-    
-   println("A"+serialInArray[serialCount]);
-   println("S"+status);
-    
-    
-//    /* Device sends '?' character as a handshake / logging list request */
-//    if(serialInArray[serialCount] == '?'){
-//      
-//      /* Prevents '63' values in data stream from being misinterpreted as a handshake request */ 
-//      if(hsCount < 5){
-//        hsCount++;
-//      }
-//      else{
-//        hsCount = 0;     
-//        if(serialCount == 0){
-//           status = 1;
-//         }
-//         else{
-//           status = 4;
-//         }
-//         print("HS ");
-//         redraw();
-//       }
-//    }
-//    else{
-//      hsCount = 0;
-//    }
-//    
-//    if(readyState==true){
-//      /* Request from TI chip to send CAN IDs */
-//      if((serialCount == 0)&&(serialInArray[0] == '?')){       
-//        status = 2;
-//        /* this delay is necesssary for the TI chip to keep up when it receives erroneous null characters */ 
-//        delay_ms(5);
-//        
-//        if(txPointer == 0){
-//          myPort.write('{');
-//          println("{");
-//          txPointer++;
-//        }
-//        else if(txPointer <= loggingList.length){  
-//          txListPointer =  txPointer-1;
-//          
-//          /* CAN ID high byte */
-//          myPort.write((loggingList[txListPointer][0]>>8)&0x07);
-//          /* CAN ID low byte */
-//          myPort.write (loggingList[txListPointer][0]&0xFF);
-//          /* Message length in bytes */
-//          myPort.write (loggingList[txListPointer][1]&0xFF);
-//          /* Message cycle time */
-//          myPort.write (loggingList[txListPointer][2]&0xFF);
-//  
-//          println(hex((loggingList[txListPointer][0]>>8)&0xFF,1)+" "+hex(loggingList[txListPointer][0]&0xFF,2)+" "+hex(loggingList[txListPointer][1]&0xFF,2)+" "+hex(loggingList[txListPointer][2]&0xFF,2));
-//          txPointer++;
-//        }
-//        else if(txPointer == (loggingList.length+1)){
-//          myPort.write('~');
-//          println("~");
-//          txPointer++;
-//        }
-//        else if(txPointer == (loggingList.length+2)){
-//          myPort.write('}');
-//          println("}");
-//          txPointer++;
-//        }
-//      }    
-//      /* End of data packet - update data arrays */
-//      else if((serialCount>0)&&(serialInArray[serialCount-1] == '~')&&(serialInArray[serialCount] == '}')){
-//        hsCount = 0;
-//        status = 3;
-//        
-//        /* First character of packet after { indicates packet type */
-//        switch(serialInArray[1]){ 
-//             
-//        case 'M': 
-//        /* Data packet contains mailbox information */
-//        
-//          if(serialCount-3 == 1){
-//            filterSize = 1;
-//          }
-//          else{
-//            filterSize = (serialCount-3)/3;
-//          }
-//          
-//          for(loggingListPointer=0;loggingListPointer<filterSize;loggingListPointer++){
-//            IDhPointer = (3*loggingListPointer)+2;
-//            IDlPointer = (3*loggingListPointer)+3;
-//            lineEndPointer = (3*loggingListPointer)+4;
-//            
-//            IDs[loggingListPointer] = ((serialInArray[IDhPointer]<<8) | serialInArray[IDlPointer]);
-//            mapLineEnd[loggingListPointer] = standardSpacingY(serialInArray[lineEndPointer],0);
-//          }
-//          break;
-//                 
-//        case 'S':
-//        /* Data packet contains loggingList information */ 
-//         
-//          loggingListPointer = serialInArray[2];
-//          println(loggingListPointer);
-//          
-//          if(loggingListPointer < loggingList.length){
-//            /* Unpack 32 bit counter */
-//            messageCounter  = ((serialInArray[3]&0xFF)<<24);
-//            messageCounter |= ((serialInArray[4]&0xFF)<<16);
-//            messageCounter |= ((serialInArray[5]&0xFF)<<8);
-//            messageCounter |=  (serialInArray[6]&0xFF);
-//             
-//            /* counters stored in temp array until refresh required */
-//            countersTemp[loggingListPointer] = messageCounter;
-//            
-//            /* Only refresh loggingList counters on screen when all counters have been received (takes several packets) */
-//            if(loggingListPointer >= (loggingList.length-1)){
-//              allRefresh = true;
-//            }
-//          }
-//    
-//          break;
-//          
-//        case '~':
-//          /* Empty serial packet instructs screen refresh */
-//          redraw();
-//          break;
-//          
-//        default:        
-//          break;
-//        }
-//                
-//        serialCount = 0;
-//      }      
-//      /* Receiving data packet from TI chip */
-//      else if((serialInArray[0] == '{') && (serialCount < 999)){
-//          serialCount++;
-//      }
-//    }
-//    else{
-//      /* App offline */
-//      serialCount = 0;
-//      txPointer = 0;
-//      /* Handshake signals device to wait for new filter information */
-//      myPort.write('?');
-//    }
+   
+     println("A"+serialInArray[0]);
+     println("S"+status);  
+  
   }
   catch(Exception e){
     exit();
