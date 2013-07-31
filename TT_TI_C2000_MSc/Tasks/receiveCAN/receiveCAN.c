@@ -9,11 +9,10 @@
 #include "../../CAN_Exchange/CAN_Rx_global.h"
 #include "../../CAN_Exchange/CAN_Tx_global.h"
 
-#define DUPLICATES_ALLOWED (1)
+#define DUPLICATES_ALLOWED 	(1)
+#define FILTERSIZE_RATIO	(2)
 
 typedef enum{FALSE, TRUE}boolean_t;
-
-
 
 void receiveCAN_init(void){
 
@@ -26,7 +25,7 @@ void receiveCAN_update(void){
 
 	if(updateSequenceRequired_G == 1){
 
-		filterSize_G = numRxCANMsgs_G/2;
+		filterSize_G = numRxCANMsgs_G/FILTERSIZE_RATIO;
 
 		if((numRxCANMsgs_G%2)!=0){
 			filterSize_G += 1;

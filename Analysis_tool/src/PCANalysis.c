@@ -138,7 +138,7 @@ flag_t updateFilter(unsigned int filterPointer){
 				IDfound = TRUE;
 			}
 			else{
-				IDfound = FALSE;
+				IDfound = FALSE; /*** THIS BIT WAS SCREWING UP THE ALGORITHM ***/
 			}
 		}
 
