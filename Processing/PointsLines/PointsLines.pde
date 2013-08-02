@@ -70,6 +70,10 @@ int[][] loggingList = {
   {0x409,8,20},
   {0x40B,8,20},
   {0x40D,8,20},
+//  {0x707,1,20},
+//  {0x709,1,20},
+//  {0x70B,1,20},
+//  {0x70D,1,20},  
   {0x707,1,100},
   {0x709,1,100},
   {0x70B,1,100},
@@ -260,6 +264,7 @@ void draw(){
     text("Status: "+strg, (s-((4*d)+100)), standardSpacingY(62,6));
     
     allRefresh = false;  
+    
   }
   catch(Exception e){
     exit();
