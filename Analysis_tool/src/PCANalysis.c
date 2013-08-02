@@ -67,32 +67,32 @@ logging_list_t loggingList[]={
 	{ 0x209 , 10 },
 	{ 0x20B , 10 },
 	{ 0x20D , 10 },
-//	{ 0x287 , 10 },
-//	{ 0x289 , 10 },
-//	{ 0x28B , 10 },
-//	{ 0x28D , 10 },
-//	{ 0x307 , 10 },
-//	{ 0x309 , 10 },
-//	{ 0x30B , 10 },
-//	{ 0x30D , 10 },
-//	{ 0x385 , 10 },
-//	{ 0x387 , 10 },
-//	{ 0x389 , 10 },
-//	{ 0x38B , 10 },
-//	{ 0x38D , 10 },
-//	{ 0x407 , 10 },
-//	{ 0x409 , 10 },
-//	{ 0x40B , 10 },
-//	{ 0x40D , 10 },
-//	{ 0x707 , 50 },
-//	{ 0x709 , 50 },
-//	{ 0x70B , 50 },
-//	{ 0x70D , 50 }
+	{ 0x287 , 10 },
+	{ 0x289 , 10 },
+	{ 0x28B , 10 },
+	{ 0x28D , 10 },
+	{ 0x307 , 10 },
+	{ 0x309 , 10 },
+	{ 0x30B , 10 },
+	{ 0x30D , 10 },
+	{ 0x385 , 10 },
+	{ 0x387 , 10 },
+	{ 0x389 , 10 },
+	{ 0x38B , 10 },
+	{ 0x38D , 10 },
+	{ 0x407 , 10 },
+	{ 0x409 , 10 },
+	{ 0x40B , 10 },
+	{ 0x40D , 10 },
+	{ 0x707 , 50 },
+	{ 0x709 , 50 },
+	{ 0x70B , 50 },
+	{ 0x70D , 50 }
 };
 
 int listSize = sizeof(loggingList)/sizeof(logging_list_t);
 int sequenceSize;
-
+void canTraceConverter(char *filename, FILE *output);
 void CanSequenceMessageCounter(char *filename);
 void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize);
 void orderSequence(void);
@@ -138,7 +138,7 @@ flag_t updateFilter(unsigned int filterPointer){
 				IDfound = TRUE;
 			}
 			else{
-				IDfound = FALSE;
+				IDfound = FALSE; /*** THIS BIT WAS SCREWING UP THE ALGORITHM ***/
 			}
 		}
 
@@ -168,19 +168,24 @@ flag_t updateFilter(unsigned int filterPointer){
 
 
 char *logFormat = "%4u.%06u 1  %3x             Tx%s";
+char *detailedLogFormat = "%4u.%06u 1  %3x             Tx   d %1u %02X %02X %02X %02X %02X %02X %02X %02X";
 
 int main(void){
 	char *CANlogFile = "Logs/Log_for_analysis2.asc";
 	int i;
 
-	FILE *outputFile = fopen("output.txt", "w");
+	FILE *outputFile = fopen("newOutput.txt", "w");
+//	canTraceConverter(CANlogFile, outputFile);
 
+
+//
 	FILE *logFile = fopen("CAN_Logging_new.txt", "w");
+
 
 	noIDs = 0;
 	buildSequence();
 	CanSequenceMessageCounter(CANlogFile);
-//	orderSequence();
+	orderSequence();
 
 	sequenceSize = countSequence();
 	printf("\n\n\n");
@@ -202,13 +207,12 @@ int main(void){
 
 
 
-
 void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize){
 	char inputStr[200];
 	char canData[200];
 	int i = 0, IDLogCount = 0, IDMissedCount = 0;
 	flag_t IDlogged = FALSE;
-	unsigned long timeNow_s ,timeNow_us, timeOrigin;
+	unsigned long timeNow_s ,timeNow_us, timeOrigin, lineCounter=0;
 
 	int ID;
 
@@ -228,11 +232,11 @@ void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize
 
 	timeOrigin = 0;
 
-	while(fgets(inputStr, 190, bufferFile) != NULL)	{
-
+	while((fgets(inputStr, 190, bufferFile) != NULL) && ((lineCounter < MAX_TRACE_LINES) || (MAX_TRACE_LINES == 0))){
 		/* Extract values from input string */
 		unsigned int scanReturn = sscanf(inputStr, logFormat, &timeNow_s, &timeNow_us, &ID, &canData);
 		if(scanReturn == 4)	{ /* valid line in trace */
+			lineCounter++;
 
 			timeNow_us += (timeNow_s * 1000000);
 
@@ -294,12 +298,12 @@ void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize
 
 	printf("filterSize: %u   Logged: %u    Missed %u\n", filterSize, IDLogCount, IDMissedCount);
 
-//		for(i = 0; i < BUFFERSIZE; i++){
-//			if(loggingSequence[i].canID != 0){
-//				fprintf(log,",,0x%03X,%lu,%lu,%lu\n",loggingSequence[i].canID, loggingSequence[i].loggedCounter, (loggingSequence[i].counter - loggingSequence[i].loggedCounter), loggingSequence[i].counter);
-//			}
-//		}
-//		fprintf(log,"\n");
+		for(i = 0; i < BUFFERSIZE; i++){
+			if(loggingSequence[i].canID != 0){
+				fprintf(log,",,0x%03X,%lu,%lu,%lu\n",loggingSequence[i].canID, loggingSequence[i].loggedCounter, (loggingSequence[i].counter - loggingSequence[i].loggedCounter), loggingSequence[i].counter);
+			}
+		}
+		fprintf(log,"\n");
 
 	for(i = 0; i < BUFFERSIZE; i++){
 		if(loggingSequence[i].canID != 0){
@@ -308,10 +312,70 @@ void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize
 	}
 	printf("\n");
 
-	fprintf(log,",,%u,%u,%u\n", filterSize, IDLogCount, IDMissedCount);
+//	fprintf(log,",,%u,%u,%u\n", filterSize, IDLogCount, IDMissedCount);
 
 }
 
+void canTraceConverter(char *filename, FILE *output){
+	char inputStr[200];
+	unsigned int canData[8];
+
+	unsigned int i = 0, DLC, j;
+	flag_t IDfound = FALSE;
+	unsigned long timeNow_s ,timeNow_us, timeNow_ms, timeNow_ms_dec, lineCounter;
+
+	unsigned int ID;
+	printf("Reading CAN log...\r\n");
+
+	/* open trace file */
+	FILE *bufferFile = fopen(filename, "r");
+
+	fprintf(output,";$FILEVERSION=1.3\n"																);
+	fprintf(output,";$STARTTIME=41053.504196474\n"														);
+	fprintf(output,";\n"																				);
+	fprintf(output,";   C:\\Users\\SEV01\\Desktop\\BatteryCAN_151.trc\n"									);
+	fprintf(output,";   Start time: 5/24/2012 12:06:02.575.3\n"											);
+	fprintf(output,";-------------------------------------------------------------------------------\n"	);
+	fprintf(output,";   Bus  Name  Connection    Protocol\n"											);
+	fprintf(output,";   1    SEV  SEV@pcan_usb  CAN\n"													);
+	fprintf(output,";-------------------------------------------------------------------------------\n"	);
+	fprintf(output,";   Message Number\n"																);
+	fprintf(output,";   |         Time Offset (ms)\n"													);
+	fprintf(output,";   |         |       Bus\n"														);
+	fprintf(output,";   |         |       |    Type\n"													);
+	fprintf(output,";   |         |       |    |       ID (hex)\n"										);
+	fprintf(output,";   |         |       |    |       |    Reserved\n"									);
+	fprintf(output,";   |         |       |    |       |    |   Data Length Code\n"						);
+	fprintf(output,";   |         |       |    |       |    |   |    Data Bytes (hex) ...\n"			);
+	fprintf(output,";   |         |       |    |       |    |   |    |\n"								);
+	fprintf(output,";   |         |       |    |       |    |   |    |\n"								);
+	fprintf(output,";---+-- ------+------ +- --+-- ----+--- +- -+-- -+ -- -- -- -- -- -- --\n"			);
+
+
+	i=1;
+	while((fgets(inputStr, 190, bufferFile) != NULL) && ((lineCounter++ < MAX_TRACE_LINES) || (MAX_TRACE_LINES == 0))){
+		/* Extract values from input string */
+		unsigned int scanReturn = sscanf(inputStr, detailedLogFormat, &timeNow_s, &timeNow_us, &ID, &DLC, &canData[0], &canData[1], &canData[2], &canData[3], &canData[4], &canData[5], &canData[6], &canData[7]);
+		if(scanReturn >= 4){
+			timeNow_us += (timeNow_s * 1000000);
+			timeNow_ms = timeNow_us/1000;
+			timeNow_ms_dec = timeNow_us%1000;
+
+			fprintf(output,"%6u)%10lu.%03lu 1  Rx        %04X -  %1u    ", i, timeNow_ms, timeNow_ms_dec, ID, DLC);
+
+			for(j=0;j<DLC;j++){
+				fprintf(output,"%02X ",canData[j]);
+			}
+			fprintf(output,"\n");
+
+			printf("%u\n",i);
+			i++;
+		}
+	}
+
+	printf("Finished sequence.\n");
+
+}
 
 void CanSequenceMessageCounter(char *filename)
 {
@@ -361,7 +425,6 @@ void CanSequenceMessageCounter(char *filename)
 		printf("0x%03X: %u\n",loggingSequence[i].canID,loggingSequence[i].counter);
 		i++;
 	}
-
 }
 
 /* Orders sequence by CAN ID */
