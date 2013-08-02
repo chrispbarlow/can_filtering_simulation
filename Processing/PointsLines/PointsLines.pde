@@ -73,7 +73,7 @@ int[][] loggingList = {
 //  {0x707,1,20},
 //  {0x709,1,20},
 //  {0x70B,1,20},
-//  {0x70D,1,20},  
+//  {0x70D,1,20},
   {0x707,1,100},
   {0x709,1,100},
   {0x70B,1,100},
@@ -279,9 +279,9 @@ void transmitLoggingList(){
   }
   else if(txPointer <= loggingList.length){  
     txListPointer =  txPointer-1;
-    
+    loggingList[txListPointer][0] |= 0x8000;
     /* CAN ID high byte */
-    myPort.write((loggingList[txListPointer][0]>>8)&0x07);
+    myPort.write((loggingList[txListPointer][0]>>8)&0x87);
     /* CAN ID low byte */
     myPort.write (loggingList[txListPointer][0]&0xFF);
     /* Message length in bytes */
@@ -476,7 +476,7 @@ void serialEvent(Serial myPort) {
     
    
      println("A"+serialInArray[0]);
-     println("S"+status);  
+     println("S"+status);
   
   }
   catch(Exception e){
