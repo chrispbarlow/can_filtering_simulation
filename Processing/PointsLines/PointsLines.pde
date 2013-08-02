@@ -224,27 +224,25 @@ void draw(){
 
     /* Title and status block */
     fill(0);
-    rect((s-((4*d)+110)), standardSpacingY(54,15), 700, 130, 10);
-
-    fill(255);    
+    rect((s-((4*d)+110)), standardSpacingY(53,15), 760, 150, 10);
+    fill(255);  
     
     switch(status){
     case 0:
       strg = "Offline - Can't see device";
       break;      
     case 1:
-      strg = "Offline - Device waiting: press 'R' to begin.";
+      strg = "Offline - Device waiting\nPress 'R' to begin.";
       break;
     case 2:
-      strg = "Transmitting logging list: ";
-
+      strg = "Transmitting logging list: ";   
       if(txPointer>4){
-        strg += txPointer-3;
-        rect((s-((4*d)+100)), standardSpacingY(62,10), (680/(loggingList.length/(txPointer-4))), 6);
+       strg += txPointer-3; 
+       rect((s-((4*d)+100)), standardSpacingY(61,15), (740/(loggingList.length/(txPointer-4))), 6);
       }
       break;
     case 3:
-      strg = "Online - press 'R' to reset, 'S' to save hit counts, 'C' to save and close.\nTotal hits: ";
+      strg = "Online\nPress 'R' to reset, 'S' to save hit counts, 'C' to save and close, 'X' to exit without saving.\nTotal hits: ";
       strg += countersTotal;
       break;
     case 4:
@@ -254,14 +252,14 @@ void draw(){
     }
     
     textFont(fontBold, 16);
-    text("Dynamic CAN Filter Mapping Visualisation", (s-((4*d)+100)), standardSpacingY(56,6));
+    text("Dynamic CAN Filter Mapping Visualisation", (s-((4*d)+100)), standardSpacingY(55,6));
     textFont(fontBold, 14);
-    text("Chris Barlow, MSc Reliable Embedded Systems 2013, University of Leicester", (s-((4*d)+100)), standardSpacingY(57,8));
+    text("Chris Barlow, MSc Reliable Embedded Systems 2013, University of Leicester", (s-((4*d)+100)), standardSpacingY(56,8));
     textFont(font, 14);
-    text("This application displays the CAN mailbox to logging list mapping.", (s-((4*d)+100)), standardSpacingY(59,6));
-    text("Logging list is sent to the device on connection", (s-((4*d)+100)), standardSpacingY(60,6));
+    text("This application displays the CAN mailbox to logging list mapping.", (s-((4*d)+100)), standardSpacingY(58,6));
+    text("Logging list is sent to the device on connection", (s-((4*d)+100)), standardSpacingY(59,6));
     textFont(fontBold, 14);
-    text("Status: "+strg, (s-((4*d)+100)), standardSpacingY(62,6));
+    text("Status: "+strg, (s-((4*d)+100)), standardSpacingY(61,6));
     
     allRefresh = false;  
     
