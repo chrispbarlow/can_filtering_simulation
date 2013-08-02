@@ -110,6 +110,7 @@ void controlSCI_update(void)
 					IDL = rxbuffer[(4*sequenceNum)+IDL_DATAPOSITION];
 
 					loggingList[sequenceNum].canID = (IDH|IDL);
+					loggingList[sequenceNum].canID &= 0x7FF;
 					loggingList[sequenceNum].canDLC = rxbuffer[(4*sequenceNum)+DLC_DATAPOSITION];
 					loggingList[sequenceNum].cycleTime = rxbuffer[(4*sequenceNum)+CYT_DATAPOSITION];
 				}

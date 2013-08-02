@@ -39,8 +39,92 @@ int[] IDs = new int[64];
 /* logging list transmission progress */
 int txPointer = 0;
 
+
 /* The logging list. This is transmitted to the device for filter configuration */
 int[][] loggingList = {
+//{0x050,8,100},
+//{0x185,8,100},
+//{0x187,8,100},
+//{0x188,8,100},
+//{0x189,8,100},
+//{0x18A,8,100},
+//{0x18B,8,100},
+//{0x18C,8,100},
+//{0x18D,8,100},
+//{0x18E,8,100},
+//{0x190,8,100},
+//{0x192,8,100},
+//{0x205,8,100},
+//{0x207,8,100},
+//{0x209,8,100},
+//{0x20B,8,100},
+//{0x20D,8,100},
+//{0x287,8,100},
+//{0x289,8,100},
+//////{0x28B,8,100},
+//////{0x28D,8,100},
+////{0x307,8,100},
+////{0x309,8,100},
+////{0x30B,8,100},
+////{0x30D,8,100},
+////{0x385,8,100},
+////{0x387,8,100},
+////{0x389,8,100},
+////{0x38B,8,100},
+////{0x38D,8,100},
+//{0x407,8,100},
+//{0x409,8,100},
+//{0x40B,8,100},
+//{0x40D,8,100},
+//{0x487,8,100},
+//{0x489,8,100},
+//{0x48B,8,100},
+//{0x48D,8,100},
+//{0x507,8,100},
+//{0x509,8,100},
+//{0x50B,8,100},
+//{0x50D,8,100},
+//{0x705,8,100},
+//{0x707,8,100},
+//{0x709,8,100},
+//{0x70B,8,100},
+//{0x70D,8,100}
+
+
+
+//  {0x187,8,100},
+//  {0x188,8,100},
+//  {0x189,8,100},
+//  {0x18A,8,100},
+//  {0x18B,8,100},
+//  {0x18C,8,100},
+//  {0x18D,8,100},
+//  {0x18E,8,100},
+//  {0x207,8,100},
+//  {0x209,8,100},
+//  {0x20B,8,100},
+//  {0x20D,8,100},
+//  {0x287,8,100},
+//  {0x289,8,100},
+//  {0x28B,8,100},
+//  {0x28D,8,100},
+//  {0x307,8,100},
+//  {0x309,8,100},
+//  {0x30B,8,100},
+//  {0x30D,8,100},
+//  {0x385,8,100},
+//  {0x387,8,100},
+//  {0x389,8,100},
+//  {0x38B,8,100},
+//  {0x38D,8,100},
+//  {0x407,8,100},
+//  {0x409,8,100},
+//  {0x40B,8,100},
+//  {0x40D,8,100},
+//  {0x707,1,20},
+//  {0x709,1,20},
+//  {0x70B,1,20},
+//  {0x70D,1,20},  
   {0x187,8,20},
   {0x188,8,20},
   {0x189,8,20},
@@ -70,45 +154,12 @@ int[][] loggingList = {
   {0x409,8,20},
   {0x40B,8,20},
   {0x40D,8,20},
-//  {0x707,1,20},
-//  {0x709,1,20},
-//  {0x70B,1,20},
-//  {0x70D,1,20},  
+  {0x38D,8,20},
+  {0x407,8,20},
   {0x707,1,100},
   {0x709,1,100},
   {0x70B,1,100},
   {0x70D,1,100},  
-//  {0x187,8,20},
-//  {0x188,8,20},
-//  {0x189,8,20},
-//  {0x18A,8,20},
-//  {0x18B,8,20},
-//  {0x18C,8,20},
-//  {0x18D,8,20},
-//  {0x18E,8,20},
-//  {0x207,8,20},
-//  {0x209,8,20},
-//  {0x20B,8,20},
-//  {0x20D,8,20},
-//  {0x287,8,20},
-//  {0x289,8,20},
-//  {0x28B,8,20},
-//  {0x28D,8,20},
-//  {0x307,8,20},
-//  {0x309,8,20},
-//  {0x30B,8,20},
-//  {0x30D,8,20},
-//  {0x385,8,20},
-//  {0x387,8,20},
-//  {0x389,8,20},
-//  {0x38B,8,20},
-//  {0x38D,8,20},
-//  {0x407,8,20},
-//  {0x409,8,20},
-//  {0x40B,8,20},
-//  {0x40D,8,20},
-//  {0x38D,8,20},
-//  {0x407,8,20},
 };  
 
 /* counters for counting */
@@ -279,9 +330,9 @@ void transmitLoggingList(){
   }
   else if(txPointer <= loggingList.length){  
     txListPointer =  txPointer-1;
-    
+    loggingList[txListPointer][0] |= 0x8000;
     /* CAN ID high byte */
-    myPort.write((loggingList[txListPointer][0]>>8)&0x07);
+    myPort.write((loggingList[txListPointer][0]>>8)&0x87);
     /* CAN ID low byte */
     myPort.write (loggingList[txListPointer][0]&0xFF);
     /* Message length in bytes */
@@ -336,7 +387,7 @@ void receiveLoggingDetails(){
           /* Data packet contains loggingList information */ 
            
             loggingListPointer = serialInArray[2];
-            println(loggingListPointer);
+//            println(loggingListPointer);
             
             if(loggingListPointer < loggingList.length){
               /* Unpack 32 bit counter */
@@ -380,7 +431,7 @@ void serialEvent(Serial myPort) {
 
     /* read a byte from the serial port: */
     serialInArray[serialCount] = myPort.read();
-    println(serialInArray[serialCount]);
+//    println(serialInArray[serialCount]);
     
     /* Device sends '?' character as a handshake / logging list request */
     if(serialInArray[serialCount] == '?'){
@@ -398,7 +449,7 @@ void serialEvent(Serial myPort) {
         else if(status == 3){
           status = 4;
         }
-        print("HS ");
+//        print("HS ");
       }    
     }
     else{
@@ -475,8 +526,8 @@ void serialEvent(Serial myPort) {
     }
     
    
-     println("A"+serialInArray[0]);
-     println("S"+status);  
+//     println("A"+serialInArray[0]);
+//     println("S"+status);  
   
   }
   catch(Exception e){
