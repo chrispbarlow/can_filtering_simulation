@@ -31,7 +31,7 @@ void receiveCAN_update(void){
 			filterSize_G += 1;
 		}
 
-		for(mailBox=0; mailBox<filterSize_G; mailBox++){
+		for(mailBox=0; mailBox < filterSize_G; mailBox++){
 			updateFilter(mailBox);
 			updateSequenceRequired_G = 0;
 		}
@@ -86,8 +86,6 @@ void updateFilter(unsigned int filterPointer){
 		if((CAN_RxMessages[sequencePointer].timer >= (0-DUPLICATES_ALLOWED))&&(CAN_RxMessages[sequencePointer].timer <= 0)){
 			result = TRUE;
 		}
-
-
 	}
 	while((result == FALSE)&&(sequencePointer != last_sequencePointer));
 
