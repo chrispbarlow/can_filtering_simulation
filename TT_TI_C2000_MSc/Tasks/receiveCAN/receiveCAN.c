@@ -20,19 +20,29 @@ void receiveCAN_init(void){
 }
 
 void receiveCAN_update(void){
-	Uint16 mailBox, messagePointer;
+	static Uint16 mailBox;
+	Uint16 messagePointer;
 	static Uint32 totalcounter = 0;
 
 	if(updateSequenceRequired_G == 1){
+		mailBox = 0;
+		updateSequenceRequired_G = 2;
+	}
 
+	if(updateSequenceRequired_G == 2){
 		filterSize_G = numRxCANMsgs_G/FILTERSIZE_RATIO;
-
 		if((numRxCANMsgs_G%2)!=0){
 			filterSize_G += 1;
 		}
 
-		for(mailBox=0; mailBox < filterSize_G; mailBox++){
+//		for(mailBox=0; mailBox < filterSize_G; mailBox++){
+			printf("%d: %d %d\n",mailBox, CAN_RxMessages[mailBox].timer, CAN_RxMessages[mailBox].timer_reload);
 			updateFilter(mailBox);
+//			printf("%d\n",CAN_RxMessages[mailBox].timer);
+//		}
+
+		mailBox++;
+		if(mailBox == filterSize_G){
 			updateSequenceRequired_G = 0;
 		}
 	}
@@ -83,7 +93,7 @@ void updateFilter(unsigned int filterPointer){
 		}
 
 		/* ID ready to be inserted */
-		if((CAN_RxMessages[sequencePointer].timer >= (0-DUPLICATES_ALLOWED))&&(CAN_RxMessages[sequencePointer].timer <= 0)){
+		if((CAN_RxMessages[sequencePointer].timer >= (0-DUPLICATES_ALLOWED))&&(CAN_RxMessages[sequencePointer].timer < 0)){
 			result = TRUE;
 		}
 	}
