@@ -15,7 +15,7 @@ char updateSequenceRequired_G = 0;
  * Assigns messages to mailbox position (array index + CAN_RX_MBOFFSET)
  * *****************************************************************************/
 
-canRxMessage_t CAN_RxMessages[64];
+canRxMessage_t CAN_RxMessages_G[64];
 
 Uint16 numRxCANMsgs_G = 0;
 Uint16 filterSize_G = 0;

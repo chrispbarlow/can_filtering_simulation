@@ -13,6 +13,7 @@
 
 void receiveCAN_init(void);
 void receiveCAN_update(void);
-void updateFilter(unsigned int filterPointer);
+int16 getNextSequencePointer(void);
+void updateFilter(Uint16 filterPointer, int16 sequencePointer);
 
 #endif /* REVCEIVECAN_H_ */

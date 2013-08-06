@@ -150,7 +150,7 @@ void controlSCI_update(void)
 			for(i=0;i<filterSize_G;i++){
 				j = mailBoxFilters[i].messagePointer;
 				filtermap[i].mp = j;
-				filtermap[i].count = CAN_RxMessages[j].counter;
+				filtermap[i].count = CAN_RxMessages_G[j].counter;
 				filtermap[i].ID = mailBoxFilters[i].canID;
 			}
 
@@ -187,13 +187,13 @@ void controlSCI_update(void)
 					tempCharOut = (j & 0xff);
 					scia_xmit(tempCharOut);
 
-					tempCharOut = ((CAN_RxMessages[j].counter>>24)&0xFF);
+					tempCharOut = ((CAN_RxMessages_G[j].counter>>24)&0xFF);
 					scia_xmit(tempCharOut);
-					tempCharOut = ((CAN_RxMessages[j].counter>>16)&0xFF);
+					tempCharOut = ((CAN_RxMessages_G[j].counter>>16)&0xFF);
 					scia_xmit(tempCharOut);
-					tempCharOut = ((CAN_RxMessages[j].counter>>8)&0xFF);
+					tempCharOut = ((CAN_RxMessages_G[j].counter>>8)&0xFF);
 					scia_xmit(tempCharOut);
-					tempCharOut = ((CAN_RxMessages[j].counter)&0xFF);
+					tempCharOut = ((CAN_RxMessages_G[j].counter)&0xFF);
 					scia_xmit(tempCharOut);
 
 					scia_xmit('~');
@@ -238,13 +238,13 @@ void buildSequence(Uint16 listSize){
  	}
 
  	for(i=0;i<listSize;i++){
-		CAN_RxMessages[i].canID = loggingList[i].canID;
-		CAN_RxMessages[i].canData.rawData[0] = 0;
-		CAN_RxMessages[i].canData.rawData[1] = 0;
-		CAN_RxMessages[i].canDLC = loggingList[i].canDLC;
+		CAN_RxMessages_G[i].canID = loggingList[i].canID;
+		CAN_RxMessages_G[i].canData.rawData[0] = 0;
+		CAN_RxMessages_G[i].canData.rawData[1] = 0;
+		CAN_RxMessages_G[i].canDLC = loggingList[i].canDLC;
 		/* timer_reload set proportionally to weight the filter in favour of more frequent IDs */
-		CAN_RxMessages[i].timer_reload = loggingList[i].cycleTime/cycleTime_min;
-		CAN_RxMessages[i].timer = 0;
-		CAN_RxMessages[i].counter = 0;
+		CAN_RxMessages_G[i].timer_reload = loggingList[i].cycleTime/cycleTime_min;
+		CAN_RxMessages_G[i].timer = 1;
+		CAN_RxMessages_G[i].counter = 0;
  	}
  }

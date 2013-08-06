@@ -85,7 +85,7 @@ typedef struct {
 	Uint32 counter;
 } canRxMessage_t;
 
-extern canRxMessage_t CAN_RxMessages[];
+extern canRxMessage_t CAN_RxMessages_G[];
 
 typedef struct{
 	Uint32 canID;
