@@ -119,7 +119,7 @@ void controlSCI_update(void)
 				buildSequence(numRxCANMsgs_G);
 
 				/* flag tells receiveCAN to update the logging sequence */
-				updateSequenceRequired_G = 1;
+				updateSequenceRequired_G = RESET;
 
 				SCIstate = SEND;
 			}

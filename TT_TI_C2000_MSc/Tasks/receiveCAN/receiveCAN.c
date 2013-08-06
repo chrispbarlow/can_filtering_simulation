@@ -25,11 +25,11 @@ void receiveCAN_update(void){
 	int16 newSequencePointer;
 	static Uint32 totalcounter = 0;
 
-	if(updateSequenceRequired_G == 1){
+	if(updateSequenceRequired_G == RESET){
 		mailBox = 0;
-		updateSequenceRequired_G = 2;
+		updateSequenceRequired_G = UPDATE;
 	}
-	else if(updateSequenceRequired_G == 2){
+	else if(updateSequenceRequired_G == UPDATE){
 		filterSize_G = numRxCANMsgs_G/FILTERSIZE_RATIO;
 		if((numRxCANMsgs_G%2)!=0){
 			filterSize_G += 1;
@@ -42,7 +42,7 @@ void receiveCAN_update(void){
 		mailBox++;
 		if(mailBox == filterSize_G){
 			getNextSequencePointer(); /* Calling here re-initialises the sequencePointer */
-			updateSequenceRequired_G = 0;
+			updateSequenceRequired_G = RUN;
 		}
 	}
 	else{

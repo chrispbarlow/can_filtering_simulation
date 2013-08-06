@@ -11,7 +11,8 @@
 
 #include <DSP2833x_Device.h>
 
-extern char updateSequenceRequired_G;
+typedef enum{RUN,RESET,UPDATE} updateFlags_t;
+extern updateFlags_t updateSequenceRequired_G;
 
 
 /******************************************
