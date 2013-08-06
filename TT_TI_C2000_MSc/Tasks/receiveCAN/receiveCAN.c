@@ -41,6 +41,7 @@ void receiveCAN_update(void){
 
 		mailBox++;
 		if(mailBox == filterSize_G){
+			getNextSequencePointer(); /* Calling here re-initialises the sequencePointer */
 			updateSequenceRequired_G = 0;
 		}
 	}
@@ -74,38 +75,40 @@ int16 getNextSequencePointer(void){
 	boolean_t result = FALSE;
 
 	if(updateSequenceRequired_G > 0){
-		sequencePointer = filterSize_G;
+		sequencePointer = (filterSize_G - 1);
 	}
-	/* Find next required CAN ID in sequence */
-	last_sequencePointer = sequencePointer;
-	do{
-		/* Wrap search */
-		if(sequencePointer<(numRxCANMsgs_G-1)){
-			sequencePointer++;
-		}
-		else{
-			sequencePointer=0;
-		}
+	else{
+		/* Find next required CAN ID in sequence */
+		last_sequencePointer = sequencePointer;
+		do{
+			/* Wrap search */
+			if(sequencePointer<(numRxCANMsgs_G-1)){
+				sequencePointer++;
+			}
+			else{
+				sequencePointer=0;
+			}
 
-		/* ID not already in mailbox, decrement 'schedule' timer (timer set to -1 whilst ID is in mailbox) */
-		if(CAN_RxMessages_G[sequencePointer].timer > (0-DUPLICATES_ALLOWED)){
+			/* ID not already in mailbox, decrement 'schedule' timer (timer set to -1 whilst ID is in mailbox) */
+			if(CAN_RxMessages_G[sequencePointer].timer > (0-DUPLICATES_ALLOWED)){
 
-			CAN_RxMessages_G[sequencePointer].timer--;
+				CAN_RxMessages_G[sequencePointer].timer--;
 
-			/* ID ready to be inserted */
-			if(CAN_RxMessages_G[sequencePointer].timer <= 0){
-				result = TRUE;
+				/* ID ready to be inserted */
+				if(CAN_RxMessages_G[sequencePointer].timer <= 0){
+					result = TRUE;
+				}
+				else{
+					result = FALSE;
+				}
+
 			}
 			else{
 				result = FALSE;
 			}
-
 		}
-		else{
-			result = FALSE;
-		}
+		while((result == FALSE)&&(sequencePointer != last_sequencePointer));
 	}
-	while((result == FALSE)&&(sequencePointer != last_sequencePointer));
 
 	return sequencePointer;
 }

@@ -1,7 +1,7 @@
 ******************************************************************************
              TMS320C2000 Linker PC v6.1.0                      
 ******************************************************************************
->> Linked Tue Aug 06 10:23:17 2013
+>> Linked Tue Aug 06 12:55:30 2013
 
 OUTPUT FILE NAME:   <Example_2833xCpuTimer.out>
 ENTRY POINT SYMBOL: "code_start"  address: 0033fff6
@@ -25,7 +25,7 @@ PAGE 0:
   FLASHE                00318000   00008000  00000000  00008000  RWIX
   FLASHD                00320000   00008000  0000001f  00007fe1  RWIX
   FLASHC                00328000   00008000  00000000  00008000  RWIX
-  FLASHA                00338000   00007f80  00003259  00004d27  RWIX
+  FLASHA                00338000   00007f80  0000325d  00004d23  RWIX
   CSM_RSVD              0033ff80   00000076  00000000  00000076  RWIX
   BEGIN                 0033fff6   00000002  00000002  00000000  RWIX
   CSM_PWL               0033fff8   00000008  00000000  00000008  RWIX
@@ -111,7 +111,7 @@ ramfuncs   0    00320000    0000001f     RUN ADDR = 00008000
                   00320000    0000001b     DSP2833x_SysCtrl.obj (ramfuncs)
                   0032001b    00000004     DSP2833x_usDelay.obj (ramfuncs)
 
-.text      0    00338000    00002c39     
+.text      0    00338000    00002c3d     
                   00338000    00000911     rts2800_fpu32.lib : _printfi.obj (.text)
                   00338911    0000057b     CAN.obj (.text)
                   00338e8c    00000316     DSP2833x_DefaultIsr.obj (.text:retain)
@@ -121,97 +121,97 @@ ramfuncs   0    00320000    0000001f     RUN ADDR = 00008000
                   00339840    000001d4                       : memory.obj (.text)
                   00339a14    000001ac     ADC.obj (.text)
                   00339bc0    00000132     DSP2833x_ECan.obj (.text)
-                  00339cf2    00000125     receiveCAN.obj (.text)
-                  00339e17    00000107     rts2800_fpu32.lib : ll_div.obj (.text)
-                  00339f1e    00000101                       : fopen.obj (.text)
-                  0033a01f    000000f3     DSP2833x_SysCtrl.obj (.text)
-                  0033a112    000000af     rts2800_fpu32.lib : fputs.obj (.text)
-                  0033a1c1    000000ab     scheduler.obj (.text)
-                  0033a26c    0000009c     rts2800_fpu32.lib : fd_add.obj (.text)
-                  0033a308    0000009a     sendCAN.obj (.text)
-                  0033a3a2    0000008b     rts2800_fpu32.lib : fd_div.obj (.text)
-                  0033a42d    00000001     --HOLE-- [fill = 0]
-                  0033a42e    00000086                       : ankmsg.obj (.text)
-                  0033a4b4    00000083                       : fd_mpy.obj (.text)
-                  0033a537    00000076                       : setvbuf.obj (.text)
-                  0033a5ad    00000074     DSP2833x_CpuTimers.obj (.text)
-                  0033a621    00000067     SCI.obj (.text)
-                  0033a688    00000065     rts2800_fpu32.lib : _io_perm.obj (.text)
-                  0033a6ed    00000060                       : fflush.obj (.text)
-                  0033a74d    00000056     TT_Main.obj (.text)
-                  0033a7a3    00000054     rts2800_fpu32.lib : fputc.obj (.text)
-                  0033a7f7    0000004f                       : fclose.obj (.text)
-                  0033a846    00000048     DSP2833x_Sci.obj (.text)
-                  0033a88e    00000046     rts2800_fpu32.lib : boot.obj (.text)
-                  0033a8d4    0000003d                       : fseek.obj (.text)
-                  0033a911    00000032                       : printf.obj (.text)
-                  0033a943    00000031                       : atoi.obj (.text)
-                  0033a974    00000030     TT_Main.obj (.text:retain)
-                  0033a9a4    0000002c     rts2800_fpu32.lib : ltoa.obj (.text)
-                  0033a9d0    0000002a                       : fd_cmp.obj (.text)
-                  0033a9fa    0000002a                       : l_div.obj (.text)
-                  0033aa24    00000028     DSP2833x_PieCtrl.obj (.text)
-                  0033aa4c    00000021     rts2800_fpu32.lib : fd_toi.obj (.text)
-                  0033aa6d    00000021                       : memcpy_ff.obj (.text)
-                  0033aa8e    00000020     DSP2833x_PieVect.obj (.text)
-                  0033aaae    0000001f     rts2800_fpu32.lib : fd_tol.obj (.text)
-                  0033aacd    0000001f                       : strncpy.obj (.text)
-                  0033aaec    0000001e                       : ll_cmp.obj (.text)
-                  0033ab0a    0000001c                       : fs_tofd.obj (.text)
-                  0033ab26    0000001c                       : l_tofd.obj (.text)
-                  0033ab42    00000019                       : args_main.obj (.text)
-                  0033ab5b    00000019                       : exit.obj (.text)
-                  0033ab74    00000014     DSP2833x_Adc.obj (.text)
-                  0033ab88    00000014     rts2800_fpu32.lib : ll_mpy.obj (.text)
-                  0033ab9c    00000012                       : memccpy.obj (.text)
-                  0033abae    0000000f     handleCAN.obj (.text)
-                  0033abbd    0000000e     rts2800_fpu32.lib : fd_sub.obj (.text)
-                  0033abcb    0000000d                       : memchr.obj (.text)
-                  0033abd8    0000000c                       : strchr.obj (.text)
-                  0033abe4    0000000b                       : u_div.obj (.text)
-                  0033abef    0000000a                       : strcmp.obj (.text)
-                  0033abf9    0000000a                       : strlen.obj (.text)
-                  0033ac03    00000009                       : _lock.obj (.text)
-                  0033ac0c    00000009                       : fd_neg.obj (.text)
-                  0033ac15    00000009                       : strcpy.obj (.text)
-                  0033ac1e    00000008     DSP2833x_CodeStartBranch.obj (.text)
-                  0033ac26    00000007     rts2800_fpu32.lib : memset.obj (.text)
-                  0033ac2d    00000007     schedulerConfig.obj (.text)
-                  0033ac34    00000003     rts2800_fpu32.lib : remove.obj (.text)
-                  0033ac37    00000002     newTask.obj (.text)
+                  00339cf2    00000129     receiveCAN.obj (.text)
+                  00339e1b    00000107     rts2800_fpu32.lib : ll_div.obj (.text)
+                  00339f22    00000101                       : fopen.obj (.text)
+                  0033a023    000000f3     DSP2833x_SysCtrl.obj (.text)
+                  0033a116    000000af     rts2800_fpu32.lib : fputs.obj (.text)
+                  0033a1c5    000000ab     scheduler.obj (.text)
+                  0033a270    0000009c     rts2800_fpu32.lib : fd_add.obj (.text)
+                  0033a30c    0000009a     sendCAN.obj (.text)
+                  0033a3a6    0000008b     rts2800_fpu32.lib : fd_div.obj (.text)
+                  0033a431    00000001     --HOLE-- [fill = 0]
+                  0033a432    00000086                       : ankmsg.obj (.text)
+                  0033a4b8    00000083                       : fd_mpy.obj (.text)
+                  0033a53b    00000076                       : setvbuf.obj (.text)
+                  0033a5b1    00000074     DSP2833x_CpuTimers.obj (.text)
+                  0033a625    00000067     SCI.obj (.text)
+                  0033a68c    00000065     rts2800_fpu32.lib : _io_perm.obj (.text)
+                  0033a6f1    00000060                       : fflush.obj (.text)
+                  0033a751    00000056     TT_Main.obj (.text)
+                  0033a7a7    00000054     rts2800_fpu32.lib : fputc.obj (.text)
+                  0033a7fb    0000004f                       : fclose.obj (.text)
+                  0033a84a    00000048     DSP2833x_Sci.obj (.text)
+                  0033a892    00000046     rts2800_fpu32.lib : boot.obj (.text)
+                  0033a8d8    0000003d                       : fseek.obj (.text)
+                  0033a915    00000032                       : printf.obj (.text)
+                  0033a947    00000031                       : atoi.obj (.text)
+                  0033a978    00000030     TT_Main.obj (.text:retain)
+                  0033a9a8    0000002c     rts2800_fpu32.lib : ltoa.obj (.text)
+                  0033a9d4    0000002a                       : fd_cmp.obj (.text)
+                  0033a9fe    0000002a                       : l_div.obj (.text)
+                  0033aa28    00000028     DSP2833x_PieCtrl.obj (.text)
+                  0033aa50    00000021     rts2800_fpu32.lib : fd_toi.obj (.text)
+                  0033aa71    00000021                       : memcpy_ff.obj (.text)
+                  0033aa92    00000020     DSP2833x_PieVect.obj (.text)
+                  0033aab2    0000001f     rts2800_fpu32.lib : fd_tol.obj (.text)
+                  0033aad1    0000001f                       : strncpy.obj (.text)
+                  0033aaf0    0000001e                       : ll_cmp.obj (.text)
+                  0033ab0e    0000001c                       : fs_tofd.obj (.text)
+                  0033ab2a    0000001c                       : l_tofd.obj (.text)
+                  0033ab46    00000019                       : args_main.obj (.text)
+                  0033ab5f    00000019                       : exit.obj (.text)
+                  0033ab78    00000014     DSP2833x_Adc.obj (.text)
+                  0033ab8c    00000014     rts2800_fpu32.lib : ll_mpy.obj (.text)
+                  0033aba0    00000012                       : memccpy.obj (.text)
+                  0033abb2    0000000f     handleCAN.obj (.text)
+                  0033abc1    0000000e     rts2800_fpu32.lib : fd_sub.obj (.text)
+                  0033abcf    0000000d                       : memchr.obj (.text)
+                  0033abdc    0000000c                       : strchr.obj (.text)
+                  0033abe8    0000000b                       : u_div.obj (.text)
+                  0033abf3    0000000a                       : strcmp.obj (.text)
+                  0033abfd    0000000a                       : strlen.obj (.text)
+                  0033ac07    00000009                       : _lock.obj (.text)
+                  0033ac10    00000009                       : fd_neg.obj (.text)
+                  0033ac19    00000009                       : strcpy.obj (.text)
+                  0033ac22    00000008     DSP2833x_CodeStartBranch.obj (.text)
+                  0033ac2a    00000007     rts2800_fpu32.lib : memset.obj (.text)
+                  0033ac31    00000007     schedulerConfig.obj (.text)
+                  0033ac38    00000003     rts2800_fpu32.lib : remove.obj (.text)
+                  0033ac3b    00000002     newTask.obj (.text)
 
-.cinit     0    0033ac39    000003ae     
-                  0033ac39    0000028c     CAN.obj (.cinit)
-                  0033aec5    0000004b     ADC.obj (.cinit)
-                  0033af10    0000002d     rts2800_fpu32.lib : lowlev.obj (.cinit)
-                  0033af3d    0000002a                       : defs.obj (.cinit)
-                  0033af67    00000019     CAN_Tx_global.obj (.cinit)
-                  0033af80    00000014     controlSCI.obj (.cinit)
-                  0033af94    00000014     schedulerConfig.obj (.cinit)
-                  0033afa8    0000000c     CAN_Rx_global.obj (.cinit)
-                  0033afb4    0000000a     rts2800_fpu32.lib : _lock.obj (.cinit)
-                  0033afbe    0000000a                       : exit.obj (.cinit)
-                  0033afc8    00000009     receiveCAN.obj (.cinit)
-                  0033afd1    00000008     scheduler.obj (.cinit)
-                  0033afd9    00000004     SCI.obj (.cinit)
-                  0033afdd    00000004     rts2800_fpu32.lib : fopen.obj (.cinit)
-                  0033afe1    00000004                       : memory.obj (.cinit)
-                  0033afe5    00000002     --HOLE-- [fill = 0]
+.cinit     0    0033ac3d    000003ae     
+                  0033ac3d    0000028c     CAN.obj (.cinit)
+                  0033aec9    0000004b     ADC.obj (.cinit)
+                  0033af14    0000002d     rts2800_fpu32.lib : lowlev.obj (.cinit)
+                  0033af41    0000002a                       : defs.obj (.cinit)
+                  0033af6b    00000019     CAN_Tx_global.obj (.cinit)
+                  0033af84    00000014     controlSCI.obj (.cinit)
+                  0033af98    00000014     schedulerConfig.obj (.cinit)
+                  0033afac    0000000c     CAN_Rx_global.obj (.cinit)
+                  0033afb8    0000000a     rts2800_fpu32.lib : _lock.obj (.cinit)
+                  0033afc2    0000000a                       : exit.obj (.cinit)
+                  0033afcc    00000009     receiveCAN.obj (.cinit)
+                  0033afd5    00000008     scheduler.obj (.cinit)
+                  0033afdd    00000004     SCI.obj (.cinit)
+                  0033afe1    00000004     rts2800_fpu32.lib : fopen.obj (.cinit)
+                  0033afe5    00000004                       : memory.obj (.cinit)
+                  0033afe9    00000002     --HOLE-- [fill = 0]
 
-.econst    0    0033afe8    00000252     
-                  0033afe8    00000101     rts2800_fpu32.lib : ctype.obj (.econst:__ctypes_)
-                  0033b0e9    00000001     CAN_Tx_global.obj (.econst)
-                  0033b0ea    00000100     DSP2833x_PieVect.obj (.econst)
-                  0033b1ea    00000024     rts2800_fpu32.lib : _printfi.obj (.econst:.string)
-                  0033b20e    00000018                       : _printfi.obj (.econst)
-                  0033b226    0000000b     receiveCAN.obj (.econst:.string)
-                  0033b231    00000001     schedulerConfig.obj (.econst)
-                  0033b232    00000004     CAN.obj (.econst:_$P$T0$1)
-                  0033b236    00000002     rts2800_fpu32.lib : fputs.obj (.econst:.string)
-                  0033b238    00000002     CAN.obj (.econst)
+.econst    0    0033afec    00000252     
+                  0033afec    00000101     rts2800_fpu32.lib : ctype.obj (.econst:__ctypes_)
+                  0033b0ed    00000001     CAN_Tx_global.obj (.econst)
+                  0033b0ee    00000100     DSP2833x_PieVect.obj (.econst)
+                  0033b1ee    00000024     rts2800_fpu32.lib : _printfi.obj (.econst:.string)
+                  0033b212    00000018                       : _printfi.obj (.econst)
+                  0033b22a    0000000b     receiveCAN.obj (.econst:.string)
+                  0033b235    00000001     schedulerConfig.obj (.econst)
+                  0033b236    00000004     CAN.obj (.econst:_$P$T0$1)
+                  0033b23a    00000002     rts2800_fpu32.lib : fputs.obj (.econst:.string)
+                  0033b23c    00000002     CAN.obj (.econst)
 
-.switch    0    0033b23a    00000020     
-                  0033b23a    00000020     ADC.obj (.switch:_ADC_ConfigurePort)
+.switch    0    0033b23e    00000020     
+                  0033b23e    00000020     ADC.obj (.switch:_ADC_ConfigurePort)
 
 codestart 
 *          0    0033fff6    00000002     
@@ -464,31 +464,31 @@ GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name
 address    name
 --------   ----
 00338000   .text
-0033ab5b   C$$EXIT
-0033a47a   C$$IO$$
-0033a26c   FD$$ADD
-0033a9d0   FD$$CMP
-0033a3a2   FD$$DIV
-0033a4b4   FD$$MPY
-0033ac0c   FD$$NEG
-0033abbd   FD$$SUB
-0033aa4c   FD$$TOI
-0033aaae   FD$$TOL
-0033ab0a   FS$$TOFD
-0033a9fa   L$$DIV
-0033aa09   L$$MOD
-0033ab26   L$$TOFD
-0033aaec   LL$$CMP
-00339e17   LL$$DIV
-00339e53   LL$$MOD
-0033ab88   LL$$MPY
-0033abe4   U$$DIV
-0033abe9   U$$MOD
-0033aa17   UL$$DIV
-0033aa1e   UL$$MOD
-0033aafe   ULL$$CMP
-00339e8d   ULL$$DIV
-00339ebc   ULL$$MOD
+0033ab5f   C$$EXIT
+0033a47e   C$$IO$$
+0033a270   FD$$ADD
+0033a9d4   FD$$CMP
+0033a3a6   FD$$DIV
+0033a4b8   FD$$MPY
+0033ac10   FD$$NEG
+0033abc1   FD$$SUB
+0033aa50   FD$$TOI
+0033aab2   FD$$TOL
+0033ab0e   FS$$TOFD
+0033a9fe   L$$DIV
+0033aa0d   L$$MOD
+0033ab2a   L$$TOFD
+0033aaf0   LL$$CMP
+00339e1b   LL$$DIV
+00339e57   LL$$MOD
+0033ab8c   LL$$MPY
+0033abe8   U$$DIV
+0033abed   U$$MOD
+0033aa1b   UL$$DIV
+0033aa22   UL$$MOD
+0033ab02   ULL$$CMP
+00339e91   ULL$$DIV
+00339ec0   ULL$$MOD
 00338f72   _ADCINT_ISR
 00339b73   _ADC_CheckPortState
 00339a44   _ADC_ConfigurePort
@@ -501,13 +501,13 @@ address    name
 00000b00   _AdcMirror
 00007100   _AdcRegs
 0000cbf6   _CANTimer
-0033a340   _CANTx_clearAll
+0033a344   _CANTx_clearAll
 00338911   _CAN_Init
 0000c7c0   _CAN_Ports
 0000c140   _CAN_RxMessages_G
 00338924   _CAN_Test
 0000ca44   _CAN_TxMessages
-0033a5e6   _ConfigCpuTimer
+0033a5ea   _ConfigCpuTimer
 0000ca6e   _CpuTimer0
 00000c00   _CpuTimer0Regs
 0000ca5e   _CpuTimer1
@@ -516,7 +516,7 @@ address    name
 00000c10   _CpuTimer2Regs
 0033fff8   _CsmPwl
 00000ae0   _CsmRegs
-0033a0e1   _CsmUnlock
+0033a0e5   _CsmUnlock
 00338ea0   _DATALOG_ISR
 00339094   _DINTCH1_ISR
 0033909e   _DINTCH2_ISR
@@ -526,7 +526,7 @@ address    name
 003390c6   _DINTCH6_ISR
 0000801b   _DSP28x_usDelay
 00000880   _DevEmuRegs
-0033a032   _DisableDog
+0033a036   _DisableDog
 00001000   _DmaRegs
 00339120   _ECAN0INTA_ISR
 00339134   _ECAN0INTB_ISR
@@ -577,7 +577,7 @@ address    name
 0033904e   _EQEP2_INT_ISR
 00006b00   _EQep1Regs
 00006b40   _EQep2Regs
-0033aa43   _EnableInterrupts
+0033aa47   _EnableInterrupts
 00000a80   _FlashRegs
 00006f80   _GpioCtrlRegs
 00006fc0   _GpioDataRegs
@@ -598,10 +598,10 @@ address    name
 00338ec8   _ILLEGAL_ISR
 00338e8c   _INT13_ISR
 00338e96   _INT14_ISR
-0033ab74   _InitAdc
+0033ab78   _InitAdc
 00338d82   _InitCanA
 00338e07   _InitCanB
-0033a5ad   _InitCpuTimers
+0033a5b1   _InitCpuTimers
 00339bc0   _InitECan
 00339cc3   _InitECanGpio
 00339bc5   _InitECana
@@ -609,16 +609,16 @@ address    name
 00339c44   _InitECanb
 00339cde   _InitECanbGpio
 00008000   _InitFlash
-0033a086   _InitPeripheralClocks
-0033aa24   _InitPieCtrl
-0033aa8e   _InitPieVectTable
-0033a03a   _InitPll
-0033a846   _InitSci
-0033a847   _InitSciGpio
-0033a84e   _InitSciaGpio
-0033a864   _InitScibGpio
-0033a878   _InitScicGpio
-0033a01f   _InitSysCtrl
+0033a08a   _InitPeripheralClocks
+0033aa28   _InitPieCtrl
+0033aa92   _InitPieVectTable
+0033a03e   _InitPll
+0033a84a   _InitSci
+0033a84b   _InitSciGpio
+0033a852   _InitSciaGpio
+0033a868   _InitScibGpio
+0033a87c   _InitScicGpio
+0033a023   _InitSysCtrl
 00339184   _LUF_ISR
 0033917a   _LVF_ISR
 00339080   _MRINTA_ISR
@@ -632,7 +632,7 @@ address    name
 00380090   _PartIdRegs
 00000ce0   _PieCtrlRegs
 00000d00   _PieVectTable
-0033b0ea   _PieVectTableInit
+0033b0ee   _PieVectTableInit
 00338eaa   _RTOSINT_ISR
 0032001f   _RamfuncsLoadEnd
 00320000   _RamfuncsLoadStart
@@ -650,12 +650,12 @@ address    name
 00007050   _SciaRegs
 00007750   _ScibRegs
 00007770   _ScicRegs
-0033a028   _ServiceDog
+0033a02c   _ServiceDog
 00007040   _SpiaRegs
 00007010   _SysCtrlRegs
 00338f7c   _TINT0_ISR
 0000c76c   _Tasks
-0033ac2d   _Tasks_Init
+0033ac31   _Tasks_Init
 00338f2c   _USER10_ISR
 00338f36   _USER11_ISR
 00338f40   _USER12_ISR
@@ -685,37 +685,37 @@ address    name
 00000001   __TI_args_main
 ffffffff   ___binit__
 ffffffff   ___c_args__
-0033ac39   ___cinit__
-0033ac39   ___etext__
-0033aa6d   ___memcpy_ff
+0033ac3d   ___cinit__
+0033ac3d   ___etext__
+0033aa71   ___memcpy_ff
 ffffffff   ___pinit__
 00338000   ___text__
-0033ab42   __args_main
-00339f96   __cleanup
+0033ab46   __args_main
+00339f9a   __cleanup
 0000cbf0   __cleanup_ptr
-0033a7f7   __closefile
-0033afe8   __ctypes_
-0033a6ed   __doflush
+0033a7fb   __closefile
+0033afec   __ctypes_
+0033a6f1   __doflush
 0000cbf2   __dtors_ptr
 0000ca80   __ft_end
 0000cac0   __ftable
 0000cbee   __lock
-0033ac0b   __nop
+0033ac0f   __nop
 0033880e   __printfi
-0033a6c2   __rd_ok
-0033ac07   __register_lock
-0033ac03   __register_unlock
+0033a6c6   __rd_ok
+0033ac0b   __register_lock
+0033ac07   __register_unlock
 00000400   __stack
 0000d000   __sys_memory
 0000cb40   __tmpnams
 0000cbec   __unlock
-0033a688   __wrt_ok
-0033ab5b   _abort
+0033a68c   __wrt_ok
+0033ab5f   _abort
 0000cd00   _adcPorts
 003395cd   _add_device
-0033a943   _atoi
+0033a947   _atoi
 00339380   _buildSequence
-0033a88e   _c_int00
+0033a892   _c_int00
 003399fa   _calloc
 0000ca46   _canData_Tx_651
 0000ca4a   _canData_Tx_7AB
@@ -729,95 +729,95 @@ ffffffff   ___pinit__
 00338a75   _configureTxMailbox
 003391a2   _controlSCI_init
 003391a9   _controlSCI_update
-0033a765   _cpuInit
-0033a974   _cpu_timer0_isr
-0033ab5d   _exit
-0033a833   _fclose
-0033a71c   _fflush
+0033a769   _cpuInit
+0033a978   _cpu_timer0_isr
+0033ab61   _exit
+0033a837   _fclose
+0033a720   _fflush
 0000c000   _filterSize_G
 0000c540   _filtermap
 0033895e   _findMailbox
-0033a005   _fopen
-0033a7a3   _fputc
-0033a112   _fputs
+0033a009   _fopen
+0033a7a7   _fputc
+0033a116   _fputs
 00339840   _free
 003399da   _free_memory
-00339fb4   _freopen
-0033a8d4   _fseek
+00339fb8   _freopen
+0033a8d8   _fseek
 0033897d   _getCANErrors
 00338d71   _getMailboxID
-00339d87   _getNextSequencePointer
-0033a269   _goIdle
-0033a7a2   _gpioInit
-0033abae   _handleCAN_init
-0033abaf   _handleCAN_update
+00339d89   _getNextSequencePointer
+0033a26d   _goIdle
+0033a7a6   _gpioInit
+0033abb2   _handleCAN_init
+0033abb3   _handleCAN_update
 0000c782   _i
-0033a263   _interruptDisable
-0033a259   _interruptEnable
+0033a267   _interruptDisable
+0033a25d   _interruptEnable
 00338b3e   _loadTxMailbox
 0000c480   _loggingList
 0000c780   _loopcount
 0033956d   _lseek
-0033a9a4   _ltoa
+0033a9a8   _ltoa
 0000c040   _mailBoxFilters
-0033a74d   _main
+0033a751   _main
 003398ab   _malloc
 003399b8   _max_free
-0033ab9c   _memccpy
-0033abcb   _memchr
-0033ac26   _memset
+0033aba0   _memccpy
+0033abcf   _memchr
+0033ac2a   _memset
 00339885   _minit
-0033ac37   _newTask_init
-0033ac38   _newTask_update
+0033ac3b   _newTask_init
+0033ac3c   _newTask_update
 0000c001   _numRxCANMsgs_G
-0033b0e9   _numTxCANMsgs
+0033b0ed   _numTxCANMsgs
 00339517   _open
 0000ccc1   _portState_Master
-0033a917   _printf
-0033a7a3   _putc
-0033a7f2   _putchar
-0033a1af   _puts
+0033a91b   _printf
+0033a7a7   _putc
+0033a7f6   _putchar
+0033a1b3   _puts
 003394c9   _read
 00338bcd   _readRxMailbox
-0033a47e   _readmsg
+0033a482   _readmsg
 00339901   _realloc
 00339cf2   _receiveCAN_init
 00339cf3   _receiveCAN_update
-0033ac34   _remove
+0033ac38   _remove
 003394af   _remove_device
 00339486   _rename
 00339198   _rsvd_ISR
 0000c441   _rxbufferSize
-0033a1c1   _scheduler_Init
-0033a1d6   _scheduler_onTick
-0033a212   _scheduler_taskDispatcher
-0033a680   _scia_fifo_init
-0033a621   _scia_init
-0033a642   _scia_msg
-0033a667   _scia_msgTT
-0033a636   _scia_xmit
-0033a657   _scia_xmitTT
-0033a308   _sendCAN_init
-0033a31d   _sendCAN_update
-0033a537   _setvbuf
-0033abd8   _strchr
-0033abef   _strcmp
-0033ac15   _strcpy
-0033abf9   _strlen
-0033aacd   _strncpy
-0033b231   _tasksInSchedule
+0033a1c5   _scheduler_Init
+0033a1da   _scheduler_onTick
+0033a216   _scheduler_taskDispatcher
+0033a684   _scia_fifo_init
+0033a625   _scia_init
+0033a646   _scia_msg
+0033a66b   _scia_msgTT
+0033a63a   _scia_xmit
+0033a65b   _scia_xmitTT
+0033a30c   _sendCAN_init
+0033a321   _sendCAN_update
+0033a53b   _setvbuf
+0033abdc   _strchr
+0033abf3   _strcmp
+0033ac19   _strcpy
+0033abfd   _strlen
+0033aad1   _strncpy
+0033b235   _tasksInSchedule
 0000c77e   _tickCount_G
-0033a788   _timerStart
+0033a78c   _timerStart
 0033946e   _unlink
-00339dc5   _updateFilter
+00339dc9   _updateFilter
 00338c64   _updateMailboxes
 0000c002   _updateSequenceRequired_G
 003393f4   _write
-0033a42e   _writemsg
+0033a432   _writemsg
 ffffffff   binit
-0033ac39   cinit
+0033ac3d   cinit
 0033fff6   code_start
-0033ac39   etext
+0033ac3d   etext
 ffffffff   pinit
 
 
@@ -1057,121 +1057,121 @@ address    name
 00339cde   _InitECanbGpio
 00339cf2   _receiveCAN_init
 00339cf3   _receiveCAN_update
-00339d87   _getNextSequencePointer
-00339dc5   _updateFilter
-00339e17   LL$$DIV
-00339e53   LL$$MOD
-00339e8d   ULL$$DIV
-00339ebc   ULL$$MOD
-00339f96   __cleanup
-00339fb4   _freopen
-0033a005   _fopen
-0033a01f   _InitSysCtrl
-0033a028   _ServiceDog
-0033a032   _DisableDog
-0033a03a   _InitPll
-0033a086   _InitPeripheralClocks
-0033a0e1   _CsmUnlock
-0033a112   _fputs
-0033a1af   _puts
-0033a1c1   _scheduler_Init
-0033a1d6   _scheduler_onTick
-0033a212   _scheduler_taskDispatcher
-0033a259   _interruptEnable
-0033a263   _interruptDisable
-0033a269   _goIdle
-0033a26c   FD$$ADD
-0033a308   _sendCAN_init
-0033a31d   _sendCAN_update
-0033a340   _CANTx_clearAll
-0033a3a2   FD$$DIV
-0033a42e   _writemsg
-0033a47a   C$$IO$$
-0033a47e   _readmsg
-0033a4b4   FD$$MPY
-0033a537   _setvbuf
-0033a5ad   _InitCpuTimers
-0033a5e6   _ConfigCpuTimer
-0033a621   _scia_init
-0033a636   _scia_xmit
-0033a642   _scia_msg
-0033a657   _scia_xmitTT
-0033a667   _scia_msgTT
-0033a680   _scia_fifo_init
-0033a688   __wrt_ok
-0033a6c2   __rd_ok
-0033a6ed   __doflush
-0033a71c   _fflush
-0033a74d   _main
-0033a765   _cpuInit
-0033a788   _timerStart
-0033a7a2   _gpioInit
-0033a7a3   _fputc
-0033a7a3   _putc
-0033a7f2   _putchar
-0033a7f7   __closefile
-0033a833   _fclose
-0033a846   _InitSci
-0033a847   _InitSciGpio
-0033a84e   _InitSciaGpio
-0033a864   _InitScibGpio
-0033a878   _InitScicGpio
-0033a88e   _c_int00
-0033a8d4   _fseek
-0033a917   _printf
-0033a943   _atoi
-0033a974   _cpu_timer0_isr
-0033a9a4   _ltoa
-0033a9d0   FD$$CMP
-0033a9fa   L$$DIV
-0033aa09   L$$MOD
-0033aa17   UL$$DIV
-0033aa1e   UL$$MOD
-0033aa24   _InitPieCtrl
-0033aa43   _EnableInterrupts
-0033aa4c   FD$$TOI
-0033aa6d   ___memcpy_ff
-0033aa8e   _InitPieVectTable
-0033aaae   FD$$TOL
-0033aacd   _strncpy
-0033aaec   LL$$CMP
-0033aafe   ULL$$CMP
-0033ab0a   FS$$TOFD
-0033ab26   L$$TOFD
-0033ab42   __args_main
-0033ab5b   C$$EXIT
-0033ab5b   _abort
-0033ab5d   _exit
-0033ab74   _InitAdc
-0033ab88   LL$$MPY
-0033ab9c   _memccpy
-0033abae   _handleCAN_init
-0033abaf   _handleCAN_update
-0033abbd   FD$$SUB
-0033abcb   _memchr
-0033abd8   _strchr
-0033abe4   U$$DIV
-0033abe9   U$$MOD
-0033abef   _strcmp
-0033abf9   _strlen
-0033ac03   __register_unlock
-0033ac07   __register_lock
-0033ac0b   __nop
-0033ac0c   FD$$NEG
-0033ac15   _strcpy
-0033ac26   _memset
-0033ac2d   _Tasks_Init
-0033ac34   _remove
-0033ac37   _newTask_init
-0033ac38   _newTask_update
-0033ac39   ___cinit__
-0033ac39   ___etext__
-0033ac39   cinit
-0033ac39   etext
-0033afe8   __ctypes_
-0033b0e9   _numTxCANMsgs
-0033b0ea   _PieVectTableInit
-0033b231   _tasksInSchedule
+00339d89   _getNextSequencePointer
+00339dc9   _updateFilter
+00339e1b   LL$$DIV
+00339e57   LL$$MOD
+00339e91   ULL$$DIV
+00339ec0   ULL$$MOD
+00339f9a   __cleanup
+00339fb8   _freopen
+0033a009   _fopen
+0033a023   _InitSysCtrl
+0033a02c   _ServiceDog
+0033a036   _DisableDog
+0033a03e   _InitPll
+0033a08a   _InitPeripheralClocks
+0033a0e5   _CsmUnlock
+0033a116   _fputs
+0033a1b3   _puts
+0033a1c5   _scheduler_Init
+0033a1da   _scheduler_onTick
+0033a216   _scheduler_taskDispatcher
+0033a25d   _interruptEnable
+0033a267   _interruptDisable
+0033a26d   _goIdle
+0033a270   FD$$ADD
+0033a30c   _sendCAN_init
+0033a321   _sendCAN_update
+0033a344   _CANTx_clearAll
+0033a3a6   FD$$DIV
+0033a432   _writemsg
+0033a47e   C$$IO$$
+0033a482   _readmsg
+0033a4b8   FD$$MPY
+0033a53b   _setvbuf
+0033a5b1   _InitCpuTimers
+0033a5ea   _ConfigCpuTimer
+0033a625   _scia_init
+0033a63a   _scia_xmit
+0033a646   _scia_msg
+0033a65b   _scia_xmitTT
+0033a66b   _scia_msgTT
+0033a684   _scia_fifo_init
+0033a68c   __wrt_ok
+0033a6c6   __rd_ok
+0033a6f1   __doflush
+0033a720   _fflush
+0033a751   _main
+0033a769   _cpuInit
+0033a78c   _timerStart
+0033a7a6   _gpioInit
+0033a7a7   _fputc
+0033a7a7   _putc
+0033a7f6   _putchar
+0033a7fb   __closefile
+0033a837   _fclose
+0033a84a   _InitSci
+0033a84b   _InitSciGpio
+0033a852   _InitSciaGpio
+0033a868   _InitScibGpio
+0033a87c   _InitScicGpio
+0033a892   _c_int00
+0033a8d8   _fseek
+0033a91b   _printf
+0033a947   _atoi
+0033a978   _cpu_timer0_isr
+0033a9a8   _ltoa
+0033a9d4   FD$$CMP
+0033a9fe   L$$DIV
+0033aa0d   L$$MOD
+0033aa1b   UL$$DIV
+0033aa22   UL$$MOD
+0033aa28   _InitPieCtrl
+0033aa47   _EnableInterrupts
+0033aa50   FD$$TOI
+0033aa71   ___memcpy_ff
+0033aa92   _InitPieVectTable
+0033aab2   FD$$TOL
+0033aad1   _strncpy
+0033aaf0   LL$$CMP
+0033ab02   ULL$$CMP
+0033ab0e   FS$$TOFD
+0033ab2a   L$$TOFD
+0033ab46   __args_main
+0033ab5f   C$$EXIT
+0033ab5f   _abort
+0033ab61   _exit
+0033ab78   _InitAdc
+0033ab8c   LL$$MPY
+0033aba0   _memccpy
+0033abb2   _handleCAN_init
+0033abb3   _handleCAN_update
+0033abc1   FD$$SUB
+0033abcf   _memchr
+0033abdc   _strchr
+0033abe8   U$$DIV
+0033abed   U$$MOD
+0033abf3   _strcmp
+0033abfd   _strlen
+0033ac07   __register_unlock
+0033ac0b   __register_lock
+0033ac0f   __nop
+0033ac10   FD$$NEG
+0033ac19   _strcpy
+0033ac2a   _memset
+0033ac31   _Tasks_Init
+0033ac38   _remove
+0033ac3b   _newTask_init
+0033ac3c   _newTask_update
+0033ac3d   ___cinit__
+0033ac3d   ___etext__
+0033ac3d   cinit
+0033ac3d   etext
+0033afec   __ctypes_
+0033b0ed   _numTxCANMsgs
+0033b0ee   _PieVectTableInit
+0033b235   _tasksInSchedule
 0033fff6   code_start
 0033fff8   _CsmPwl
 00380080   _ADC_cal
