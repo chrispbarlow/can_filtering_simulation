@@ -131,7 +131,7 @@ int txPointer = 0;
 
 /* The logging list. This is transmitted to the device for filter configuration */
 int[][] loggingList = {
-  {80,0,20},
+  {80,0,30},
 //  {389,8,20},
 //  {391,8,20},
 //  {392,8,20},
@@ -157,7 +157,7 @@ int[][] loggingList = {
 //  {903,8,20},
 //  {905,8,20},
 //  {907,8,20},
-  {909,8,20},
+  {909,8,31},
   {1031,8,20},
   {1033,8,20},
   {1035,8,20},

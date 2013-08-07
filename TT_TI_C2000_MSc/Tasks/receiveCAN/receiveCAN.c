@@ -25,11 +25,16 @@ void receiveCAN_update(void){
 	int16 newSequencePointer;
 	static Uint32 totalcounter = 0;
 
-	if(updateSequenceRequired_G == RESET){
+
+	switch(updateSequenceRequired_G){
+	/* controlSCI will initiate RESET when new logging list is received */
+	case RESET:
 		mailBox = 0;
 		updateSequenceRequired_G = UPDATE;
-	}
-	else if(updateSequenceRequired_G == UPDATE){
+		break;
+
+	/* Set up mailboxes for initial filter conditions */
+	case UPDATE:
 		filterSize_G = numRxCANMsgs_G/FILTERSIZE_RATIO;
 		if((numRxCANMsgs_G%2)!=0){
 			filterSize_G += 1;
@@ -44,8 +49,10 @@ void receiveCAN_update(void){
 			getNextSequencePointer(); /* Calling here re-initialises the sequencePointer */
 			updateSequenceRequired_G = RUN;
 		}
-	}
-	else{
+		break;
+
+	/* Checking for CAN messages and updating filters - normal running conditions */
+	case RUN:
 		/* look through mailboxes for pending messages */
 		for(mailBox=0; mailBox<filterSize_G; mailBox++){
 			if(checkMailboxState(CANPORT_A, mailBox) == RX_PENDING){
@@ -66,6 +73,12 @@ void receiveCAN_update(void){
 				updateFilter(mailBox, newSequencePointer);
 			}
 		}
+		break;
+
+	/* Do nothing until first RESET */
+	default:
+	case INIT:
+		break;
 	}
 }
 

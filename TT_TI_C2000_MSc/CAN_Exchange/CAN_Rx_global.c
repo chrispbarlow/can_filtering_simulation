@@ -8,7 +8,7 @@
 
 filterShadow_t mailBoxFilters[64];
 
-updateFlags_t updateSequenceRequired_G = RUN;
+updateFlags_t updateSequenceRequired_G = INIT;
 
 /*******************************************************************************
  * CAN Rx Message array
