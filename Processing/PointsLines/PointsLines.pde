@@ -131,7 +131,7 @@ int txPointer = 0;
 
 /* The logging list. This is transmitted to the device for filter configuration */
 int[][] loggingList = {
-//  {80,1,20},
+  {80,0,20},
 //  {389,8,20},
 //  {391,8,20},
 //  {392,8,20},
@@ -157,12 +157,12 @@ int[][] loggingList = {
 //  {903,8,20},
 //  {905,8,20},
 //  {907,8,20},
-//  {909,8,20},
-//  {1031,8,20},
-//  {1033,8,20},
-//  {1035,8,20},
-//  {1037,8,20},
-  {1799,1,100},
+  {909,8,20},
+  {1031,8,20},
+  {1033,8,20},
+  {1035,8,20},
+  {1037,8,20},
+//  {1799,1,100},
 //  {1801,1,100},
 //  {1803,1,100},
 //  {1805,1,100},
@@ -336,7 +336,6 @@ void transmitLoggingList(){
   }
   else if(txPointer <= loggingList.length){  
     txListPointer =  txPointer-1;
-    loggingList[txListPointer][0] |= 0x8000;
     /* CAN ID high byte */
     myPort.write((loggingList[txListPointer][0]>>8)&0x87);
     /* CAN ID low byte */

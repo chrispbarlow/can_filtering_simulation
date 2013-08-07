@@ -313,14 +313,6 @@ int16 readRxMailbox(char port, char mbNum, Uint32 data[]){
 
 	canRegsShadow.CANMD.all = CAN_Ports[port].canRegs->CANMD.all;
 
-	/* Trying to force CANRMP.mbNum to clear */
-//	do{
-//		canRegsShadow.CANRMP.all = CAN_Ports[port].canRegs->CANRMP.all;
-//		messagePending = canRegsShadow.CANRMP.all & (bitSelect_32<<mbNum);
-//
-//		CAN_Ports[port].canRegs->CANRMP.all = messagePending;
-//	}while(messagePending != 0);
-
 	if((canRegsShadow.CANMD.all & (bitSelect_32<<mbNum)) != 0){
 
 		dataLength = CAN_Ports[port].message_Objects[mbNum].mailbox->MSGCTRL.bit.DLC;

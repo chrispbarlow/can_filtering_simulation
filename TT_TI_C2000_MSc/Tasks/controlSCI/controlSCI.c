@@ -78,10 +78,6 @@ void controlSCI_update(void)
     	/* Checks SCI receive flag for new character */
     	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
     		rxbuffer[i] = SciaRegs.SCIRXBUF.all;
-    	}
-
-    	/* safeguard against null characters received mid-packet (happens with terminals) */
-     	if(rxbuffer[i] != 0){
 
      		/* "???" sent by desktop app indicates that a reset is required (someone pressed the 'R' key */
          	if((rxbuffer[i] == '?')&&(rxbuffer[i-1] == '?')&&(rxbuffer[i-2] == '?')){
@@ -126,6 +122,7 @@ void controlSCI_update(void)
 			else if(rxbuffer[0] == '{'){
 				/* data packet reception still in progress */
 				i++;
+
 				/* Reset state if buffer overflows - can happen if data loss occurs */
 				if(i >= (sizeof(rxbuffer)/sizeof(rxbuffer[0]))){
 					SCIstate = WAITING;
@@ -143,7 +140,7 @@ void controlSCI_update(void)
 
      	if(rxbuffer[0] == '?'){
      		SCIstate = WAITING;
-     		rxbuffer[0] = ' ';
+//     		rxbuffer[0] = ' '; /* TODO: don't need this, WAITING clears the buffer anyway */
      	}
      	else{
 			/* Take snapshot of filters (should prevent updates halfway through transmission)*/
