@@ -79,16 +79,15 @@ void controlSCI_update(void)
     	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
     		rxbuffer[i] = SciaRegs.SCIRXBUF.all;
 
-     		/* "???" sent by desktop app indicates that a reset is required (someone pressed the 'R' key */
+     		/* "???" sent by desktop app indicates that a reset is required (someone pressed the 'R' key) */
          	if((rxbuffer[i] == '?')&&(rxbuffer[i-1] == '?')&&(rxbuffer[i-2] == '?')){
          		SCIstate = WAITING;
          	}
 
          	/* *
          	 * Data packet looks like this:
-         	 *                 11111
-         	 * 		 012345678901234
-         	 * 		"{aaAXbbBYccCZ~}" where:
+         	 * 		 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14
+         	 * 		"{ a a A X b b B Y c  c  C  Z  ~  }" where:
          	 *  	aa is two byte CAN ID
          	 * 		A is the CAN data length
          	 *  	X is the CAN message cycle time
@@ -140,7 +139,6 @@ void controlSCI_update(void)
 
      	if(rxbuffer[0] == '?'){
      		SCIstate = WAITING;
-//     		rxbuffer[0] = ' '; /* TODO: don't need this, WAITING clears the buffer anyway */
      	}
      	else{
 			/* Take snapshot of filters (should prevent updates halfway through transmission)*/
@@ -224,7 +222,7 @@ void controlSCI_update(void)
 
 /* Iterates through logging sequence (CAN_Rx_global.c) and updates / resets values */
 void buildSequence(Uint16 listSize){
-	Uint16 i, cycleTime_min;
+	Uint16 i, cycleTime_min, newReload, remainder = 0;
 
 	/* Finds the minimum cycle time in the logging list */
  	cycleTime_min = 0xFFFF;
@@ -239,8 +237,19 @@ void buildSequence(Uint16 listSize){
 		CAN_RxMessages_G[i].canData.rawData[0] = 0;
 		CAN_RxMessages_G[i].canData.rawData[1] = 0;
 		CAN_RxMessages_G[i].canDLC = loggingList[i].canDLC;
+
 		/* timer_reload set proportionally to weight the filter in favour of more frequent IDs */
-		CAN_RxMessages_G[i].timer_reload = loggingList[i].cycleTime/cycleTime_min;
+		newReload = loggingList[i].cycleTime/cycleTime_min;
+		/* Rounding logic */
+		remainder = loggingList[i].cycleTime%cycleTime_min;
+		if((remainder > 0)&&(remainder >= (cycleTime_min/2))){
+			CAN_RxMessages_G[i].timer_reload = (newReload + 1);
+		}
+		else{
+			CAN_RxMessages_G[i].timer_reload = newReload;
+		}
+
+		/* Force all timers to 1 for first iteration - level playing field */
 		CAN_RxMessages_G[i].timer = 1;
 		CAN_RxMessages_G[i].counter = 0;
  	}
