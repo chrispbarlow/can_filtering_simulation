@@ -42,7 +42,7 @@ int[] IDs = new int[64];
 int txPointer = 0;
 
 /* Config */
-int filterSizeTx = 10;
+int filterSizeTx = 15;      /* Set to zero to enable auto-sizing */
 int duplicatesAllowed = 1;
 
 //int[][] loggingList = {

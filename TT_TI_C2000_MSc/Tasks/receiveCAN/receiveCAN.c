@@ -37,6 +37,13 @@ void receiveCAN_update(void){
 	/* Set up mailboxes for initial filter conditions */
 	case UPDATE:
 
+		if(filterSize_G == 0){
+			filterSize_G = numRxCANMsgs_G/FILTERSIZE_RATIO;
+			if((numRxCANMsgs_G%2)!=0){
+				filterSize_G += 1;
+			}
+		}
+
 		/* Direct copy of first filterSize_G IDs in the sequence */
 		updateFilter(mailBox,mailBox);
 		printf("%d: %d %d\n",mailBox, CAN_RxMessages_G[mailBox].timer, CAN_RxMessages_G[mailBox].timer_reload);
