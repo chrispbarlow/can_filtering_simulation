@@ -13,6 +13,7 @@ updateFlags_t updateSequenceRequired_G = INIT;
 
 canRxMessage_t CAN_RxMessages_G[64];
 
+
 Uint16 numRxCANMsgs_G = 0;
 Uint16 filterSize_G = 0;
 

@@ -1,29 +1,26 @@
 /*
- * sendCAN - controls timing and transmission of CAN messages from the CAN_Messages array.
- *
+*   receiveCAN checks the status of mailboxes. When a message is pending, the data is read
+ *  and the dynamic filter mechanism updates the mailbox to the next valid CAN ID
  *  Created on: 11 Feb 2013
  *      Author: chris.barlow
  */
+
 #include "receiveCAN.h"
 #include <stdio.h>
 #include "../../CAN_Exchange/CAN_Rx_global.h"
 #include "../../CAN_Exchange/CAN_Tx_global.h"
 
 #define DUPLICATES_ALLOWED 	(1)
-#define FILTERSIZE_RATIO	(2)
 
 typedef enum{FALSE, TRUE}boolean_t;
 
+/* Init function called once when device boots */
 void receiveCAN_init(void){
-
-	/* mailboxes are configured when first logging list is received from desktop app */
+	/* mailboxes are configured in _update when first logging list is received from desktop app */
+	updateSequenceRequired_G = INIT;
 }
 
-/* receiveCAN checks the status of mailboxes.
- * When a message is pending, the data is read
- * and the dynamic filter mechanism updates the mailbox
- * to the next valid CAN ID
- */
+/* update function called periodically from TT scheduler */
 void receiveCAN_update(void){
 	static Uint16 mailBox;
 	Uint16 messagePointer;

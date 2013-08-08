@@ -1,6 +1,8 @@
 /*
  * controlSCI.c
  *
+ *  Controls the serial data transfer between device and desktop application via the TI SCI port
+ *
  *  Created on: 25 June 2013
  *      Author: chris.barlow
  */
@@ -19,12 +21,14 @@ typedef struct{
 	Uint16 ID;
 	Uint32 count;
 } tempShadow_t;
+tempShadow_t filtermap[64];
 
 typedef struct{
 	Uint16 canID;
 	Uint16 canDLC;
 	Uint16 cycleTime;
 } logging_list_t;
+logging_list_t loggingList[64];
 
 enum {
 	FSC_DATAPOSITION = 1,
@@ -36,10 +40,7 @@ enum {
 };
 
 
-logging_list_t loggingList[64];
-
-tempShadow_t filtermap[64];
-
+/* Init function called once when device boots */
 void controlSCI_init(void)
 {
 	/* This TI function is found in the DSP2833x_Sci.c file. */
@@ -48,6 +49,7 @@ void controlSCI_init(void)
 	scia_init();  			/* Initalize SCI for echoback */
 }
 
+/* update function called periodically from TT scheduler */
 void controlSCI_update(void)
 {
 	static SCIstate_t SCIstate = WAITING;
@@ -102,6 +104,14 @@ void controlSCI_update(void)
 				/* In above eg, i = 16 at end of packet, numRxCANMsgs_G = 3 */
 				numRxCANMsgs_G = (i-4)/4;
 
+				/* Safeguard against mailbox overload */
+				if(rxbuffer[FSC_DATAPOSITION] <= 32){
+					filterSize_G = rxbuffer[FSC_DATAPOSITION];
+				}
+				else{
+					filterSize_G = 32;
+				}
+
 				/* Unpackaging logging list info from data packet */
 				for(sequenceNum=0;sequenceNum<numRxCANMsgs_G;sequenceNum++){
 					IDH = rxbuffer[(4*sequenceNum)+IDH_DATAPOSITION];
@@ -116,8 +126,6 @@ void controlSCI_update(void)
 
 				/* Initialise sequence */
 				buildSequence(numRxCANMsgs_G);
-
-				filterSize_G = rxbuffer[FSC_DATAPOSITION];
 
 				/* flag tells receiveCAN to update the logging sequence */
 				updateSequenceRequired_G = RESET;
@@ -222,7 +230,6 @@ void controlSCI_update(void)
 
     /* ? symbol acts as a handshake request with the desktop app */
 	scia_xmit('?');
-
 
 }
 
