@@ -11,6 +11,7 @@
 #include "../../CAN_Exchange/CAN_Tx_global.h"
 
 #define DUPLICATES_ALLOWED 	(1)
+#define FILTERSIZE_RATIO	(2)
 
 typedef enum{FALSE, TRUE}boolean_t;
 
@@ -31,18 +32,17 @@ void receiveCAN_update(void){
 	/* controlSCI will initiate RESET when new logging list is received */
 	case RESET:
 		mailBox = 0;
-		updateSequenceRequired_G = UPDATE;
-		break;
-
-	/* Set up mailboxes for initial filter conditions */
-	case UPDATE:
-
 		if(filterSize_G == 0){
 			filterSize_G = numRxCANMsgs_G/FILTERSIZE_RATIO;
 			if((numRxCANMsgs_G%2)!=0){
 				filterSize_G += 1;
 			}
 		}
+		updateSequenceRequired_G = UPDATE;
+		break;
+
+	/* Set up mailboxes for initial filter conditions */
+	case UPDATE:
 
 		/* Direct copy of first filterSize_G IDs in the sequence */
 		updateFilter(mailBox,mailBox);
