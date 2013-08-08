@@ -27,10 +27,12 @@ typedef struct{
 } logging_list_t;
 
 enum {
-	IDH_DATAPOSITION = 1,
-	IDL_DATAPOSITION = 2,
-	DLC_DATAPOSITION = 3,
-	CYT_DATAPOSITION = 4
+	FSC_DATAPOSITION = 1,
+	DUP_DATAPOSITION = 2,
+	IDH_DATAPOSITION = 3,
+	IDL_DATAPOSITION = 4,
+	DLC_DATAPOSITION = 5,
+	CYT_DATAPOSITION = 6
 };
 
 
@@ -86,8 +88,10 @@ void controlSCI_update(void)
 
          	/* *
          	 * Data packet looks like this:
-         	 * 		 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14
-         	 * 		"{ a a A X b b B Y c  c  C  Z  ~  }" where:
+         	 * 		 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+         	 * 		"{ f d a a A X b b B  Y  c  c  C  Z  ~  }" where:
+         	 * 		f is the filter size control constant
+         	 * 		d is the duplication control constant
          	 *  	aa is two byte CAN ID
          	 * 		A is the CAN data length
          	 *  	X is the CAN message cycle time
@@ -95,8 +99,8 @@ void controlSCI_update(void)
          	 * */
 			if((i>0)&&(rxbuffer[i-1] == '~')&&(rxbuffer[i] == '}')){
 
-				/* In above eg, i = 14 at end of packet, numRxCANMsgs_G = 3 */
-				numRxCANMsgs_G = (i-2)/4;
+				/* In above eg, i = 16 at end of packet, numRxCANMsgs_G = 3 */
+				numRxCANMsgs_G = (i-4)/4;
 
 				/* Unpackaging logging list info from data packet */
 				for(sequenceNum=0;sequenceNum<numRxCANMsgs_G;sequenceNum++){
@@ -112,6 +116,8 @@ void controlSCI_update(void)
 
 				/* Initialise sequence */
 				buildSequence(numRxCANMsgs_G);
+
+				filterSize_G = rxbuffer[FSC_DATAPOSITION];
 
 				/* flag tells receiveCAN to update the logging sequence */
 				updateSequenceRequired_G = RESET;
@@ -143,10 +149,10 @@ void controlSCI_update(void)
      	else{
 			/* Take snapshot of filters (should prevent updates halfway through transmission)*/
 			for(i=0;i<filterSize_G;i++){
-				j = mailBoxFilters[i].messagePointer;
+				j = mailBoxFilters_G[i].messagePointer;
 				filtermap[i].mp = j;
 				filtermap[i].count = CAN_RxMessages_G[j].counter;
-				filtermap[i].ID = mailBoxFilters[i].canID;
+				filtermap[i].ID = mailBoxFilters_G[i].canID;
 			}
 
 			/* Transmit mailbox data */

@@ -19,13 +19,17 @@ void receiveCAN_init(void){
 	/* mailboxes are configured when first logging list is received from desktop app */
 }
 
+/* receiveCAN checks the status of mailboxes.
+ * When a message is pending, the data is read
+ * and the dynamic filter mechanism updates the mailbox
+ * to the next valid CAN ID
+ */
 void receiveCAN_update(void){
 	static Uint16 mailBox;
 	Uint16 messagePointer;
 	int16 newSequencePointer;
-	static Uint32 totalcounter = 0;
 
-
+	/* updateSequenceRequired_G controls the sequence update mechanism when a new logging list is transmitted to the device */
 	switch(updateSequenceRequired_G){
 	/* controlSCI will initiate RESET when new logging list is received */
 	case RESET:
@@ -35,13 +39,9 @@ void receiveCAN_update(void){
 
 	/* Set up mailboxes for initial filter conditions */
 	case UPDATE:
-		filterSize_G = numRxCANMsgs_G/FILTERSIZE_RATIO;
-		if((numRxCANMsgs_G%2)!=0){
-			filterSize_G += 1;
-		}
 
+		/* Direct copy of first filterSize_G IDs in the sequence */
 		updateFilter(mailBox,mailBox);
-
 		printf("%d: %d %d\n",mailBox, CAN_RxMessages_G[mailBox].timer, CAN_RxMessages_G[mailBox].timer_reload);
 
 		mailBox++;
@@ -58,11 +58,10 @@ void receiveCAN_update(void){
 			if(checkMailboxState(CANPORT_A, mailBox) == RX_PENDING){
 
 				/* Find message pointer from mailbox shadow */
-				messagePointer = mailBoxFilters[mailBox].messagePointer;
+				messagePointer = mailBoxFilters_G[mailBox].messagePointer;
 
 				/* Count message hits */
 				CAN_RxMessages_G[messagePointer].counter++;
-				totalcounter++;
 
 				newSequencePointer = getNextSequencePointer();
 
@@ -82,12 +81,15 @@ void receiveCAN_update(void){
 	}
 }
 
+/* getNextSequencePointer controls the scheduling of the IDs in the filter and returns the next valid ID */
 int16 getNextSequencePointer(void){
 	static int16 sequencePointer = -1;
 	int16 last_sequencePointer;
 	boolean_t result = FALSE;
 
-	if(updateSequenceRequired_G > 0){
+
+	if(updateSequenceRequired_G != RUN){
+		/* Reset sequencePointer to continue sequence after loading mailbox */
 		sequencePointer = (filterSize_G - 1);
 	}
 	else{
@@ -114,7 +116,6 @@ int16 getNextSequencePointer(void){
 				else{
 					result = FALSE;
 				}
-
 			}
 			else{
 				result = FALSE;
@@ -126,16 +127,17 @@ int16 getNextSequencePointer(void){
 	return sequencePointer;
 }
 
+/* Replaces the ID in the filter at location filterPointer, with ID from sequence at location sequencePointer */
 void updateFilter(Uint16 filterPointer, int16 sequencePointer){
-
 	Uint16 last_messagePointer;
 
-	if(updateSequenceRequired_G == 0){
+	if(updateSequenceRequired_G == RUN){
 		/* Message scheduling */
-		last_messagePointer = mailBoxFilters[filterPointer].messagePointer;
+		last_messagePointer = mailBoxFilters_G[filterPointer].messagePointer;
 		CAN_RxMessages_G[last_messagePointer].timer = CAN_RxMessages_G[last_messagePointer].timer_reload;
 	}
 	else{
+		/* Used during mailbox reload - replicates the timer mechanism for first use of ID */
 		CAN_RxMessages_G[filterPointer].timer = 0;
 	}
 
@@ -143,6 +145,6 @@ void updateFilter(Uint16 filterPointer, int16 sequencePointer){
 	configureRxMailbox(CANPORT_A, filterPointer, ID_STD, CAN_RxMessages_G[sequencePointer].canID, CAN_RxMessages_G[sequencePointer].canDLC);
 
 	/* ID replacement in shadow */
-	mailBoxFilters[filterPointer].canID = CAN_RxMessages_G[sequencePointer].canID;
-	mailBoxFilters[filterPointer].messagePointer = sequencePointer;
+	mailBoxFilters_G[filterPointer].canID = CAN_RxMessages_G[sequencePointer].canID;
+	mailBoxFilters_G[filterPointer].messagePointer = sequencePointer;
 }

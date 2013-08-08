@@ -6,14 +6,10 @@
  */
 #include "CAN_Rx_global.h"
 
-filterShadow_t mailBoxFilters[64];
+/* Filter shadow is necessary due to being unable to read a mailbox's ID from registry */
+filterShadow_t mailBoxFilters_G[64];
 
 updateFlags_t updateSequenceRequired_G = INIT;
-
-/*******************************************************************************
- * CAN Rx Message array
- * Assigns messages to mailbox position (array index + CAN_RX_MBOFFSET)
- * *****************************************************************************/
 
 canRxMessage_t CAN_RxMessages_G[64];
 
