@@ -8,6 +8,7 @@
 #ifndef CAN_RX_GLOBAL_H_
 #define CAN_RX_GLOBAL_H_
 
+#define NUM_MAILBOXES_MAX (32)
 
 #include <DSP2833x_Device.h>
 

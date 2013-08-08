@@ -42,7 +42,7 @@ int[] IDs = new int[64];
 int txPointer = 0;
 
 /* Config */
-int filterSizeTx = 2;
+int filterSizeTx = 10;
 int duplicatesAllowed = 1;
 
 //int[][] loggingList = {
@@ -209,28 +209,6 @@ void setup(){
   }
 }
 
-void delay_ms(int ms){
-  long lastTime = millis();
-  while (millis()-lastTime < ms);
-}
-
-int standardSpacingY(int mult, int offset){
-  return ((d*mult)+(2*d)+offset);
-}
-
-String intToStr_02(int num){
-  String returnStrg;
-  
-  if(i<10){
-    returnStrg = (" 0"+num);
-  }
-  else{
-    returnStrg = (" "+str(num));
-  }
-  
-  return returnStrg;
-}
-
 void draw(){
   int barLength = 0;
   String strg = "";
@@ -346,7 +324,9 @@ void transmitLoggingList(){
   *    etc
   * */
   print(txPointer+" ");
+  
   if(txPointer == 0){
+  /* packet start */
     myPort.write('{');
     println("{");
   }
@@ -372,6 +352,7 @@ void transmitLoggingList(){
     println(hex((loggingList[txListPointer][0]>>8)&0xFF,1)+" "+hex(loggingList[txListPointer][0]&0xFF,2)+" "+hex(loggingList[txListPointer][1]&0xFF,2)+" "+hex(loggingList[txListPointer][2]&0xFF,2));
   }
   else if(txPointer == (loggingList.length+3)){
+  /* packet sign-off */
     myPort.write('~');
     println("~");
   }
@@ -395,6 +376,15 @@ void receiveLoggingDetails(){
                
           case 'M': 
           /* Data packet contains mailbox information */
+          /* *
+          * Data packet looks like this:
+          *      0 1 2 3 4 5 6 7 
+          *     "{ M A a a X ~ }" where:
+          *    A is the sequence location mapped to mailbox
+          *    aa is two byte CAN ID        
+          *    X mailbox location
+          *    This is fixed length.
+          * */
           
             if(serialCount-3 == 1){
               filterSizeRx = 1;
@@ -414,7 +404,15 @@ void receiveLoggingDetails(){
             break;
                    
           case 'S':
-          /* Data packet contains loggingList information */ 
+          /* Data packet contains loggingList information */
+          /* *
+          * Data packet looks like this:
+          *      0 1 2 3 4 5 6 7 8 
+          *     "{ S A a a a a ~ }" where:
+          *    A is the sequence location
+          *    aaaa is four byte hit count for the sequence location      
+          *    This is fixed length.
+          * */ 
            
             loggingListPointer = serialInArray[2];
 //            println(loggingListPointer);
@@ -632,4 +630,27 @@ void saveCounters(File selection){
     lastFile = selection;
   }
 }
+
+void delay_ms(int ms){
+  long lastTime = millis();
+  while (millis()-lastTime < ms);
+}
+
+int standardSpacingY(int mult, int offset){
+  return ((d*mult)+(2*d)+offset);
+}
+
+String intToStr_02(int num){
+  String returnStrg;
+  
+  if(i<10){
+    returnStrg = (" 0"+num);
+  }
+  else{
+    returnStrg = (" "+str(num));
+  }
+  
+  return returnStrg;
+}
+
   

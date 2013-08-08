@@ -105,7 +105,7 @@ void controlSCI_update(void)
 				numRxCANMsgs_G = (i-4)/4;
 
 				/* Safeguard against mailbox overload */
-				if(rxbuffer[FSC_DATAPOSITION] <= 32){
+				if(rxbuffer[FSC_DATAPOSITION] <= NUM_MAILBOXES_MAX){
 					filterSize_G = rxbuffer[FSC_DATAPOSITION];
 				}
 				else{
@@ -184,10 +184,11 @@ void controlSCI_update(void)
 			scia_xmit('}');
 
 			/* Transmit message counts */
-			for(i=0;i<=10;i++){
-				/* Due to the large amount of data for the message counts
-				 * Data is transmitted as max 10 values, 6 apart, offset by pointerShift*/
-				j = (6*i)+pointerShift;
+			/* Due to the large amount of data for the message counts
+			 * Data is transmitted as max 10 values, 6 apart, offset by pointerShift*/
+			for(i=0;i<=SEQ_TX_CHUNK_SIZE;i++){
+
+				j = (i*SEQ_TX_CHUNK_SPACING)+pointerShift;
 
 				if(j<=numRxCANMsgs_G){
 					scia_xmit('{');

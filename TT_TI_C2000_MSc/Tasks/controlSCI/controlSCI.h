@@ -7,6 +7,10 @@
 
 #ifndef CONTROLSCI_H_
 #define CONTROLSCI_H_
+
+#define SEQ_TX_CHUNK_SIZE		(10)
+#define SEQ_TX_CHUNK_SPACING	(6)
+
 #include "DSP28x_Project.h"     // Device Headerfile and Examples Include File
 
 void controlSCI_init(void);
