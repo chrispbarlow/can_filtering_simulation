@@ -1,6 +1,8 @@
 /*
  * controlSCI.c
  *
+ *  Controls the serial data transfer between device and desktop application via the TI SCI port
+ *
  *  Created on: 25 June 2013
  *      Author: chris.barlow
  */
@@ -19,25 +21,26 @@ typedef struct{
 	Uint16 ID;
 	Uint32 count;
 } tempShadow_t;
+tempShadow_t filtermap[64];
 
 typedef struct{
 	Uint16 canID;
 	Uint16 canDLC;
 	Uint16 cycleTime;
 } logging_list_t;
+logging_list_t loggingList[64];
 
 enum {
-	IDH_DATAPOSITION = 1,
-	IDL_DATAPOSITION = 2,
-	DLC_DATAPOSITION = 3,
-	CYT_DATAPOSITION = 4
+	FSC_DATAPOSITION = 1,
+	DUP_DATAPOSITION = 2,
+	IDH_DATAPOSITION = 3,
+	IDL_DATAPOSITION = 4,
+	DLC_DATAPOSITION = 5,
+	CYT_DATAPOSITION = 6
 };
 
 
-logging_list_t loggingList[64];
-
-tempShadow_t filtermap[64];
-
+/* Init function called once when device boots */
 void controlSCI_init(void)
 {
 	/* This TI function is found in the DSP2833x_Sci.c file. */
@@ -46,6 +49,7 @@ void controlSCI_init(void)
 	scia_init();  			/* Initalize SCI for echoback */
 }
 
+/* update function called periodically from TT scheduler */
 void controlSCI_update(void)
 {
 	static SCIstate_t SCIstate = WAITING;
@@ -78,21 +82,18 @@ void controlSCI_update(void)
     	/* Checks SCI receive flag for new character */
     	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
     		rxbuffer[i] = SciaRegs.SCIRXBUF.all;
-    	}
 
-    	/* safeguard against null characters received mid-packet (happens with terminals) */
-     	if(rxbuffer[i] != 0){
-
-     		/* "???" sent by desktop app indicates that a reset is required (someone pressed the 'R' key */
+     		/* "???" sent by desktop app indicates that a reset is required (someone pressed the 'R' key) */
          	if((rxbuffer[i] == '?')&&(rxbuffer[i-1] == '?')&&(rxbuffer[i-2] == '?')){
          		SCIstate = WAITING;
          	}
 
          	/* *
          	 * Data packet looks like this:
-         	 *                 11111
-         	 * 		 012345678901234
-         	 * 		"{aaAXbbBYccCZ~}" where:
+         	 * 		 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+         	 * 		"{ f d a a A X b b B  Y  c  c  C  Z  ~  }" where:
+         	 * 		f is the filter size control constant
+         	 * 		d is the duplication control constant
          	 *  	aa is two byte CAN ID
          	 * 		A is the CAN data length
          	 *  	X is the CAN message cycle time
@@ -100,8 +101,16 @@ void controlSCI_update(void)
          	 * */
 			if((i>0)&&(rxbuffer[i-1] == '~')&&(rxbuffer[i] == '}')){
 
-				/* In above eg, i = 14 at end of packet, numRxCANMsgs_G = 3 */
-				numRxCANMsgs_G = (i-2)/4;
+				/* In above eg, i = 16 at end of packet, numRxCANMsgs_G = 3 */
+				numRxCANMsgs_G = (i-4)/4;
+
+				/* Safeguard against mailbox overload */
+				if(rxbuffer[FSC_DATAPOSITION] <= NUM_MAILBOXES_MAX){
+					filterSize_G = rxbuffer[FSC_DATAPOSITION];
+				}
+				else{
+					filterSize_G = 32;
+				}
 
 				/* Unpackaging logging list info from data packet */
 				for(sequenceNum=0;sequenceNum<numRxCANMsgs_G;sequenceNum++){
@@ -119,13 +128,14 @@ void controlSCI_update(void)
 				buildSequence(numRxCANMsgs_G);
 
 				/* flag tells receiveCAN to update the logging sequence */
-				updateSequenceRequired_G = 1;
+				updateSequenceRequired_G = RESET;
 
 				SCIstate = SEND;
 			}
 			else if(rxbuffer[0] == '{'){
 				/* data packet reception still in progress */
 				i++;
+
 				/* Reset state if buffer overflows - can happen if data loss occurs */
 				if(i >= (sizeof(rxbuffer)/sizeof(rxbuffer[0]))){
 					SCIstate = WAITING;
@@ -143,15 +153,14 @@ void controlSCI_update(void)
 
      	if(rxbuffer[0] == '?'){
      		SCIstate = WAITING;
-     		rxbuffer[0] = ' ';
      	}
      	else{
 			/* Take snapshot of filters (should prevent updates halfway through transmission)*/
 			for(i=0;i<filterSize_G;i++){
-				j = mailBoxFilters[i].messagePointer;
+				j = mailBoxFilters_G[i].messagePointer;
 				filtermap[i].mp = j;
-				filtermap[i].count = CAN_RxMessages[j].counter;
-				filtermap[i].ID = mailBoxFilters[i].canID;
+				filtermap[i].count = CAN_RxMessages_G[j].counter;
+				filtermap[i].ID = mailBoxFilters_G[i].canID;
 			}
 
 			/* Transmit mailbox data */
@@ -175,10 +184,11 @@ void controlSCI_update(void)
 			scia_xmit('}');
 
 			/* Transmit message counts */
-			for(i=0;i<=10;i++){
-				/* Due to the large amount of data for the message counts
-				 * Data is transmitted as max 10 values, 6 apart, offset by pointerShift*/
-				j = (6*i)+pointerShift;
+			/* Due to the large amount of data for the message counts
+			 * Data is transmitted as max 10 values, 6 apart, offset by pointerShift*/
+			for(i=0;i<=SEQ_TX_CHUNK_SIZE;i++){
+
+				j = (i*SEQ_TX_CHUNK_SPACING)+pointerShift;
 
 				if(j<=numRxCANMsgs_G){
 					scia_xmit('{');
@@ -187,13 +197,13 @@ void controlSCI_update(void)
 					tempCharOut = (j & 0xff);
 					scia_xmit(tempCharOut);
 
-					tempCharOut = ((CAN_RxMessages[j].counter>>24)&0xFF);
+					tempCharOut = ((CAN_RxMessages_G[j].counter>>24)&0xFF);
 					scia_xmit(tempCharOut);
-					tempCharOut = ((CAN_RxMessages[j].counter>>16)&0xFF);
+					tempCharOut = ((CAN_RxMessages_G[j].counter>>16)&0xFF);
 					scia_xmit(tempCharOut);
-					tempCharOut = ((CAN_RxMessages[j].counter>>8)&0xFF);
+					tempCharOut = ((CAN_RxMessages_G[j].counter>>8)&0xFF);
 					scia_xmit(tempCharOut);
-					tempCharOut = ((CAN_RxMessages[j].counter)&0xFF);
+					tempCharOut = ((CAN_RxMessages_G[j].counter)&0xFF);
 					scia_xmit(tempCharOut);
 
 					scia_xmit('~');
@@ -222,12 +232,11 @@ void controlSCI_update(void)
     /* ? symbol acts as a handshake request with the desktop app */
 	scia_xmit('?');
 
-
 }
 
 /* Iterates through logging sequence (CAN_Rx_global.c) and updates / resets values */
 void buildSequence(Uint16 listSize){
-	Uint16 i, cycleTime_min;
+	Uint16 i, cycleTime_min, newReload, remainder = 0;
 
 	/* Finds the minimum cycle time in the logging list */
  	cycleTime_min = 0xFFFF;
@@ -238,13 +247,24 @@ void buildSequence(Uint16 listSize){
  	}
 
  	for(i=0;i<listSize;i++){
-		CAN_RxMessages[i].canID = loggingList[i].canID;
-		CAN_RxMessages[i].canData.rawData[0] = 0;
-		CAN_RxMessages[i].canData.rawData[1] = 0;
-		CAN_RxMessages[i].canDLC = loggingList[i].canDLC;
+		CAN_RxMessages_G[i].canID = loggingList[i].canID;
+		CAN_RxMessages_G[i].canData.rawData[0] = 0;
+		CAN_RxMessages_G[i].canData.rawData[1] = 0;
+		CAN_RxMessages_G[i].canDLC = loggingList[i].canDLC;
+
 		/* timer_reload set proportionally to weight the filter in favour of more frequent IDs */
-		CAN_RxMessages[i].timer_reload = loggingList[i].cycleTime/cycleTime_min;
-		CAN_RxMessages[i].timer = 0;
-		CAN_RxMessages[i].counter = 0;
+		newReload = loggingList[i].cycleTime/cycleTime_min;
+		/* Rounding logic */
+		remainder = loggingList[i].cycleTime%cycleTime_min;
+		if((remainder > 0)&&(remainder >= (cycleTime_min/2))){
+			CAN_RxMessages_G[i].timer_reload = (newReload + 1);
+		}
+		else{
+			CAN_RxMessages_G[i].timer_reload = newReload;
+		}
+
+		/* Force all timers to 1 for first iteration - level playing field */
+		CAN_RxMessages_G[i].timer = 1;
+		CAN_RxMessages_G[i].counter = 0;
  	}
  }
