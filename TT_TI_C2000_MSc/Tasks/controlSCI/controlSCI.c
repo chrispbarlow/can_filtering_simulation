@@ -48,8 +48,7 @@ logging_list_t loggingList_SCIRx[NUM_MESSAGES_MAX];
 /***********************************************************************************************************
  * Initialisation - called once when the device boots, before the scheduler starts.
  * *********************************************************************************************************/
-void controlSCI_init(void)
-{
+void controlSCI_init(void){
 	/* This TI function is found in the DSP2833x_Sci.c file. */
 	InitSciaGpio();
 	scia_fifo_init();	  	/* Initialize the SCI FIFO */
@@ -61,8 +60,7 @@ void controlSCI_init(void)
 /***********************************************************************************************************
  * Update function - called periodically from scheduler
  * *********************************************************************************************************/
-void controlSCI_update(void)
-{
+void controlSCI_update(void){
 	static SCIstate_t SCIstate = WAITING;
     static Uint16 i = 0, j = 0;
     Uint32 IDH = 0, IDL = 0;

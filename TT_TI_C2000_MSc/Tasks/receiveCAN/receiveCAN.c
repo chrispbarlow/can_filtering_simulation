@@ -3,7 +3,7 @@
  *  	checks the status of mailboxes. When a message is pending, the data is read
  *  	and the dynamic filter mechanism updates the mailbox to the next valid CAN ID
  *
- *  Created on: 11 Feb 2013
+ *  Created on: 19 Jun 2013
  *      Author: chris.barlow
  * *********************************************************************************************************/
 
@@ -34,15 +34,21 @@ void receiveCAN_update(void){
 
 	/* updateSequenceRequired_G controls the sequence update mechanism when a new logging list is transmitted to the device */
 	switch(updateSequenceRequired_G){
+	/* Do nothing until first logging list arrival (RESET)*/
+	default:
+	case INIT:
+		break;
+
 	/* controlSCI will initiate RESET when new logging list is received */
 	case RESET:
 
+		/* Ensure all mailboxes are disabled */
 		for(mailBox = 0; mailBox < NUM_MAILBOXES_MAX; mailBox++){
 			disableMailbox(CANPORT_A, mailBox);
 		}
 
 		mailBox = 0;
-		if(filterSize_G == 0){
+		if(filterSize_G == 0){	/* Dynamic filterSize calculation if 0 is received from configuration app */
 			filterSize_G = numRxCANMsgs_G/FILTERSIZE_RATIO;
 			if((numRxCANMsgs_G%2)!=0){
 				filterSize_G += 1;
@@ -90,11 +96,6 @@ void receiveCAN_update(void){
 				CAN_RxMessages_G[sequenceIndex_received].counter++;
 			}
 		}
-		break;
-
-	/* Do nothing until first logging list arrival (RESET)*/
-	default:
-	case INIT:
 		break;
 	}
 }

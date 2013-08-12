@@ -3,7 +3,7 @@
  *  	checks the status of mailboxes. When a message is pending, the data is read
  *  	and the dynamic filter mechanism updates the mailbox to the next valid CAN ID
  *
- *  Created on: 11 Feb 2013
+ *  Created on: 19 Jun 2013
  *      Author: chris.barlow
  * *********************************************************************************************************/
 
