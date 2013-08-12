@@ -1,9 +1,11 @@
-/*
- *  receiveCAN checks the status of mailboxes. When a message is pending, the data is read
- *  and the dynamic filter mechanism updates the mailbox to the next valid CAN ID
+/***********************************************************************************************************
+ *  receiveCAN.c
+ *  	checks the status of mailboxes. When a message is pending, the data is read
+ *  	and the dynamic filter mechanism updates the mailbox to the next valid CAN ID
+ *
  *  Created on: 11 Feb 2013
  *      Author: chris.barlow
- */
+ * *********************************************************************************************************/
 
 #include "../../global.h"
 #include "receiveCAN.h"
@@ -11,16 +13,20 @@
 #include "../../CAN_Exchange/CAN_Rx_global.h"
 #include "../../CAN_Exchange/CAN_Tx_global.h"
 
-#define DUPLICATES_ALLOWED 	(1)		/* Controls the number of duplicates for each ID allowed to be added to filter between arrivals of that ID */
+#define DUPLICATES_LIMIT 	(1)		/* Controls the number of duplicates for each ID allowed to be added to filter between arrivals of that ID */
 #define FILTERSIZE_RATIO	(2)
 
-/* Init function called once when device boots */
+/***********************************************************************************************************
+ * Initialisation - called once when the device boots, before the scheduler starts.
+ * *********************************************************************************************************/
 void receiveCAN_init(void){
 	/* mailboxes are configured in _update when first logging list is received from desktop app */
 	updateSequenceRequired_G = INIT;
 }
 
-/* update function called periodically from TT scheduler */
+/***********************************************************************************************************
+ * Update function - called periodically from scheduler
+ * *********************************************************************************************************/
 void receiveCAN_update(void){
 	static Uint16 mailBox = 0;
 	Uint16 sequenceIndex_received;
@@ -93,7 +99,9 @@ void receiveCAN_update(void){
 	}
 }
 
-/* getNextSequencePointer controls the scheduling of the IDs in the filter and returns the next valid ID */
+/***********************************************************************************************************
+ * Controls the scheduling of the IDs in the filter.
+ * *********************************************************************************************************/
 int16 getNextSequenceIndex(void){
 	static int16 sequenceIndex_next = -1;
 	int16 sequenceIndex_last;
@@ -117,7 +125,7 @@ int16 getNextSequenceIndex(void){
 			}
 
 			/* ID not already in mailbox, decrement 'schedule' timer (timer sits between -DUPLICATES ALLOWED and 0 while ID is in one or more mailboxes) */
-			if(CAN_RxMessages_G[sequenceIndex_next].timer > (0-DUPLICATES_ALLOWED)){
+			if(CAN_RxMessages_G[sequenceIndex_next].timer > (0-DUPLICATES_LIMIT)){
 				CAN_RxMessages_G[sequenceIndex_next].timer--;
 
 				/* ID ready to be inserted */
@@ -138,7 +146,9 @@ int16 getNextSequenceIndex(void){
 	return sequenceIndex_next;
 }
 
-/* Replaces the ID in the filter at location filterPointer, with ID from sequence at location sequencePointer */
+/***********************************************************************************************************
+ * Replaces the ID in the filter at location filterPointer, with ID from sequence at location sequencePointer.
+ * *********************************************************************************************************/
 void updateFilter(Uint16 filterIndex, int16 sequenceIndex_replace){
 	Uint16 sequenceIndex_old;
 

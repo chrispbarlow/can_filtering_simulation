@@ -42,7 +42,7 @@ int[] IDs = new int[64];
 int txPointer = 0;
 
 /* Config */
-int filterSizeTx = 14;      /* Set to zero to enable auto-sizing */
+int filterSizeTx = 0;      /* Set to zero to enable auto-sizing */
 int duplicatesAllowed = 1; /* This isn't implemented in the device code. Still deciding if it's beneficial */
 
 //int[][] loggingList = {
@@ -312,17 +312,18 @@ void transmitLoggingList(){
   int txListPointer;
 
 
-  /* *
-  * Data packet looks like this:
-  *      0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
-  *     "{ f d a a A X b b B  Y  c  c  C  Z  ~  }" where:
-  *     f is the filter size control constant
-  *     d is the duplication control constant
-  *    aa is two byte CAN ID
-  *     A is the CAN data length
-  *    X is the CAN message cycle time
-  *    etc
-  * */
+  /* Transmitted data packet looks like this:
+   *
+   *     index:  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+   *     chars:  { f d a a A X b b B  Y  c  c  C  Z  ~  }
+   * Where:
+   *     f is the filter size control constant
+   *     d is the duplication control constant
+   *    aa is two byte CAN ID
+   *     A is the CAN data length
+   *     X is the CAN message cycle time
+   *    etc
+   * */
   print(txPointer+" ");
   
   if(txPointer == 0){
@@ -375,16 +376,17 @@ void receiveLoggingDetails(){
           switch(serialInArray[1]){ 
                
           case 'M': 
-          /* Data packet contains mailbox information */
-          /* *
-          * Data packet looks like this:
-          *      0 1 2 3 4 5 6 7 
-          *     "{ M A a a X ~ }" where:
-          *    A is the sequence location mapped to mailbox
-          *    aa is two byte CAN ID        
-          *    X mailbox location
-          *    This is fixed length.
-          * */
+          /* Data packet contains mailbox information
+           *
+           * Data packet looks like this:
+           *    index:  0 1 2 3 4 5 6 7
+           *    chars:  { M A a a X ~ }
+           * Where:
+           *    A is the sequence location mapped to mailbox
+           *    aa is two byte CAN ID
+           *    X mailbox location
+           *    This is fixed length.
+           * */
           
             if(serialCount-3 == 1){
               filterSizeRx = 1;
@@ -404,15 +406,19 @@ void receiveLoggingDetails(){
             break;
                    
           case 'S':
-          /* Data packet contains loggingList information */
-          /* *
-          * Data packet looks like this:
-          *      0 1 2 3 4 5 6 7 8 
-          *     "{ S A a a a a ~ }" where:
-          *    A is the sequence location
-          *    aaaa is four byte hit count for the sequence location      
-          *    This is fixed length.
-          * */ 
+          /* Data packet contains loggingList information 
+           * Due to the large amount of data for the message counts
+           * Data is transmitted as max 10 values, 6 apart, offset by pointerShift
+           *
+           * Data packet looks like this:
+           *     index:  0 1 2 3 4 5 6 7 8
+           *     chars:  { S A a a a a ~ }
+           * Where:
+           *    A is the sequence location
+           *    aaaa is four byte hit count for the sequence location
+           *
+           *    This is fixed length.
+           * */
            
             loggingListPointer = serialInArray[2];
 //            println(loggingListPointer);

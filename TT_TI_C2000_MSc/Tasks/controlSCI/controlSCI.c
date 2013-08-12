@@ -1,21 +1,35 @@
-/*
+/***********************************************************************************************************
  * controlSCI.c
  *
- *  Controls the serial data transfer between device and desktop application via the TI SCI port
+ * Controls the serial data transfer between device and desktop application via the TI SCI port
  *
- *  Created on: 25 June 2013
+ * Created on: 25 June 2013
  *      Author: chris.barlow
- */
+ * *********************************************************************************************************/
+
 #include "../../Lib/SCI/SCI.h"
 #include "controlSCI.h"
 #include <stdio.h>
 #include "../../CAN_Exchange/CAN_Rx_global.h"
 
-
+/* SCI states */
 typedef enum{WAITING,RECEIVE,SEND}SCIstate_t;
+
+/* Raw character receive buffer */
 static char rxbuffer[300];
 Uint16 rxbufferSize = (sizeof(rxbuffer)/sizeof(rxbuffer[0]));
 
+/* Position control for packet data */
+enum {
+	FSC_DATAPOSITION = 1,
+	DUP_DATAPOSITION = 2,
+	IDH_DATAPOSITION = 3,
+	IDL_DATAPOSITION = 4,
+	DLC_DATAPOSITION = 5,
+	CYT_DATAPOSITION = 6
+};
+
+/* Temporary arrays for data unpacking */
 typedef struct{
 	Uint16 sequenceIndex_SCITx;
 	Uint16 canID_SCITx;
@@ -29,17 +43,11 @@ typedef struct{
 } logging_list_t;
 logging_list_t loggingList_SCIRx[NUM_MESSAGES_MAX];
 
-enum {
-	FSC_DATAPOSITION = 1,
-	DUP_DATAPOSITION = 2,
-	IDH_DATAPOSITION = 3,
-	IDL_DATAPOSITION = 4,
-	DLC_DATAPOSITION = 5,
-	CYT_DATAPOSITION = 6
-};
 
 
-/* Init function called once when device boots */
+/***********************************************************************************************************
+ * Initialisation - called once when the device boots, before the scheduler starts.
+ * *********************************************************************************************************/
 void controlSCI_init(void)
 {
 	/* This TI function is found in the DSP2833x_Sci.c file. */
@@ -48,21 +56,23 @@ void controlSCI_init(void)
 	scia_init();  			/* Initalize SCI for echoback */
 }
 
-/* update function called periodically from TT scheduler */
+
+
+/***********************************************************************************************************
+ * Update function - called periodically from scheduler
+ * *********************************************************************************************************/
 void controlSCI_update(void)
 {
 	static SCIstate_t SCIstate = WAITING;
     static Uint16 i = 0, j = 0;
     Uint32 IDH = 0, IDL = 0;
     char tempCharOut;
-    static Uint16 pointerShift = 0;
+    static Uint16 indexShift = 0;
     Uint16 sequenceNum = 0;
 
 
-    /*
-     * state machine controls whether the device is transmitting or receiving logging list information
-     * will always receive until first logging list is received
-     * */
+    /* state machine controls whether the device is transmitting or receiving logging list information
+     * will always receive until first logging list is received */
     switch(SCIstate){
 
     case WAITING:
@@ -87,10 +97,10 @@ void controlSCI_update(void)
          		SCIstate = WAITING;
          	}
 
-         	/* *
-         	 * Data packet looks like this:
-         	 * 		 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
-         	 * 		"{ f d a a A X b b B  Y  c  c  C  Z  ~  }" where:
+         	/* Received data packet looks like this:
+         	 * 		index:  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+         	 * 		chars:  { f d a a A X b b B  Y  c  c  C  Z  ~  }
+         	 * Where:
          	 * 		f is the filter size control constant
          	 * 		d is the duplication control constant
          	 *  	aa is two byte CAN ID
@@ -161,7 +171,17 @@ void controlSCI_update(void)
 				mailBoxFilterShadow_SCITx[i].canID_SCITx = mailBoxFilterShadow_G[i].canID_mapped;
 			}
 
-			/* Transmit mailbox data */
+			/* Transmit mailbox data
+			 *
+			 * Data packet looks like this:
+			 *    index:  0 1 2 3 4 5 6 7
+			 *    chars:  { M A a a X ~ }
+			 * Where:
+			 *    A is the sequence location mapped to mailbox
+			 *    aa is two byte CAN ID
+			 *    X mailbox location
+			 *    This is fixed length.
+			 * */
 			scia_xmit('{');
 			scia_xmit('M');
 
@@ -176,17 +196,27 @@ void controlSCI_update(void)
 
 				tempCharOut = (j & 0xFF);
 				scia_xmit(tempCharOut);
-		   }
+		    }
 
 			scia_xmit('~');
 			scia_xmit('}');
 
-			/* Transmit message counts */
-			/* Due to the large amount of data for the message counts
-			 * Data is transmitted as max 10 values, 6 apart, offset by pointerShift*/
+			/* Transmit message counts
+			 * Due to the large amount of data for the message counts
+			 * Data is transmitted as max 10 values, 6 apart, offset by pointerShift
+			 *
+			 * Data packet looks like this:
+			 *     index:  0 1 2 3 4 5 6 7 8
+			 *     chars:  { S A a a a a ~ }
+			 * Where:
+		 	 *    A is the sequence location
+		 	 *    aaaa is four byte hit count for the sequence location
+		 	 *
+			 *    This is fixed length.
+			 * */
 			for(i=0;i<=SEQ_TX_CHUNK_SIZE;i++){
 
-				j = (i*SEQ_TX_CHUNK_SPACING)+pointerShift;
+				j = (i*SEQ_TX_CHUNK_SPACING)+indexShift;
 
 				if(j<=numRxCANMsgs_G){
 					scia_xmit('{');
@@ -195,6 +225,7 @@ void controlSCI_update(void)
 					tempCharOut = (j & 0xff);
 					scia_xmit(tempCharOut);
 
+					/* Send the 32-bit counter value */
 					tempCharOut = ((CAN_RxMessages_G[j].counter>>24)&0xFF);
 					scia_xmit(tempCharOut);
 					tempCharOut = ((CAN_RxMessages_G[j].counter>>16)&0xFF);
@@ -211,9 +242,9 @@ void controlSCI_update(void)
 		   }
 
 			/* Increment pointerShift to inter-space next set of values next time */
-			pointerShift++;
-			if(pointerShift > 6){
-				pointerShift = 0;
+			indexShift++;
+			if(indexShift > 6){
+				indexShift = 0;
 			}
 
 			/* Instruct desktop app to refresh screen */
@@ -232,7 +263,12 @@ void controlSCI_update(void)
 
 }
 
-/* Iterates through logging sequence (CAN_Rx_global.c) and updates / resets values */
+
+
+/***********************************************************************************************************
+ * Copies sequence details from temporary buffers to global message sequence array.
+ * Since we don't know where in the sequence we will start, the schedule timer for all messages is set to 1.
+ * *********************************************************************************************************/
 void buildSequence(Uint16 listSize){
 	Uint16 i, cycleTime_min, newReload, remainder = 0;
 

@@ -21,7 +21,6 @@ typedef enum {CAN_TX, CAN_RX} mailboxDirection_t;
 typedef enum {DISABLED, TX_FREE, RX_FREE, TX_PENDING, RX_PENDING, TX_SENT, RX_ARRIVAL, TX_ERR} messageObjectStates_t;
 
 typedef struct{
-
 	messageObjectStates_t 		mailboxState;		/* High-level Tx / Rx State of message object */
 	volatile struct MBOX *		mailbox;			/* Mailbox */
 	volatile union CANLAM_REG * LAMRegs; 			/* Local acceptance mask */

@@ -1,9 +1,11 @@
-/*
- * CAN_Rx_global.h
+/***********************************************************************************************************
+ * CAN_Rx_global.c
  *
- *  Created on: 4 Mar 2013
+ * Global CAN message receive buffers and control variables
+ *
+ *  Created on: 7 Mar 2013
  *      Author: chris.barlow
- */
+ * *********************************************************************************************************/
 
 #ifndef CAN_RX_GLOBAL_H_
 #define CAN_RX_GLOBAL_H_
@@ -18,7 +20,7 @@ extern updateFlags_t updateSequenceRequired_G;
 
 /*******************************************************************************
  * CAN Rx Message array
- * Assigns messages to mailbox position (array index + CAN_RX_MBOFFSET)
+ * Assigns messages to logging sequence position
  * *****************************************************************************/
 
 /* If we were doing anything with the CAN data received, the individual bytes of the message could be accessed from here */
