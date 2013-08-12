@@ -1,6 +1,10 @@
 # FIXED
 
 Tasks/receiveCAN/receiveCAN.obj: ../Tasks/receiveCAN/receiveCAN.c
+Tasks/receiveCAN/receiveCAN.obj: ../Tasks/receiveCAN/../../global.h
+Tasks/receiveCAN/receiveCAN.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h
+Tasks/receiveCAN/receiveCAN.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/linkage.h
+Tasks/receiveCAN/receiveCAN.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdarg.h
 Tasks/receiveCAN/receiveCAN.obj: ../Tasks/receiveCAN/receiveCAN.h
 Tasks/receiveCAN/receiveCAN.obj: ../Tasks/receiveCAN/../../Lib/CAN/CAN.h
 Tasks/receiveCAN/receiveCAN.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP28x_Project.h
@@ -30,12 +34,14 @@ Tasks/receiveCAN/receiveCAN.obj: C:/ti/controlSUITE/device_support/f2833x/v133/D
 Tasks/receiveCAN/receiveCAN.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_I2C_defines.h
 Tasks/receiveCAN/receiveCAN.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_DefaultISR.h
 Tasks/receiveCAN/receiveCAN.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h
-Tasks/receiveCAN/receiveCAN.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/linkage.h
-Tasks/receiveCAN/receiveCAN.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdarg.h
 Tasks/receiveCAN/receiveCAN.obj: ../Tasks/receiveCAN/../../CAN_Exchange/CAN_Rx_global.h
 Tasks/receiveCAN/receiveCAN.obj: ../Tasks/receiveCAN/../../CAN_Exchange/CAN_Tx_global.h
 
 ../Tasks/receiveCAN/receiveCAN.c: 
+../Tasks/receiveCAN/../../global.h: 
+C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h: 
+C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/linkage.h: 
+C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdarg.h: 
 ../Tasks/receiveCAN/receiveCAN.h: 
 ../Tasks/receiveCAN/../../Lib/CAN/CAN.h: 
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP28x_Project.h: 
@@ -65,7 +71,5 @@ C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_D
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_I2C_defines.h: 
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_DefaultISR.h: 
 C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h: 
-C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/linkage.h: 
-C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdarg.h: 
 ../Tasks/receiveCAN/../../CAN_Exchange/CAN_Rx_global.h: 
 ../Tasks/receiveCAN/../../CAN_Exchange/CAN_Tx_global.h: 

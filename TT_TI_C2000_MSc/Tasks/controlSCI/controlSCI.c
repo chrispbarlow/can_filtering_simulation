@@ -17,18 +17,17 @@ static char rxbuffer[300];
 Uint16 rxbufferSize = (sizeof(rxbuffer)/sizeof(rxbuffer[0]));
 
 typedef struct{
-	Uint16 mp;
-	Uint16 ID;
-	Uint32 count;
+	Uint16 sequenceIndex_SCITx;
+	Uint16 canID_SCITx;
 } tempShadow_t;
-tempShadow_t filtermap[64];
+tempShadow_t mailBoxFilterShadow_SCITx[NUM_MESSAGES_MAX];
 
 typedef struct{
-	Uint16 canID;
-	Uint16 canDLC;
-	Uint16 cycleTime;
+	Uint16 canID_SCIRx;
+	Uint16 canDLC_SCIRx;
+	Uint16 cycleTime_SCIRx;
 } logging_list_t;
-logging_list_t loggingList[64];
+logging_list_t loggingList_SCIRx[NUM_MESSAGES_MAX];
 
 enum {
 	FSC_DATAPOSITION = 1,
@@ -118,10 +117,10 @@ void controlSCI_update(void)
 					IDH <<= 8;
 					IDL = rxbuffer[(4*sequenceNum)+IDL_DATAPOSITION];
 
-					loggingList[sequenceNum].canID = (IDH|IDL);
-					loggingList[sequenceNum].canID &= 0x7FF;
-					loggingList[sequenceNum].canDLC = rxbuffer[(4*sequenceNum)+DLC_DATAPOSITION];
-					loggingList[sequenceNum].cycleTime = rxbuffer[(4*sequenceNum)+CYT_DATAPOSITION];
+					loggingList_SCIRx[sequenceNum].canID_SCIRx = (IDH|IDL);
+					loggingList_SCIRx[sequenceNum].canID_SCIRx &= 0x7FF;
+					loggingList_SCIRx[sequenceNum].canDLC_SCIRx = rxbuffer[(4*sequenceNum)+DLC_DATAPOSITION];
+					loggingList_SCIRx[sequenceNum].cycleTime_SCIRx = rxbuffer[(4*sequenceNum)+CYT_DATAPOSITION];
 				}
 
 				/* Initialise sequence */
@@ -157,10 +156,9 @@ void controlSCI_update(void)
      	else{
 			/* Take snapshot of filters (should prevent updates halfway through transmission)*/
 			for(i=0;i<filterSize_G;i++){
-				j = mailBoxFilters_G[i].messagePointer;
-				filtermap[i].mp = j;
-				filtermap[i].count = CAN_RxMessages_G[j].counter;
-				filtermap[i].ID = mailBoxFilters_G[i].canID;
+				j = mailBoxFilterShadow_G[i].sequenceIndex_mapped;
+				mailBoxFilterShadow_SCITx[i].sequenceIndex_SCITx = j;
+				mailBoxFilterShadow_SCITx[i].canID_SCITx = mailBoxFilterShadow_G[i].canID_mapped;
 			}
 
 			/* Transmit mailbox data */
@@ -168,12 +166,12 @@ void controlSCI_update(void)
 			scia_xmit('M');
 
 			for(i=0;i<filterSize_G;i++){
-				j = filtermap[i].mp;
+				j = mailBoxFilterShadow_SCITx[i].sequenceIndex_SCITx;
 
-				tempCharOut = ((filtermap[i].ID>>8) & 0xFF);
+				tempCharOut = ((mailBoxFilterShadow_SCITx[i].canID_SCITx>>8) & 0xFF);
 				scia_xmit(tempCharOut);
 
-				tempCharOut = (filtermap[i].ID & 0xFF);
+				tempCharOut = (mailBoxFilterShadow_SCITx[i].canID_SCITx & 0xFF);
 				scia_xmit(tempCharOut);
 
 				tempCharOut = (j & 0xFF);
@@ -241,21 +239,21 @@ void buildSequence(Uint16 listSize){
 	/* Finds the minimum cycle time in the logging list */
  	cycleTime_min = 0xFFFF;
  	for(i=0;i<listSize;i++){
- 		if(loggingList[i].cycleTime<cycleTime_min){
- 			cycleTime_min = loggingList[i].cycleTime;
+ 		if(loggingList_SCIRx[i].cycleTime_SCIRx < cycleTime_min){
+ 			cycleTime_min = loggingList_SCIRx[i].cycleTime_SCIRx;
  		}
  	}
 
  	for(i=0;i<listSize;i++){
-		CAN_RxMessages_G[i].canID = loggingList[i].canID;
+		CAN_RxMessages_G[i].canID = loggingList_SCIRx[i].canID_SCIRx;
 		CAN_RxMessages_G[i].canData.rawData[0] = 0;
 		CAN_RxMessages_G[i].canData.rawData[1] = 0;
-		CAN_RxMessages_G[i].canDLC = loggingList[i].canDLC;
+		CAN_RxMessages_G[i].canDLC = loggingList_SCIRx[i].canDLC_SCIRx;
 
 		/* timer_reload set proportionally to weight the filter in favour of more frequent IDs */
-		newReload = loggingList[i].cycleTime/cycleTime_min;
+		newReload = (loggingList_SCIRx[i].cycleTime_SCIRx / cycleTime_min);
 		/* Rounding logic */
-		remainder = loggingList[i].cycleTime%cycleTime_min;
+		remainder = (loggingList_SCIRx[i].cycleTime_SCIRx % cycleTime_min);
 		if((remainder > 0)&&(remainder >= (cycleTime_min/2))){
 			CAN_RxMessages_G[i].timer_reload = (newReload + 1);
 		}

@@ -18,9 +18,10 @@ void receiveCAN_init(void);
 void receiveCAN_update(void);
 
 /* getNextSequencePointer controls the scheduling of the IDs in the filter and returns the next valid ID */
-int16 getNextSequencePointer(void);
+int16 getNextSequenceIndex(void);
 
-/* Replaces the ID in the filter at location filterPointer, with ID from sequence at location sequencePointer */
+/* Replaces the ID in the filter at location filterPointer, with ID from sequence at location sequencePointer
+ * Arguments:*/
 void updateFilter(Uint16 filterPointer, int16 sequencePointer);
 
 #endif /* REVCEIVECAN_H_ */

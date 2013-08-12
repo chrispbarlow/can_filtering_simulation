@@ -8,15 +8,20 @@
 #ifndef CAN_RX_GLOBAL_H_
 #define CAN_RX_GLOBAL_H_
 
-#define NUM_MAILBOXES_MAX (32)
+#define NUM_MAILBOXES_MAX 	(32)
+#define NUM_MESSAGES_MAX 	(64)
 
 #include <DSP2833x_Device.h>
 
 typedef enum{INIT,RUN,RESET,UPDATE} updateFlags_t;
 extern updateFlags_t updateSequenceRequired_G;
 
+/*******************************************************************************
+ * CAN Rx Message array
+ * Assigns messages to mailbox position (array index + CAN_RX_MBOFFSET)
+ * *****************************************************************************/
 
-/* Specify Byte Variables for CAN Message */
+/* If we were doing anything with the CAN data received, the individual bytes of the message could be accessed from here */
 struct CAN_DATA_VARS_RX{
 
 	/*byte variable examples */
@@ -38,36 +43,34 @@ typedef union {
 }canData_t;
 
 
-/*******************************************************************************/
-
-
-/*******************************************************************************
- * CAN Rx Message array
- * Assigns messages to mailbox position (array index + CAN_RX_MBOFFSET)
- * *****************************************************************************/
 typedef struct {
 	Uint32 canID;			/* CAN ID */
 	canData_t canData;		/* CAN Data */
 	Uint16 canDLC;			/* Message byte length */
-	int16 timer;
+	int16 timer;			/* Used for message scheduling */
 	int16 timer_reload;
-	Uint32 counter;
+	Uint32 counter;			/* Used to track message hits */
 } canRxMessage_t;
 
 extern canRxMessage_t CAN_RxMessages_G[];
 
-/* The filterShadow holds a copy of the current ID - mailbox mapping.
- * Necessary because we can't read the mailbox ID directly from the registry
- */
+/*******************************************************************************/
 
+/*******************************************************************************
+ * The filterShadow holds a copy of the current ID - mailbox mapping.
+ * Necessary because we can't read the mailbox ID directly from the registry
+ * *****************************************************************************/
 typedef struct{
-	Uint32 canID;
-	Uint16 messagePointer;
+	Uint32 canID_mapped;				/* CAN ID currently being held in mailbox */
+	Uint16 sequenceIndex_mapped;		/* Index of CAN_RxMessages[] mapped to mailbox */
 }filterShadow_t;
 
-extern filterShadow_t mailBoxFilters_G[];
+extern filterShadow_t mailBoxFilterShadow_G[];
 
+/*******************************************************************************/
 
+/* Control values set dynamically when logging list is received */
 extern Uint16 numRxCANMsgs_G;
 extern Uint16 filterSize_G;
+
 #endif /* CAN_RX_GLOBAL_H_ */

@@ -7,12 +7,12 @@
 #include "CAN_Rx_global.h"
 
 /* Filter shadow is necessary due to being unable to read a mailbox's ID from registry */
-filterShadow_t mailBoxFilters_G[64];
+filterShadow_t mailBoxFilterShadow_G[NUM_MESSAGES_MAX];
+
+/* The main CAN Rx buffer - holds all received data in logging order */
+canRxMessage_t CAN_RxMessages_G[NUM_MESSAGES_MAX];
 
 updateFlags_t updateSequenceRequired_G = INIT;
-
-canRxMessage_t CAN_RxMessages_G[64];
-
 
 Uint16 numRxCANMsgs_G = 0;
 Uint16 filterSize_G = 0;

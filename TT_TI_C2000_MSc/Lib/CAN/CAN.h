@@ -51,6 +51,8 @@ int16 loadTxMailbox(char port, char mbNum, Uint32 data[]);
 
 int16 commitSendMailbox(char port, char mbNum);
 
+void disableMailbox(char port, char mbNum);
+
 int16 readRxMailbox(char port, char mbNum, Uint32 data[]);
 
 
