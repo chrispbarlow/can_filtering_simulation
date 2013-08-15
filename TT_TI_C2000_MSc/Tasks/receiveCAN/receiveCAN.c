@@ -11,7 +11,6 @@
 #include "receiveCAN.h"
 #include <stdio.h>
 #include "../../CAN_Exchange/CAN_Rx_global.h"
-#include "../../CAN_Exchange/CAN_Tx_global.h"
 
 #define DUPLICATES_LIMIT 	(1)		/* Controls the number of duplicates for each ID allowed to be added to filter between arrivals of that ID */
 #define FILTERSIZE_RATIO	(2)

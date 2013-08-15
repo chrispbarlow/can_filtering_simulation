@@ -31,16 +31,14 @@ TT_Main.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/inclu
 TT_Main.obj: ../scheduler/scheduler.h
 TT_Main.obj: ../scheduler/../TT_Main.h
 TT_Main.obj: ../scheduler/schedulerConfig.h
-TT_Main.obj: ../scheduler/../Tasks/sendCAN/sendCAN.h
-TT_Main.obj: ../scheduler/../Tasks/sendCAN/../../Lib/CAN/CAN.h
 TT_Main.obj: ../scheduler/../Tasks/handleCAN/handleCAN.h
+TT_Main.obj: ../scheduler/../Tasks/handleCAN/../../Lib/CAN/CAN.h
 TT_Main.obj: ../scheduler/../Tasks/receiveCAN/receiveCAN.h
 TT_Main.obj: ../scheduler/../Tasks/controlSCI/controlSCI.h
 TT_Main.obj: ../global.h
 TT_Main.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h
 TT_Main.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/linkage.h
 TT_Main.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdarg.h
-TT_Main.obj: ../Lib/ADC/ADC.h
 
 ../TT_Main.c: 
 ../TT_Main.h: 
@@ -73,13 +71,11 @@ C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_D
 ../scheduler/scheduler.h: 
 ../scheduler/../TT_Main.h: 
 ../scheduler/schedulerConfig.h: 
-../scheduler/../Tasks/sendCAN/sendCAN.h: 
-../scheduler/../Tasks/sendCAN/../../Lib/CAN/CAN.h: 
 ../scheduler/../Tasks/handleCAN/handleCAN.h: 
+../scheduler/../Tasks/handleCAN/../../Lib/CAN/CAN.h: 
 ../scheduler/../Tasks/receiveCAN/receiveCAN.h: 
 ../scheduler/../Tasks/controlSCI/controlSCI.h: 
 ../global.h: 
 C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h: 
 C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/linkage.h: 
 C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdarg.h: 
-../Lib/ADC/ADC.h: 

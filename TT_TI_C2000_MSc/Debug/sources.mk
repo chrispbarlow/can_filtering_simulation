@@ -97,7 +97,6 @@ S64_DEPS__QUOTED :=
 SUBDIRS := \
 . \
 scheduler \
-Tasks/sendCAN \
 Tasks/receiveCAN \
 Tasks/newTask_Template \
 Tasks/handleCAN \
@@ -105,6 +104,5 @@ Tasks/controlSCI \
 Lib/TI \
 Lib/SCI \
 Lib/CAN \
-Lib/ADC \
 CAN_Exchange \
 
