@@ -1,4 +1,5 @@
 /**
+ * Remote CAN filter configuration and
  * Filter Mapping Visualisation
  * 
  * A close-to-realtime visualisation of the mapping between 
@@ -291,7 +292,7 @@ void draw(){
     }
     
     textFont(fontBold, 16);
-    text("Dynamic CAN Filter Mapping Visualisation", (s-((4*d)+100)), standardSpacingY(55,6));
+    text("Dynamic CAN Filter Remote Configuration and Mapping Visualisation Tool", (s-((4*d)+100)), standardSpacingY(55,6));
     textFont(fontBold, 14);
     text("Chris Barlow, MSc Reliable Embedded Systems 2013, University of Leicester", (s-((4*d)+100)), standardSpacingY(56,8));
     textFont(font, 14);
