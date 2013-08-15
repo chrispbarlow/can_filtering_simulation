@@ -24,18 +24,4 @@ void receiveCAN_init(void);
  * *********************************************************************************************************/
 void receiveCAN_update(void);
 
-/***********************************************************************************************************
- * Controls the scheduling of the IDs in the filter.
- * Returns the next valid sequence index to use in the filter.
- * *********************************************************************************************************/
-int16 getNextSequenceIndex(void);
-
-/***********************************************************************************************************
- * Replaces the ID in the filter at location filterPointer, with ID from sequence at location sequencePointer.
- * Arguments:
- * 		filterIndex -- the Index of the filter mailbox to modify
- * 		sequenceIndex_replace -- The new sequence index to use in the filter
- * *********************************************************************************************************/
-void updateFilter(Uint16 filterIndex, int16 sequenceIndex_replace);
-
 #endif /* REVCEIVECAN_H_ */

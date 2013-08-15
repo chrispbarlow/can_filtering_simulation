@@ -21,6 +21,18 @@ CAN_Exchange/CAN_Rx_global.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DS
 CAN_Exchange/CAN_Rx_global.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/include/DSP2833x_SysCtrl.h
 CAN_Exchange/CAN_Rx_global.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/include/DSP2833x_XIntrupt.h
 CAN_Exchange/CAN_Rx_global.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/include/DSP2833x_Xintf.h
+CAN_Exchange/CAN_Rx_global.obj: ../CAN_Exchange/../Lib/CAN/CAN.h
+CAN_Exchange/CAN_Rx_global.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP28x_Project.h
+CAN_Exchange/CAN_Rx_global.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_Examples.h
+CAN_Exchange/CAN_Rx_global.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_GlobalPrototypes.h
+CAN_Exchange/CAN_Rx_global.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_ePwm_defines.h
+CAN_Exchange/CAN_Rx_global.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_Dma_defines.h
+CAN_Exchange/CAN_Rx_global.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_I2C_defines.h
+CAN_Exchange/CAN_Rx_global.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_DefaultISR.h
+CAN_Exchange/CAN_Rx_global.obj: ../CAN_Exchange/../global.h
+CAN_Exchange/CAN_Rx_global.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h
+CAN_Exchange/CAN_Rx_global.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/linkage.h
+CAN_Exchange/CAN_Rx_global.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdarg.h
 
 ../CAN_Exchange/CAN_Rx_global.c: 
 ../CAN_Exchange/CAN_Rx_global.h: 
@@ -43,3 +55,15 @@ C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/include/DSP2833x_
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/include/DSP2833x_SysCtrl.h: 
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/include/DSP2833x_XIntrupt.h: 
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/include/DSP2833x_Xintf.h: 
+../CAN_Exchange/../Lib/CAN/CAN.h: 
+C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP28x_Project.h: 
+C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_Examples.h: 
+C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_GlobalPrototypes.h: 
+C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_ePwm_defines.h: 
+C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_Dma_defines.h: 
+C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_I2C_defines.h: 
+C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_DefaultISR.h: 
+../CAN_Exchange/../global.h: 
+C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h: 
+C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/linkage.h: 
+C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdarg.h: 

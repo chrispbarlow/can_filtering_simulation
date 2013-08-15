@@ -36,12 +36,7 @@ typedef struct{
 } tempShadow_t;
 tempShadow_t mailBoxFilterShadow_SCITx[NUM_MESSAGES_MAX];
 
-typedef struct{
-	Uint16 canID_SCIRx;
-	Uint16 canDLC_SCIRx;
-	Uint16 cycleTime_SCIRx;
-} logging_list_t;
-logging_list_t loggingList_SCIRx[NUM_MESSAGES_MAX];
+
 
 
 
@@ -125,10 +120,10 @@ void controlSCI_update(void){
 					IDH <<= 8;
 					IDL = rxbuffer[(4*sequenceNum)+IDL_DATAPOSITION];
 
-					loggingList_SCIRx[sequenceNum].canID_SCIRx = (IDH|IDL);
-					loggingList_SCIRx[sequenceNum].canID_SCIRx &= 0x7FF;
-					loggingList_SCIRx[sequenceNum].canDLC_SCIRx = rxbuffer[(4*sequenceNum)+DLC_DATAPOSITION];
-					loggingList_SCIRx[sequenceNum].cycleTime_SCIRx = rxbuffer[(4*sequenceNum)+CYT_DATAPOSITION];
+					loggingList_G[sequenceNum].canID_LLRx = (IDH|IDL);
+					loggingList_G[sequenceNum].canID_LLRx &= 0x7FF;
+					loggingList_G[sequenceNum].canDLC_LLRx = rxbuffer[(4*sequenceNum)+DLC_DATAPOSITION];
+					loggingList_G[sequenceNum].cycleTime_LLRx = rxbuffer[(4*sequenceNum)+CYT_DATAPOSITION];
 				}
 
 				/* Initialise sequence */
@@ -261,42 +256,3 @@ void controlSCI_update(void){
 
 }
 
-
-
-/***********************************************************************************************************
- * Copies sequence details from temporary buffers to global message sequence array.
- * Since we don't know where in the sequence we will start, the schedule timer for all messages is set to 1.
- * *********************************************************************************************************/
-void buildSequence(Uint16 listSize){
-	Uint16 i, cycleTime_min, newReload, remainder = 0;
-
-	/* Finds the minimum cycle time in the logging list */
- 	cycleTime_min = 0xFFFF;
- 	for(i=0;i<listSize;i++){
- 		if(loggingList_SCIRx[i].cycleTime_SCIRx < cycleTime_min){
- 			cycleTime_min = loggingList_SCIRx[i].cycleTime_SCIRx;
- 		}
- 	}
-
- 	for(i=0;i<listSize;i++){
-		CAN_RxMessages_G[i].canID = loggingList_SCIRx[i].canID_SCIRx;
-		CAN_RxMessages_G[i].canData.rawData[0] = 0;
-		CAN_RxMessages_G[i].canData.rawData[1] = 0;
-		CAN_RxMessages_G[i].canDLC = loggingList_SCIRx[i].canDLC_SCIRx;
-
-		/* timer_reload set proportionally to weight the filter in favour of more frequent IDs */
-		newReload = (loggingList_SCIRx[i].cycleTime_SCIRx / cycleTime_min);
-		/* Rounding logic */
-		remainder = (loggingList_SCIRx[i].cycleTime_SCIRx % cycleTime_min);
-		if((remainder > 0)&&(remainder >= (cycleTime_min/2))){
-			CAN_RxMessages_G[i].timer_reload = (newReload + 1);
-		}
-		else{
-			CAN_RxMessages_G[i].timer_reload = newReload;
-		}
-
-		/* Force all timers to 1 for first iteration - level playing field */
-		CAN_RxMessages_G[i].timer = 1;
-		CAN_RxMessages_G[i].counter = 0;
- 	}
- }

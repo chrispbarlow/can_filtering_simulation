@@ -12,8 +12,6 @@
 #include <stdio.h>
 #include "../../CAN_Exchange/CAN_Rx_global.h"
 
-#define DUPLICATES_LIMIT 	(1)		/* Controls the number of duplicates for each ID allowed to be added to filter between arrivals of that ID */
-#define FILTERSIZE_RATIO	(2)
 
 /***********************************************************************************************************
  * Initialisation - called once when the device boots, before the scheduler starts.
@@ -99,73 +97,4 @@ void receiveCAN_update(void){
 	}
 }
 
-/***********************************************************************************************************
- * Controls the scheduling of the IDs in the filter.
- * *********************************************************************************************************/
-int16 getNextSequenceIndex(void){
-	static int16 sequenceIndex_next = -1;
-	int16 sequenceIndex_last;
-	boolean_t searchResult = FALSE;
 
-
-	if(updateSequenceRequired_G != RUN){
-		/* Reset sequencePointer to continue sequence after loading mailbox */
-		sequenceIndex_next = (filterSize_G - 1);
-	}
-	else{
-		/* Find next required CAN ID in sequence */
-		sequenceIndex_last = sequenceIndex_next;
-		do{
-			/* Wrap search */
-			if(sequenceIndex_next<(numRxCANMsgs_G-1)){
-				sequenceIndex_next++;
-			}
-			else{
-				sequenceIndex_next = 0;
-			}
-
-			/* ID not already in mailbox, decrement 'schedule' timer (timer sits between -DUPLICATES ALLOWED and 0 while ID is in one or more mailboxes) */
-			if(CAN_RxMessages_G[sequenceIndex_next].timer > (0-DUPLICATES_LIMIT)){
-				CAN_RxMessages_G[sequenceIndex_next].timer--;
-
-				/* ID ready to be inserted */
-				if(CAN_RxMessages_G[sequenceIndex_next].timer <= 0){
-					searchResult = TRUE;
-				}
-				else{
-					searchResult = FALSE;	/* ET balancing */
-				}
-			}
-			else{
-				searchResult = FALSE;		/* ET balancing */
-			}
-		}	/* Search will abort if all messages have been checked */
-		while((searchResult == FALSE)&&(sequenceIndex_next != sequenceIndex_last));
-	}
-
-	return sequenceIndex_next;
-}
-
-/***********************************************************************************************************
- * Replaces the ID in the filter at location filterPointer, with ID from sequence at location sequencePointer.
- * *********************************************************************************************************/
-void updateFilter(Uint16 filterIndex, int16 sequenceIndex_replace){
-	Uint16 sequenceIndex_old;
-
-	if(updateSequenceRequired_G == RUN){
-		/* Message scheduling */
-		sequenceIndex_old = mailBoxFilterShadow_G[filterIndex].sequenceIndex_mapped;
-		CAN_RxMessages_G[sequenceIndex_old].timer = CAN_RxMessages_G[sequenceIndex_old].timer_reload;
-	}
-	else{
-		/* Used during mailbox reload - replicates the timer mechanism for first use of ID */
-		CAN_RxMessages_G[filterIndex].timer = 0;
-	}
-
-	/* ID replacement in shadow */
-	mailBoxFilterShadow_G[filterIndex].canID_mapped = CAN_RxMessages_G[sequenceIndex_replace].canID;
-	mailBoxFilterShadow_G[filterIndex].sequenceIndex_mapped = sequenceIndex_replace;
-
-	/* Real ID replacement - also re-enables mailbox*/
-	configureRxMailbox(CANPORT_A, filterIndex, ID_STD, CAN_RxMessages_G[sequenceIndex_replace].canID, CAN_RxMessages_G[sequenceIndex_replace].canDLC);
-}

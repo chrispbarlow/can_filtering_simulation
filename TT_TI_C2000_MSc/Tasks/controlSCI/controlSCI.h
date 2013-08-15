@@ -27,13 +27,5 @@ void controlSCI_init(void);
 void controlSCI_update(void);
 
 
-/***********************************************************************************************************
- * Copies sequence details from temporary buffers to global message sequence array.
- * Since we don't know where in the sequence we will start, the schedule timer for all messages is set to 1.
- *
- * Arguments:
- * 		listSize -- number of messages in sequence.
- * *********************************************************************************************************/
-void buildSequence(Uint16 listSize);
 
 #endif /* CONTROLSCI_H_ */

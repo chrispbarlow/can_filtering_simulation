@@ -13,7 +13,12 @@
 #define NUM_MAILBOXES_MAX 	(32)
 #define NUM_MESSAGES_MAX 	(64)
 
+#define DUPLICATES_LIMIT 	(1)		/* Controls the number of duplicates for each ID allowed to be added to filter between arrivals of that ID */
+#define FILTERSIZE_RATIO	(2)
+
 #include <DSP2833x_Device.h>
+#include "../Lib/CAN/CAN.h"
+#include "../global.h"
 
 typedef enum{INIT,RUN,RESET,UPDATE} updateFlags_t;
 extern updateFlags_t updateSequenceRequired_G;
@@ -71,8 +76,49 @@ extern filterShadow_t mailBoxFilterShadow_G[];
 
 /*******************************************************************************/
 
+
+
+
+/*******************************************************************************
+ * The logging list - list of CAN IDs transmitted to device in logging sequence order
+ * *****************************************************************************/
+
+typedef struct{
+	Uint16 canID_LLRx;
+	Uint16 canDLC_LLRx;
+	Uint16 cycleTime_LLRx;
+} logging_list_t;
+extern logging_list_t loggingList_G[];
+
+/*******************************************************************************/
+
+
 /* Control values set dynamically when logging list is received */
 extern Uint16 numRxCANMsgs_G;
 extern Uint16 filterSize_G;
+
+/***********************************************************************************************************
+ * Controls the scheduling of the IDs in the filter.
+ * Returns the next valid sequence index to use in the filter.
+ * *********************************************************************************************************/
+int16 getNextSequenceIndex(void);
+
+/***********************************************************************************************************
+ * Replaces the ID in the filter at location filterPointer, with ID from sequence at location sequencePointer.
+ * Arguments:
+ * 		filterIndex -- the Index of the filter mailbox to modify
+ * 		sequenceIndex_replace -- The new sequence index to use in the filter
+ * *********************************************************************************************************/
+void updateFilter(Uint16 filterIndex, int16 sequenceIndex_replace);
+
+/***********************************************************************************************************
+ * Copies sequence details from temporary buffers to global message sequence array.
+ * Since we don't know where in the sequence we will start, the schedule timer for all messages is set to 1.
+ *
+ * Arguments:
+ * 		listSize -- number of messages in sequence.
+ * *********************************************************************************************************/
+void buildSequence(Uint16 listSize);
+
 
 #endif /* CAN_RX_GLOBAL_H_ */
