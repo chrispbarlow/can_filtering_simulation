@@ -7,7 +7,7 @@
  *      Author: chris.barlow
  * *********************************************************************************************************/
 
-#include "CAN_Rx_global.h"
+#include "CAN_Rx_Filter_global.h"
 
 /* Filter shadow is necessary due to being unable to read a mailbox's ID from registry */
 filterShadow_t mailBoxFilterShadow_G[NUM_MESSAGES_MAX];
@@ -24,6 +24,50 @@ updateFlags_t updateSequenceRequired_G = INIT;
 /* Global control variables */
 Uint16 numRxCANMsgs_G = 0;
 Uint16 filterSize_G = 0;
+
+
+
+/***********************************************************************************************************
+ * Copies sequence details from temporary buffers to global message sequence array.
+ * Since we don't know where in the sequence we will start, the schedule timer for all messages is set to 1.
+ * *********************************************************************************************************/
+void buildSequence(Uint16 listSize){
+	Uint16 i, cycleTime_min, newReload, remainder = 0;
+
+	/* Finds the minimum cycle time in the logging list */
+ 	cycleTime_min = 0xFFFF;
+ 	for(i=0;i<listSize;i++){
+ 		if(loggingList_G[i].cycleTime_LLRx < cycleTime_min){
+ 			cycleTime_min = loggingList_G[i].cycleTime_LLRx;
+ 		}
+ 	}
+
+ 	for(i=0;i<listSize;i++){
+		CAN_RxMessages_G[i].canID = loggingList_G[i].canID_LLRx;
+		CAN_RxMessages_G[i].canData.rawData[0] = 0;
+		CAN_RxMessages_G[i].canData.rawData[1] = 0;
+		CAN_RxMessages_G[i].canDLC = loggingList_G[i].canDLC_LLRx;
+
+		/* timer_reload set proportionally to weight the filter in favour of more frequent IDs */
+		newReload = (loggingList_G[i].cycleTime_LLRx / cycleTime_min);
+		/* Rounding logic */
+		remainder = (loggingList_G[i].cycleTime_LLRx % cycleTime_min);
+		if((remainder > 0)&&(remainder >= (cycleTime_min/2))){
+			CAN_RxMessages_G[i].timer_reload = (newReload + 1);
+		}
+		else{
+			CAN_RxMessages_G[i].timer_reload = newReload;
+		}
+
+		/* Force all timers to 1 for first iteration - level playing field */
+		CAN_RxMessages_G[i].timer = 1;
+		CAN_RxMessages_G[i].counter = 0;
+ 	}
+
+ 	numRxCANMsgs_G = listSize;
+ }
+
+
 
 /***********************************************************************************************************
  * Controls the scheduling of the IDs in the filter.
@@ -71,44 +115,6 @@ int16 getNextSequenceIndex(void){
 
 	return sequenceIndex_next;
 }
-
-/***********************************************************************************************************
- * Copies sequence details from temporary buffers to global message sequence array.
- * Since we don't know where in the sequence we will start, the schedule timer for all messages is set to 1.
- * *********************************************************************************************************/
-void buildSequence(Uint16 listSize){
-	Uint16 i, cycleTime_min, newReload, remainder = 0;
-
-	/* Finds the minimum cycle time in the logging list */
- 	cycleTime_min = 0xFFFF;
- 	for(i=0;i<listSize;i++){
- 		if(loggingList_G[i].cycleTime_LLRx < cycleTime_min){
- 			cycleTime_min = loggingList_G[i].cycleTime_LLRx;
- 		}
- 	}
-
- 	for(i=0;i<listSize;i++){
-		CAN_RxMessages_G[i].canID = loggingList_G[i].canID_LLRx;
-		CAN_RxMessages_G[i].canData.rawData[0] = 0;
-		CAN_RxMessages_G[i].canData.rawData[1] = 0;
-		CAN_RxMessages_G[i].canDLC = loggingList_G[i].canDLC_LLRx;
-
-		/* timer_reload set proportionally to weight the filter in favour of more frequent IDs */
-		newReload = (loggingList_G[i].cycleTime_LLRx / cycleTime_min);
-		/* Rounding logic */
-		remainder = (loggingList_G[i].cycleTime_LLRx % cycleTime_min);
-		if((remainder > 0)&&(remainder >= (cycleTime_min/2))){
-			CAN_RxMessages_G[i].timer_reload = (newReload + 1);
-		}
-		else{
-			CAN_RxMessages_G[i].timer_reload = newReload;
-		}
-
-		/* Force all timers to 1 for first iteration - level playing field */
-		CAN_RxMessages_G[i].timer = 1;
-		CAN_RxMessages_G[i].counter = 0;
- 	}
- }
 
 
 /***********************************************************************************************************

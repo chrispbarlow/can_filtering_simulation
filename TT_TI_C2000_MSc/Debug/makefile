@@ -10,7 +10,7 @@ ORDERED_OBJS += \
 $(GEN_CMDS__FLAG) \
 -l"rts2800_fpu32_fast_supplement.lib" \
 -l"rts2800_fpu32.lib" \
-"./CAN_Exchange/CAN_Rx_global.obj" \
+"./CAN_Exchange/CAN_Rx_Filter_global.obj" \
 "./Lib/CAN/CAN.obj" \
 "./Lib/SCI/SCI.obj" \
 "./Lib/TI/DSP2833x_usDelay.obj" \
@@ -164,8 +164,8 @@ Example_2833xCpuTimer.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 # Other Targets
 clean:
 	-$(RM) $(C2000_EXECUTABLE_OUTPUTS__QUOTED) "Example_2833xCpuTimer.out"
-	-$(RM) "TT_Main.pp" "scheduler\scheduler.pp" "scheduler\schedulerConfig.pp" "Tasks\receiveCAN\receiveCAN.pp" "Tasks\newTask_Template\newTask.pp" "Tasks\handleCAN\handleCAN.pp" "Tasks\controlSCI\controlSCI.pp" "Lib\TI\DSP2833x_CpuTimers.pp" "Lib\TI\DSP2833x_DefaultIsr.pp" "Lib\TI\DSP2833x_ECan.pp" "Lib\TI\DSP2833x_GlobalVariableDefs.pp" "Lib\TI\DSP2833x_PieCtrl.pp" "Lib\TI\DSP2833x_PieVect.pp" "Lib\TI\DSP2833x_Sci.pp" "Lib\TI\DSP2833x_SysCtrl.pp" "Lib\SCI\SCI.pp" "Lib\CAN\CAN.pp" "CAN_Exchange\CAN_Rx_global.pp" 
-	-$(RM) "TT_Main.obj" "scheduler\scheduler.obj" "scheduler\schedulerConfig.obj" "Tasks\receiveCAN\receiveCAN.obj" "Tasks\newTask_Template\newTask.obj" "Tasks\handleCAN\handleCAN.obj" "Tasks\controlSCI\controlSCI.obj" "Lib\TI\DSP2833x_ADC_cal.obj" "Lib\TI\DSP2833x_CodeStartBranch.obj" "Lib\TI\DSP2833x_CpuTimers.obj" "Lib\TI\DSP2833x_DefaultIsr.obj" "Lib\TI\DSP2833x_ECan.obj" "Lib\TI\DSP2833x_GlobalVariableDefs.obj" "Lib\TI\DSP2833x_PieCtrl.obj" "Lib\TI\DSP2833x_PieVect.obj" "Lib\TI\DSP2833x_Sci.obj" "Lib\TI\DSP2833x_SysCtrl.obj" "Lib\TI\DSP2833x_usDelay.obj" "Lib\SCI\SCI.obj" "Lib\CAN\CAN.obj" "CAN_Exchange\CAN_Rx_global.obj" 
+	-$(RM) "TT_Main.pp" "scheduler\scheduler.pp" "scheduler\schedulerConfig.pp" "Tasks\receiveCAN\receiveCAN.pp" "Tasks\newTask_Template\newTask.pp" "Tasks\handleCAN\handleCAN.pp" "Tasks\controlSCI\controlSCI.pp" "Lib\TI\DSP2833x_CpuTimers.pp" "Lib\TI\DSP2833x_DefaultIsr.pp" "Lib\TI\DSP2833x_ECan.pp" "Lib\TI\DSP2833x_GlobalVariableDefs.pp" "Lib\TI\DSP2833x_PieCtrl.pp" "Lib\TI\DSP2833x_PieVect.pp" "Lib\TI\DSP2833x_Sci.pp" "Lib\TI\DSP2833x_SysCtrl.pp" "Lib\SCI\SCI.pp" "Lib\CAN\CAN.pp" "CAN_Exchange\CAN_Rx_Filter_global.pp" 
+	-$(RM) "TT_Main.obj" "scheduler\scheduler.obj" "scheduler\schedulerConfig.obj" "Tasks\receiveCAN\receiveCAN.obj" "Tasks\newTask_Template\newTask.obj" "Tasks\handleCAN\handleCAN.obj" "Tasks\controlSCI\controlSCI.obj" "Lib\TI\DSP2833x_ADC_cal.obj" "Lib\TI\DSP2833x_CodeStartBranch.obj" "Lib\TI\DSP2833x_CpuTimers.obj" "Lib\TI\DSP2833x_DefaultIsr.obj" "Lib\TI\DSP2833x_ECan.obj" "Lib\TI\DSP2833x_GlobalVariableDefs.obj" "Lib\TI\DSP2833x_PieCtrl.obj" "Lib\TI\DSP2833x_PieVect.obj" "Lib\TI\DSP2833x_Sci.obj" "Lib\TI\DSP2833x_SysCtrl.obj" "Lib\TI\DSP2833x_usDelay.obj" "Lib\SCI\SCI.obj" "Lib\CAN\CAN.obj" "CAN_Exchange\CAN_Rx_Filter_global.obj" 
 	-$(RM) "Lib\TI\DSP2833x_ADC_cal.pp" "Lib\TI\DSP2833x_CodeStartBranch.pp" "Lib\TI\DSP2833x_usDelay.pp" 
 	-@echo 'Finished clean'
 	-@echo ' '

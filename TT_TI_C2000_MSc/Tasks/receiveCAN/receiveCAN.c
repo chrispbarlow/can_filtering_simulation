@@ -10,7 +10,7 @@
 #include "../../global.h"
 #include "receiveCAN.h"
 #include <stdio.h>
-#include "../../CAN_Exchange/CAN_Rx_global.h"
+#include "../../CAN_Exchange/CAN_Rx_Filter_global.h"
 
 
 /***********************************************************************************************************

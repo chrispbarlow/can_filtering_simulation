@@ -1,7 +1,7 @@
 ******************************************************************************
              TMS320C2000 Linker PC v6.1.0                      
 ******************************************************************************
->> Linked Thu Aug 15 13:52:48 2013
+>> Linked Fri Aug 16 12:44:08 2013
 
 OUTPUT FILE NAME:   <Example_2833xCpuTimer.out>
 ENTRY POINT SYMBOL: "code_start"  address: 0033fff6
@@ -117,10 +117,10 @@ ramfuncs   0    00320000    0000001f     RUN ADDR = 00008000
                   00338e9c    00000316     DSP2833x_DefaultIsr.obj (.text:retain)
                   003391b2    0000024b     rts2800_fpu32.lib : lowlev.obj (.text)
                   003393fd    00000201                       : trgdrv.obj (.text)
-                  003395fe    000001d9     controlSCI.obj (.text)
-                  003397d7    000001d4     rts2800_fpu32.lib : memory.obj (.text)
-                  003399ab    00000132     DSP2833x_ECan.obj (.text)
-                  00339add    0000011a     CAN_Rx_global.obj (.text)
+                  003395fe    000001d6     controlSCI.obj (.text)
+                  003397d4    000001d4     rts2800_fpu32.lib : memory.obj (.text)
+                  003399a8    00000132     DSP2833x_ECan.obj (.text)
+                  00339ada    0000011d     CAN_Rx_Filter_global.obj (.text)
                   00339bf7    00000107     rts2800_fpu32.lib : ll_div.obj (.text)
                   00339cfe    00000101                       : fopen.obj (.text)
                   00339dff    000000f3     DSP2833x_SysCtrl.obj (.text)
@@ -183,7 +183,7 @@ ramfuncs   0    00320000    0000001f     RUN ADDR = 00008000
                   0033acd6    0000002a                       : defs.obj (.cinit)
                   0033ad00    00000014     controlSCI.obj (.cinit)
                   0033ad14    00000014     schedulerConfig.obj (.cinit)
-                  0033ad28    00000010     CAN_Rx_global.obj (.cinit)
+                  0033ad28    00000010     CAN_Rx_Filter_global.obj (.cinit)
                   0033ad38    0000000a     rts2800_fpu32.lib : _lock.obj (.cinit)
                   0033ad42    0000000a                       : exit.obj (.cinit)
                   0033ad4c    00000008     scheduler.obj (.cinit)
@@ -416,7 +416,7 @@ I2caRegsFile
                   00007900    00000022     DSP2833x_GlobalVariableDefs.obj (I2caRegsFile)
 
 .ebss      1    0000c000    00000c08     UNINITIALIZED
-                  0000c000    00000500     CAN_Rx_global.obj (.ebss)
+                  0000c000    00000500     CAN_Rx_Filter_global.obj (.ebss)
                   0000c500    000002c4     CAN.obj (.ebss)
                   0000c7c4    00000018     DSP2833x_CpuTimers.obj (.ebss)
                   0000c7dc    00000012     schedulerConfig.obj (.ebss)
@@ -580,12 +580,12 @@ address    name
 00338d92   _InitCanA
 00338e17   _InitCanB
 0033a3a9   _InitCpuTimers
-003399ab   _InitECan
-00339aae   _InitECanGpio
-003399b0   _InitECana
-00339ab3   _InitECanaGpio
-00339a2f   _InitECanb
-00339ac9   _InitECanbGpio
+003399a8   _InitECan
+00339aab   _InitECanGpio
+003399ad   _InitECana
+00339ab0   _InitECanaGpio
+00339a2c   _InitECanb
+00339ac6   _InitECanbGpio
 00008000   _InitFlash
 00339e66   _InitPeripheralClocks
 0033a81e   _InitPieCtrl
@@ -691,11 +691,11 @@ ffffffff   ___pinit__
 0033a955   _abort
 0033938b   _add_device
 0033a73d   _atoi
-00339b14   _buildSequence
+00339ada   _buildSequence
 0033a688   _c_int00
-00339991   _calloc
+0033998e   _calloc
 00338d71   _checkMailboxState
-0033998f   _chkheap
+0033998c   _chkheap
 00339359   _close
 00338ba2   _commitSendMailbox
 0033898a   _configureRxMailbox
@@ -708,18 +708,18 @@ ffffffff   ___pinit__
 0033a957   _exit
 0033a62d   _fclose
 0033a518   _fflush
-0000c000   _filterSize_G
+0000c001   _filterSize_G
 0033895e   _findMailbox
 00339de5   _fopen
 0033a59d   _fputc
 00339fa9   _fputs
-003397d7   _free
-00339971   _free_memory
+003397d4   _free
+0033996e   _free_memory
 00339d94   _freopen
 0033a6ce   _fseek
 0033897d   _getCANErrors
 00338d81   _getMailboxID
-00339add   _getNextSequenceIndex
+00339b6d   _getNextSequenceIndex
 0033a100   _goIdle
 0033a59c   _gpioInit
 0033a994   _handleCAN_init
@@ -735,15 +735,15 @@ ffffffff   ___pinit__
 0000c100   _mailBoxFilterShadow_G
 0000c840   _mailBoxFilterShadow_SCITx
 0033a549   _main
-00339842   _malloc
-0033994f   _max_free
+0033983f   _malloc
+0033994c   _max_free
 0033a982   _memccpy
 0033a9b1   _memchr
 0033aa0c   _memset
-0033981c   _minit
+00339819   _minit
 0033aa1b   _newTask_init
 0033aa1c   _newTask_update
-0000c001   _numRxCANMsgs_G
+0000c002   _numRxCANMsgs_G
 003392d5   _open
 0033a711   _printf
 0033a59d   _putc
@@ -752,7 +752,7 @@ ffffffff   ___pinit__
 00339287   _read
 00338bfb   _readRxMailbox
 0033a27a   _readmsg
-00339898   _realloc
+00339895   _realloc
 00339ef2   _receiveCAN_init
 00339ef6   _receiveCAN_update
 0033aa18   _remove
@@ -781,7 +781,7 @@ ffffffff   ___pinit__
 0033922c   _unlink
 00339ba4   _updateFilter
 00338c74   _updateMailboxes
-0000c002   _updateSequenceRequired_G
+0000c000   _updateSequenceRequired_G
 003391b2   _write
 0033a22a   _writemsg
 ffffffff   binit
@@ -852,9 +852,9 @@ address    name
 00008000   _InitFlash
 00008000   _RamfuncsRunStart
 0000801b   _DSP28x_usDelay
-0000c000   _filterSize_G
-0000c001   _numRxCANMsgs_G
-0000c002   _updateSequenceRequired_G
+0000c000   _updateSequenceRequired_G
+0000c001   _filterSize_G
+0000c002   _numRxCANMsgs_G
 0000c040   _loggingList_G
 0000c100   _mailBoxFilterShadow_G
 0000c200   _CAN_RxMessages_G
@@ -996,22 +996,22 @@ address    name
 003395d2   _HOSTclock
 003395fe   _controlSCI_init
 00339605   _controlSCI_update
-003397d7   _free
-0033981c   _minit
-00339842   _malloc
-00339898   _realloc
-0033994f   _max_free
-00339971   _free_memory
-0033998f   _chkheap
-00339991   _calloc
-003399ab   _InitECan
-003399b0   _InitECana
-00339a2f   _InitECanb
-00339aae   _InitECanGpio
-00339ab3   _InitECanaGpio
-00339ac9   _InitECanbGpio
-00339add   _getNextSequenceIndex
-00339b14   _buildSequence
+003397d4   _free
+00339819   _minit
+0033983f   _malloc
+00339895   _realloc
+0033994c   _max_free
+0033996e   _free_memory
+0033998c   _chkheap
+0033998e   _calloc
+003399a8   _InitECan
+003399ad   _InitECana
+00339a2c   _InitECanb
+00339aab   _InitECanGpio
+00339ab0   _InitECanaGpio
+00339ac6   _InitECanbGpio
+00339ada   _buildSequence
+00339b6d   _getNextSequenceIndex
 00339ba4   _updateFilter
 00339bf7   LL$$DIV
 00339c33   LL$$MOD

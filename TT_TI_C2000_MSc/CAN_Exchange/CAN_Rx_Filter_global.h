@@ -61,7 +61,6 @@ typedef struct {
 
 extern canRxMessage_t CAN_RxMessages_G[];
 
-/*******************************************************************************/
 
 /*******************************************************************************
  * The filterShadow holds a copy of the current ID - mailbox mapping.
@@ -73,10 +72,6 @@ typedef struct{
 }filterShadow_t;
 
 extern filterShadow_t mailBoxFilterShadow_G[];
-
-/*******************************************************************************/
-
-
 
 
 /*******************************************************************************
@@ -90,26 +85,14 @@ typedef struct{
 } logging_list_t;
 extern logging_list_t loggingList_G[];
 
-/*******************************************************************************/
 
 
-/* Control values set dynamically when logging list is received */
+/*******************************************************************************
+ * Control values set dynamically when logging list is received
+ * *****************************************************************************/
 extern Uint16 numRxCANMsgs_G;
 extern Uint16 filterSize_G;
 
-/***********************************************************************************************************
- * Controls the scheduling of the IDs in the filter.
- * Returns the next valid sequence index to use in the filter.
- * *********************************************************************************************************/
-int16 getNextSequenceIndex(void);
-
-/***********************************************************************************************************
- * Replaces the ID in the filter at location filterPointer, with ID from sequence at location sequencePointer.
- * Arguments:
- * 		filterIndex -- the Index of the filter mailbox to modify
- * 		sequenceIndex_replace -- The new sequence index to use in the filter
- * *********************************************************************************************************/
-void updateFilter(Uint16 filterIndex, int16 sequenceIndex_replace);
 
 /***********************************************************************************************************
  * Copies sequence details from temporary buffers to global message sequence array.
@@ -119,6 +102,22 @@ void updateFilter(Uint16 filterIndex, int16 sequenceIndex_replace);
  * 		listSize -- number of messages in sequence.
  * *********************************************************************************************************/
 void buildSequence(Uint16 listSize);
+
+
+/***********************************************************************************************************
+ * Controls the scheduling of the IDs in the filter.
+ * Returns the next valid sequence index to use in the filter.
+ * *********************************************************************************************************/
+int16 getNextSequenceIndex(void);
+
+
+/***********************************************************************************************************
+ * Replaces the ID in the filter at location filterPointer, with ID from sequence at location sequencePointer.
+ * Arguments:
+ * 		filterIndex -- the Index of the filter mailbox to modify
+ * 		sequenceIndex_replace -- The new sequence index to use in the filter
+ * *********************************************************************************************************/
+void updateFilter(Uint16 filterIndex, int16 sequenceIndex_replace);
 
 
 #endif /* CAN_RX_GLOBAL_H_ */

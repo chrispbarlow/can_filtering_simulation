@@ -10,7 +10,7 @@
 #include "../../Lib/SCI/SCI.h"
 #include "controlSCI.h"
 #include <stdio.h>
-#include "../../CAN_Exchange/CAN_Rx_global.h"
+#include "../../CAN_Exchange/CAN_Rx_Filter_global.h"
 
 /* SCI states */
 typedef enum{WAITING,RECEIVE,SEND}SCIstate_t;
@@ -61,7 +61,7 @@ void controlSCI_update(void){
     Uint32 IDH = 0, IDL = 0;
     char tempCharOut;
     static Uint16 indexShift = 0;
-    Uint16 sequenceNum = 0;
+    Uint16 sequenceNum = 0, sequenceSize_Rx = 0;
 
 
     /* state machine controls whether the device is transmitting or receiving logging list information
@@ -104,7 +104,7 @@ void controlSCI_update(void){
 			if((i>0)&&(rxbuffer[i-1] == '~')&&(rxbuffer[i] == '}')){
 
 				/* In above eg, i = 16 at end of packet, numRxCANMsgs_G = 3 */
-				numRxCANMsgs_G = (i-4)/4;
+				sequenceSize_Rx = (i-4)/4;
 
 				/* Safeguard against mailbox overload */
 				if(rxbuffer[FSC_DATAPOSITION] <= NUM_MAILBOXES_MAX){
@@ -115,7 +115,7 @@ void controlSCI_update(void){
 				}
 
 				/* Unpackaging logging list info from data packet */
-				for(sequenceNum=0;sequenceNum<numRxCANMsgs_G;sequenceNum++){
+				for(sequenceNum=0;sequenceNum<sequenceSize_Rx;sequenceNum++){
 					IDH = rxbuffer[(4*sequenceNum)+IDH_DATAPOSITION];
 					IDH <<= 8;
 					IDL = rxbuffer[(4*sequenceNum)+IDL_DATAPOSITION];
@@ -127,7 +127,7 @@ void controlSCI_update(void){
 				}
 
 				/* Initialise sequence */
-				buildSequence(numRxCANMsgs_G);
+				buildSequence(sequenceSize_Rx);
 
 				/* flag tells receiveCAN to update the logging sequence */
 				updateSequenceRequired_G = RESET;

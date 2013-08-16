@@ -624,13 +624,15 @@ void keyPressed() {
 /* Save counters to text file */
 void saveCounters(File selection){
   int k;
-  String[] lines = new String[loggingList.length+1];
+  String[] lines = new String[loggingList.length+2];
+  
+  lines[0] = ("CAN ID,Hits");
   
   for (k = 0; k < loggingList.length; k++) {
-      lines[k] = (hex(loggingList[k][0],3)+","+counters[k]);
+      lines[k+1] = (hex(loggingList[k][0],3)+","+counters[k]);
   }
   
-  lines[k] = ("Total,"+countersTotal);
+  lines[k+2] = ("Total,"+countersTotal);
   
   if(selection != null){
     saveStrings(selection, lines);
