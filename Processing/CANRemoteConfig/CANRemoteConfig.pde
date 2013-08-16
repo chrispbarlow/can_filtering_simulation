@@ -593,19 +593,17 @@ void keyPressed() {
       counters[k] = 0;
     }
     filterSizeRx = 0;
-//    status = 0;
     redraw();
   }
   
   /* Save */
   if((key == 's')||(key == 'S')){
-//    saveCounters();
     selectOutput("Select file","saveCounters",lastFile);
   } 
   
   /* Close and save */
   if((key == 'c')||(key == 'C')){
-//    saveCounters();
+    selectOutput("Select file","saveCounters",lastFile);
     exit(); // Stop the program
   } 
   
@@ -624,15 +622,19 @@ void keyPressed() {
 /* Save counters to text file */
 void saveCounters(File selection){
   int k;
-  String[] lines = new String[loggingList.length+2];
+  String[] lines = new String[loggingList.length+6];
   
-  lines[0] = ("CAN ID,Hits");
+  lines[0] = ("CAN Filter Hit Rates");
+  lines[1] = ("Tested on:,"+ day()+"/"+month()+"/"+year()+",at:,"+hour()+":"+minute());
+  lines[2] = (",");
+  lines[3] = ("CAN ID,Hits");
   
   for (k = 0; k < loggingList.length; k++) {
-      lines[k+1] = (hex(loggingList[k][0],3)+","+counters[k]);
+      lines[k+4] = (hex(loggingList[k][0],3)+","+counters[k]);
   }
   
-  lines[k+2] = ("Total,"+countersTotal);
+  lines[k+4] = (" ");
+  lines[k+5] = ("Total,"+countersTotal);
   
   if(selection != null){
     saveStrings(selection, lines);
