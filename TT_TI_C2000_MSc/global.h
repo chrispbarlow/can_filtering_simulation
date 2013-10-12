@@ -12,5 +12,6 @@
 
 extern unsigned long tickCount_G;
 
+typedef enum{FALSE, TRUE}boolean_t;
 
 #endif /* GLOBAL_H_ */

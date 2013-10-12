@@ -32,7 +32,10 @@ Tasks/controlSCI/controlSCI.obj: ../Tasks/controlSCI/controlSCI.h
 Tasks/controlSCI/controlSCI.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h
 Tasks/controlSCI/controlSCI.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/linkage.h
 Tasks/controlSCI/controlSCI.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdarg.h
-Tasks/controlSCI/controlSCI.obj: ../Tasks/controlSCI/../../CAN_Exchange/CAN_Rx_global.h
+Tasks/controlSCI/controlSCI.obj: ../Tasks/controlSCI/../../CAN_Exchange/CAN_Rx_Filter_global.h
+Tasks/controlSCI/controlSCI.obj: ../Tasks/controlSCI/../../CAN_Exchange/../Lib/CAN/CAN.h
+Tasks/controlSCI/controlSCI.obj: ../Tasks/controlSCI/../../CAN_Exchange/../global.h
+Tasks/controlSCI/controlSCI.obj: C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h
 
 ../Tasks/controlSCI/controlSCI.c: 
 ../Tasks/controlSCI/../../Lib/SCI/SCI.h: 
@@ -66,4 +69,7 @@ C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_D
 C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h: 
 C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/linkage.h: 
 C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdarg.h: 
-../Tasks/controlSCI/../../CAN_Exchange/CAN_Rx_global.h: 
+../Tasks/controlSCI/../../CAN_Exchange/CAN_Rx_Filter_global.h: 
+../Tasks/controlSCI/../../CAN_Exchange/../Lib/CAN/CAN.h: 
+../Tasks/controlSCI/../../CAN_Exchange/../global.h: 
+C:/ti/ccsv5/tools/compiler/c2000_6.1.0/include/stdio.h: 

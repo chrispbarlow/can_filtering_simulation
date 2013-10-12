@@ -1,4 +1,5 @@
 /**
+ * Remote CAN filter configuration and
  * Filter Mapping Visualisation
  * 
  * A close-to-realtime visualisation of the mapping between 
@@ -8,12 +9,14 @@
  * as a form of remote configuration
  *
  */
-
+ 
 /* Serial port definitions */ 
 import processing.serial.*;
 Serial myPort;                       
 int[] serialInArray = new int[1000];    
 int serialCount = 0;
+
+File lastFile;
 
 /* Global state flags */
 boolean readyState = false;
@@ -38,6 +41,61 @@ int[] IDs = new int[64];
 
 /* logging list transmission progress */
 int txPointer = 0;
+
+/* Config */
+int filterSizeTx = 0;      /* Set to zero to enable auto-sizing */
+int duplicatesAllowed = 1; /* This isn't implemented in the device code. Still deciding if it's beneficial */
+
+//int[][] loggingList = {
+//  {0x050,1,100},
+////  {0x101,1,100},
+//  {0x185,8,100},
+//  {0x187,8,100},
+//  {0x188,8,100},
+//  {0x189,8,100},
+//  {0x18A,8,100},
+//  {0x18B,8,100},
+//  {0x18C,8,100},
+//  {0x18D,8,100},
+//  {0x18E,8,100},
+//  {0x190,8,100},
+//  {0x192,8,100},
+//  {0x205,8,100},
+//  {0x207,8,100},
+//  {0x209,8,100},
+//  {0x20B,8,100},
+//  {0x20D,8,100},
+//  {0x287,8,100},
+//  {0x289,8,100},
+//  {0x28B,8,100},
+//  {0x28D,8,100},
+//  {0x307,8,100},
+//  {0x309,8,100},
+//  {0x30B,8,100},
+//  {0x30D,8,100},
+//  {0x385,8,100},
+//  {0x387,8,100},
+//  {0x389,8,100},
+//  {0x38B,8,100},
+//  {0x38D,8,100},
+//  {0x407,8,100},
+//  {0x409,8,100},
+//  {0x40B,8,100},
+//  {0x40D,8,100},
+//  {0x487,8,100},
+//  {0x489,8,100},
+//  {0x48B,8,100},
+//  {0x48D,8,100},
+//  {0x507,8,100},
+//  {0x509,8,100},
+//  {0x50B,8,100},
+//  {0x50D,8,100},
+//  {0x705,1,100},
+//  {0x707,1,100},
+//  {0x709,1,100},
+//  {0x70B,1,100},
+//  {0x70D,1,100}
+//};
 
 /* The logging list. This is transmitted to the device for filter configuration */
 int[][] loggingList = {
@@ -70,46 +128,50 @@ int[][] loggingList = {
   {0x409,8,20},
   {0x40B,8,20},
   {0x40D,8,20},
-//  {0x707,1,20},
-//  {0x709,1,20},
-//  {0x70B,1,20},
-//  {0x70D,1,20},  
   {0x707,1,100},
   {0x709,1,100},
   {0x70B,1,100},
   {0x70D,1,100},  
-//  {0x187,8,20},
-//  {0x188,8,20},
-//  {0x189,8,20},
-//  {0x18A,8,20},
-//  {0x18B,8,20},
-//  {0x18C,8,20},
-//  {0x18D,8,20},
-//  {0x18E,8,20},
-//  {0x207,8,20},
-//  {0x209,8,20},
-//  {0x20B,8,20},
-//  {0x20D,8,20},
-//  {0x287,8,20},
-//  {0x289,8,20},
-//  {0x28B,8,20},
-//  {0x28D,8,20},
-//  {0x307,8,20},
-//  {0x309,8,20},
-//  {0x30B,8,20},
-//  {0x30D,8,20},
-//  {0x385,8,20},
-//  {0x387,8,20},
-//  {0x389,8,20},
-//  {0x38B,8,20},
-//  {0x38D,8,20},
-//  {0x407,8,20},
-//  {0x409,8,20},
-//  {0x40B,8,20},
-//  {0x40D,8,20},
-//  {0x38D,8,20},
-//  {0x407,8,20},
 };  
+
+/* The logging list. This is transmitted to the device for filter configuration */
+//int[][] loggingList = {
+//  {80,0,20},
+//  {389,8,20},
+//  {391,8,20},
+//  {392,8,20},
+//  {393,8,20},
+//  {394,8,20},
+//  {395,8,20},
+//  {396,8,20},
+//  {397,8,20},
+//  {398,8,20},
+//  {519,8,20},
+//  {521,8,20},
+//  {523,8,20},
+//  {525,8,20},
+//  {647,8,20},
+//  {649,8,20},
+//  {651,8,20},
+//  {653,8,20},
+//  {775,8,20},
+//  {777,8,20},
+//  {779,8,20},
+//  {781,8,20},
+//  {901,8,20},
+//  {903,8,20},
+//  {905,8,20},
+//  {907,8,20},
+//  {909,8,20},
+//  {1031,8,20},
+//  {1033,8,20},
+//  {1035,8,20},
+//  {1037,8,20},
+//  {1799,1,100},
+//  {1801,1,100},
+//  {1803,1,100},
+//  {1805,1,100},
+//};
 
 /* counters for counting */
 long[] counters = new long[loggingList.length];
@@ -117,7 +179,7 @@ long[] countersTemp = new long[loggingList.length];
 long countersTotal = 0;
   
 /* the number of mailboxes used for the filter (this should be half the number of IDs in the logging list */
-int filterSize = 0;
+int filterSizeRx = 0;
 
 void setup(){
   if(loggingList.length > 64){
@@ -148,28 +210,6 @@ void setup(){
   }
 }
 
-void delay_ms(int ms){
-  long lastTime = millis();
-  while (millis()-lastTime < ms);
-}
-
-int standardSpacingY(int mult, int offset){
-  return ((d*mult)+(2*d)+offset);
-}
-
-String intToStr_02(int num){
-  String returnStrg;
-  
-  if(i<10){
-    returnStrg = (" 0"+num);
-  }
-  else{
-    returnStrg = (" "+str(num));
-  }
-  
-  return returnStrg;
-}
-
 void draw(){
   int barLength = 0;
   String strg = "";
@@ -180,7 +220,7 @@ void draw(){
     background(10);    
     stroke(255);
     fill(20);
-    rect((s-((4*d)+110)), 2, s-d-(s-((4*d)+110)), 25+(filterSize*d),10);
+    rect((s-((4*d)+110)), 2, s-d-(s-((4*d)+110)), 25+(filterSizeRx*d),10);
     rect(w+d, 2, 250, 2*d+(loggingList.length*d),10);
     
     stroke(255);
@@ -211,7 +251,7 @@ void draw(){
     
     /* Draws device filter information and mapping lines */
     textFont(fontBold, 12);    
-    for(i=0;i<filterSize;i++){
+    for(i=0;i<filterSizeRx;i++){
       /* Text and leader lines */
       strg = intToStr_02(i);
       text(strg+": "+hex(IDs[i],3), (s-((4*d)+20)), standardSpacingY(i,6));
@@ -224,27 +264,25 @@ void draw(){
 
     /* Title and status block */
     fill(0);
-    rect((s-((4*d)+110)), standardSpacingY(54,15), 700, 130, 10);
-
-    fill(255);    
+    rect((s-((4*d)+110)), standardSpacingY(53,15), 760, 150, 10);
+    fill(255);  
     
     switch(status){
     case 0:
       strg = "Offline - Can't see device";
       break;      
     case 1:
-      strg = "Offline - Device waiting: press 'R' to begin.";
+      strg = "Offline - Device waiting\nPress 'R' to begin.";
       break;
     case 2:
-      strg = "Transmitting logging list: ";
-
-      if(txPointer>4){
-        strg += txPointer-3;
-        rect((s-((4*d)+100)), standardSpacingY(62,10), (680/(loggingList.length/(txPointer-4))), 6);
+      strg = "Transmitting logging list: ";   
+      if(txPointer>6){
+       strg += txPointer-6; 
+       rect((s-((4*d)+100)), standardSpacingY(61,15), (740/(loggingList.length/(txPointer-6))), 6);
       }
       break;
     case 3:
-      strg = "Online - press 'R' to reset, 'S' to save hit counts, 'C' to save and close.\nTotal hits: ";
+      strg = "Online\nPress 'R' to reset, 'S' to save hit counts, 'C' to save and close, 'X' to exit without saving.\nTotal hits: ";
       strg += countersTotal;
       break;
     case 4:
@@ -254,14 +292,14 @@ void draw(){
     }
     
     textFont(fontBold, 16);
-    text("Dynamic CAN Filter Mapping Visualisation", (s-((4*d)+100)), standardSpacingY(56,6));
+    text("Dynamic CAN Filter Remote Configuration and Mapping Visualisation Tool", (s-((4*d)+100)), standardSpacingY(55,6));
     textFont(fontBold, 14);
-    text("Chris Barlow, MSc Reliable Embedded Systems 2013, University of Leicester", (s-((4*d)+100)), standardSpacingY(57,8));
+    text("Chris Barlow, MSc Reliable Embedded Systems 2013, University of Leicester", (s-((4*d)+100)), standardSpacingY(56,8));
     textFont(font, 14);
-    text("This application displays the CAN mailbox to logging list mapping.", (s-((4*d)+100)), standardSpacingY(59,6));
-    text("Logging list is sent to the device on connection", (s-((4*d)+100)), standardSpacingY(60,6));
+    text("This application displays the CAN mailbox to logging list mapping.", (s-((4*d)+100)), standardSpacingY(58,6));
+    text("Logging list is sent to the device on connection", (s-((4*d)+100)), standardSpacingY(59,6));
     textFont(fontBold, 14);
-    text("Status: "+strg, (s-((4*d)+100)), standardSpacingY(62,6));
+    text("Status: "+strg, (s-((4*d)+100)), standardSpacingY(61,6));
     
     allRefresh = false;  
     
@@ -274,16 +312,38 @@ void draw(){
 void transmitLoggingList(){
   int txListPointer;
 
+
+  /* Transmitted data packet looks like this:
+   *
+   *     index:  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+   *     chars:  { f d a a A X b b B  Y  c  c  C  Z  ~  }
+   * Where:
+   *     f is the filter size control constant
+   *     d is the duplication control constant
+   *    aa is two byte CAN ID
+   *     A is the CAN data length
+   *     X is the CAN message cycle time
+   *    etc
+   * */
+  print(txPointer+" ");
+  
   if(txPointer == 0){
+  /* packet start */
     myPort.write('{');
     println("{");
-    txPointer++;
   }
-  else if(txPointer <= loggingList.length){  
-    txListPointer =  txPointer-1;
-    
+  else if(txPointer == 1){
+    myPort.write(filterSizeTx);
+    println(filterSizeTx);
+  }
+  else if(txPointer == 2){
+    myPort.write(duplicatesAllowed);
+    println(duplicatesAllowed);
+  } 
+  else if(txPointer < loggingList.length+3){
+    txListPointer =  txPointer-3;
     /* CAN ID high byte */
-    myPort.write((loggingList[txListPointer][0]>>8)&0x07);
+    myPort.write((loggingList[txListPointer][0]>>8)&0x87);
     /* CAN ID low byte */
     myPort.write (loggingList[txListPointer][0]&0xFF);
     /* Message length in bytes */
@@ -292,17 +352,19 @@ void transmitLoggingList(){
     myPort.write (loggingList[txListPointer][2]&0xFF);
     
     println(hex((loggingList[txListPointer][0]>>8)&0xFF,1)+" "+hex(loggingList[txListPointer][0]&0xFF,2)+" "+hex(loggingList[txListPointer][1]&0xFF,2)+" "+hex(loggingList[txListPointer][2]&0xFF,2));
-    txPointer++;
   }
-  else if(txPointer == (loggingList.length+1)){
+  else if(txPointer == (loggingList.length+3)){
+  /* packet sign-off */
     myPort.write('~');
     println("~");
-    txPointer++;
   }
-  else if(txPointer == (loggingList.length+2)){
+  else if(txPointer == (loggingList.length+4)){
     myPort.write('}');
     println("}");
-    txPointer++;
+
+  }
+  else{
+   println("got here");
   } 
 }
 
@@ -315,16 +377,26 @@ void receiveLoggingDetails(){
           switch(serialInArray[1]){ 
                
           case 'M': 
-          /* Data packet contains mailbox information */
+          /* Data packet contains mailbox information
+           *
+           * Data packet looks like this:
+           *    index:  0 1 2 3 4 5 6 7
+           *    chars:  { M A a a X ~ }
+           * Where:
+           *    A is the sequence location mapped to mailbox
+           *    aa is two byte CAN ID
+           *    X mailbox location
+           *    This is fixed length.
+           * */
           
             if(serialCount-3 == 1){
-              filterSize = 1;
+              filterSizeRx = 1;
             }
             else{
-              filterSize = (serialCount-3)/3;
+              filterSizeRx = (serialCount-3)/3;
             }
             
-            for(loggingListPointer=0;loggingListPointer<filterSize;loggingListPointer++){
+            for(loggingListPointer=0;loggingListPointer<filterSizeRx;loggingListPointer++){
               IDhPointer = (3*loggingListPointer)+2;
               IDlPointer = (3*loggingListPointer)+3;
               lineEndPointer = (3*loggingListPointer)+4;
@@ -335,10 +407,22 @@ void receiveLoggingDetails(){
             break;
                    
           case 'S':
-          /* Data packet contains loggingList information */ 
+          /* Data packet contains loggingList information 
+           * Due to the large amount of data for the message counts
+           * Data is transmitted as max 10 values, 6 apart, offset by pointerShift
+           *
+           * Data packet looks like this:
+           *     index:  0 1 2 3 4 5 6 7 8
+           *     chars:  { S A a a a a ~ }
+           * Where:
+           *    A is the sequence location
+           *    aaaa is four byte hit count for the sequence location
+           *
+           *    This is fixed length.
+           * */
            
             loggingListPointer = serialInArray[2];
-            println(loggingListPointer);
+//            println(loggingListPointer);
             
             if(loggingListPointer < loggingList.length){
               /* Unpack 32 bit counter */
@@ -382,13 +466,13 @@ void serialEvent(Serial myPort) {
 
     /* read a byte from the serial port: */
     serialInArray[serialCount] = myPort.read();
-    println(serialInArray[serialCount]);
+//    println(serialInArray[serialCount]);
     
     /* Device sends '?' character as a handshake / logging list request */
     if(serialInArray[serialCount] == '?'){
     
       /* Prevents '63' values in data stream from being misinterpreted as a handshake request */ 
-      if(hsCount < 5){
+      if(hsCount < 10){
         hsCount++;
       }
       else{
@@ -437,13 +521,18 @@ void serialEvent(Serial myPort) {
     case 2:
       if(readyState==true){
         /* this delay is necesssary for the TI chip to keep up when it receives erroneous null characters */ 
-        if((serialInArray[0] == '?')&&(txPointer <= (loggingList.length+2))){
+        if((serialInArray[0] == '?')&&(txPointer <= (loggingList.length+4))){
           delay_ms(5);
           transmitLoggingList();
+          txPointer++;
           redraw();
         }
         else if(serialInArray[0] == '{'){
+          println("got here");
           status = 3;
+        }
+        else{
+          println("staying here");
         }
       }
       else{
@@ -454,6 +543,7 @@ void serialEvent(Serial myPort) {
       break;
     /* Online */
     case 3:
+      
       if(readyState==true){
       /* End of data packet - update data arrays */
         if((serialCount>0)&&(serialInArray[serialCount-1] == '~')&&(serialInArray[serialCount] == '}')){
@@ -477,8 +567,8 @@ void serialEvent(Serial myPort) {
     }
     
    
-     println("A"+serialInArray[0]);
-     println("S"+status);  
+//     println("A"+serialInArray[0]);
+//     println("S"+status);
   
   }
   catch(Exception e){
@@ -494,7 +584,7 @@ void keyPressed() {
   if((key == 'r')||(key == 'R')){
      readyState = !readyState;
      println(readyState);
-     for(k=0;k<filterSize;k++){
+     for(k=0;k<filterSizeRx;k++){
         IDs[k] = 0x000;
         mapLineEnd[k] = standardSpacingY(k,0);
      }
@@ -502,25 +592,23 @@ void keyPressed() {
      for (k = 0; k < loggingList.length; k++) {
       counters[k] = 0;
     }
-    filterSize = 0;
-//    status = 0;
+    filterSizeRx = 0;
     redraw();
   }
   
   /* Save */
   if((key == 's')||(key == 'S')){
-    saveCounters();
+    selectOutput("Select file","saveCounters",lastFile);
   } 
   
   /* Close and save */
   if((key == 'c')||(key == 'C')){
-    saveCounters();
+    selectOutput("Select file","saveCounters",lastFile);
     exit(); // Stop the program
   } 
   
   /* Exit without saving */
   if((key == 'x')||(key == 'X')){
-    saveCounters();
     exit(); // Stop the program
   } 
 
@@ -532,12 +620,48 @@ void keyPressed() {
 
 
 /* Save counters to text file */
-void saveCounters(){
-  String[] lines = new String[loggingList.length];
+void saveCounters(File selection){
+  int k;
+  String[] lines = new String[loggingList.length+6];
   
-  for (int k = 0; k < loggingList.length; k++) {
-      lines[k] = str(counters[k]);
+  lines[0] = ("CAN Filter Hit Rates");
+  lines[1] = ("Tested on:,"+ day()+"/"+month()+"/"+year()+",at:,"+hour()+":"+minute());
+  lines[2] = (",");
+  lines[3] = ("CAN ID,Hits");
+  
+  for (k = 0; k < loggingList.length; k++) {
+      lines[k+4] = (hex(loggingList[k][0],3)+","+counters[k]);
   }
-  saveStrings("log_output.txt", lines);
+  
+  lines[k+4] = (" ");
+  lines[k+5] = ("Total,"+countersTotal);
+  
+  if(selection != null){
+    saveStrings(selection, lines);
+    lastFile = selection;
+  }
 }
+
+void delay_ms(int ms){
+  long lastTime = millis();
+  while (millis()-lastTime < ms);
+}
+
+int standardSpacingY(int mult, int offset){
+  return ((d*mult)+(2*d)+offset);
+}
+
+String intToStr_02(int num){
+  String returnStrg;
+  
+  if(i<10){
+    returnStrg = (" 0"+num);
+  }
+  else{
+    returnStrg = (" "+str(num));
+  }
+  
+  return returnStrg;
+}
+
   

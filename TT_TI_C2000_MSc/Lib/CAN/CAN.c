@@ -173,6 +173,7 @@ Uint32 getCANErrors(char port){
 /* Always returns 0  */
 int16 configureRxMailbox(char port, char mbNum, char IDE, Uint32 canID, Uint16 dataLength){
 	int16 success = -1;
+	Uint32 messagePending = 0;
 
 	/*Read regs into shadow */
 	canRegsShadow.CANME.all = CAN_Ports[port].canRegs->CANME.all;
@@ -201,10 +202,24 @@ int16 configureRxMailbox(char port, char mbNum, char IDE, Uint32 canID, Uint16 d
 	CAN_Ports[port].message_Objects[mbNum].mailboxState = RX_FREE;
 
 	/* Enable mailbox */
+	canRegsShadow.CANME.all = CAN_Ports[port].canRegs->CANME.all;
 	canRegsShadow.CANME.all |= (bitSelect_32<<mbNum);
 
+	canRegsShadow.CANOPC.all = CAN_Ports[port].canRegs->CANOPC.all;
+	canRegsShadow.CANOPC.all |= (bitSelect_32<<mbNum);
+
+
 	CAN_Ports[port].canRegs->CANMD.all = canRegsShadow.CANMD.all;
+	CAN_Ports[port].canRegs->CANOPC.all = canRegsShadow.CANOPC.all;
 	CAN_Ports[port].canRegs->CANME.all = canRegsShadow.CANME.all;
+
+	/* Trying to force CANRMP.mbNum to clear */
+	do{
+		canRegsShadow.CANRMP.all = CAN_Ports[port].canRegs->CANRMP.all;
+		messagePending = canRegsShadow.CANRMP.all & (bitSelect_32<<mbNum);
+
+		CAN_Ports[port].canRegs->CANRMP.all = messagePending;
+	}while(messagePending != 0);
 
 	success = 0;
 
@@ -292,14 +307,20 @@ int16 commitSendMailbox(char port, char mbNum){
 	return success;
 }
 
+void disableMailbox(char port, char mbNum){
+	canRegsShadow.CANME.all = CAN_Ports[port].canRegs->CANME.all;
+	/* disable mailbox */
+	canRegsShadow.CANME.all &= ~(bitSelect_32<<mbNum);
+	CAN_Ports[port].canRegs->CANME.all = canRegsShadow.CANME.all;
+	CAN_Ports[port].message_Objects[mbNum].mailboxState = DISABLED;
+}
+
+
 int16 readRxMailbox(char port, char mbNum, Uint32 data[]){
 	int16 dataLength = 0;
+	Uint32 messagePending = 0;
 
 	canRegsShadow.CANMD.all = CAN_Ports[port].canRegs->CANMD.all;
-
-
-	CAN_Ports[port].message_Objects[mbNum].mailbox->MDL.all = 0x00000000;
-	CAN_Ports[port].message_Objects[mbNum].mailbox->MDH.all = 0x00000000;
 
 	if((canRegsShadow.CANMD.all & (bitSelect_32<<mbNum)) != 0){
 
@@ -314,17 +335,26 @@ int16 readRxMailbox(char port, char mbNum, Uint32 data[]){
 		dataLength = -1;	/* mailbox not set to receive */
 	}
 
+	/* Trying to force CANRMP.mbNum to clear */
+	do{
+		canRegsShadow.CANRMP.all = CAN_Ports[port].canRegs->CANRMP.all;
+		messagePending = canRegsShadow.CANRMP.all & (bitSelect_32<<mbNum);
+
+		CAN_Ports[port].canRegs->CANRMP.all = messagePending;
+	}while(messagePending != 0);
+
 	return dataLength;
 }
 
-void updateMailboxes(char port){ /* This will probably become the CANTx_update() task */
+/* Updates the mailbox state machine (call at least twice between Tx and Rx tasks) */
+void updateMailboxes(char port){
 
 	Uint16 i;
+	Uint32 CANRMPclearMask = 0x00000000, CANTAclearMask = 0x00000000;
 
 	canRegsShadow.CANTA.all 	= CAN_Ports[port].canRegs->CANTA.all;
 	canRegsShadow.CANTRS.all 	= CAN_Ports[port].canRegs->CANTRS.all;
 	canRegsShadow.CANRMP.all 	= CAN_Ports[port].canRegs->CANRMP.all;
-
 
 	for(i = 0; i < 32; i++)
 	{
@@ -341,7 +371,7 @@ void updateMailboxes(char port){ /* This will probably become the CANTx_update()
 			{
 				if(((canRegsShadow.CANTA.all & (bitSelect_32<<i)) >> i) == 1)
 				{
-					canRegsShadow.CANTA.all |= (bitSelect_32<<i);
+					CANTAclearMask |= (bitSelect_32<<i);
 					CAN_Ports[port].message_Objects[i].mailboxState = TX_SENT;
 				}
 				else
@@ -369,7 +399,7 @@ void updateMailboxes(char port){ /* This will probably become the CANTx_update()
 		case RX_FREE:
 			if((canRegsShadow.CANRMP.all & (bitSelect_32<<i)) != 0)
 			{
-				canRegsShadow.CANRMP.all |= (bitSelect_32<<i);
+				CANRMPclearMask |= (bitSelect_32<<i);
 				CAN_Ports[port].message_Objects[i].mailboxState = RX_ARRIVAL;
 			}
 			break;
@@ -392,8 +422,8 @@ void updateMailboxes(char port){ /* This will probably become the CANTx_update()
 		}
 	}
 
-	CAN_Ports[port].canRegs->CANTA.all = canRegsShadow.CANTA.all;
-	CAN_Ports[port].canRegs->CANRMP.all = canRegsShadow.CANRMP.all;
+	CAN_Ports[port].canRegs->CANTA.all = CANTAclearMask;
+	CAN_Ports[port].canRegs->CANRMP.all = CANRMPclearMask;
 }
 
 messageObjectStates_t checkMailboxState(char port, char mbNum){
