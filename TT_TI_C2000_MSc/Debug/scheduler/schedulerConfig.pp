@@ -2,8 +2,8 @@
 
 scheduler/schedulerConfig.obj: ../scheduler/schedulerConfig.c
 scheduler/schedulerConfig.obj: ../scheduler/schedulerConfig.h
-scheduler/schedulerConfig.obj: ../scheduler/../Tasks/sendCAN/sendCAN.h
-scheduler/schedulerConfig.obj: ../scheduler/../Tasks/sendCAN/../../Lib/CAN/CAN.h
+scheduler/schedulerConfig.obj: ../scheduler/../Tasks/handleCAN/handleCAN.h
+scheduler/schedulerConfig.obj: ../scheduler/../Tasks/handleCAN/../../Lib/CAN/CAN.h
 scheduler/schedulerConfig.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP28x_Project.h
 scheduler/schedulerConfig.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/include/DSP2833x_Device.h
 scheduler/schedulerConfig.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/include/DSP2833x_Adc.h
@@ -30,14 +30,13 @@ scheduler/schedulerConfig.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP
 scheduler/schedulerConfig.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_Dma_defines.h
 scheduler/schedulerConfig.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_I2C_defines.h
 scheduler/schedulerConfig.obj: C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_DefaultISR.h
-scheduler/schedulerConfig.obj: ../scheduler/../Tasks/handleCAN/handleCAN.h
 scheduler/schedulerConfig.obj: ../scheduler/../Tasks/receiveCAN/receiveCAN.h
 scheduler/schedulerConfig.obj: ../scheduler/../Tasks/controlSCI/controlSCI.h
 
 ../scheduler/schedulerConfig.c: 
 ../scheduler/schedulerConfig.h: 
-../scheduler/../Tasks/sendCAN/sendCAN.h: 
-../scheduler/../Tasks/sendCAN/../../Lib/CAN/CAN.h: 
+../scheduler/../Tasks/handleCAN/handleCAN.h: 
+../scheduler/../Tasks/handleCAN/../../Lib/CAN/CAN.h: 
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP28x_Project.h: 
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/include/DSP2833x_Device.h: 
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_headers/include/DSP2833x_Adc.h: 
@@ -64,6 +63,5 @@ C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_e
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_Dma_defines.h: 
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_I2C_defines.h: 
 C:/ti/controlSUITE/device_support/f2833x/v133/DSP2833x_common/include/DSP2833x_DefaultISR.h: 
-../scheduler/../Tasks/handleCAN/handleCAN.h: 
 ../scheduler/../Tasks/receiveCAN/receiveCAN.h: 
 ../scheduler/../Tasks/controlSCI/controlSCI.h: 

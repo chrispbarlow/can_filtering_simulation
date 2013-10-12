@@ -1,35 +1,25 @@
-/*
+/***********************************************************************************************************
  * controlSCI.c
  *
- *  Controls the serial data transfer between device and desktop application via the TI SCI port
+ * Controls the serial data transfer between device and desktop application via the TI SCI port
  *
- *  Created on: 25 June 2013
+ * Created on: 25 June 2013
  *      Author: chris.barlow
- */
+ * *********************************************************************************************************/
+
 #include "../../Lib/SCI/SCI.h"
 #include "controlSCI.h"
 #include <stdio.h>
-#include "../../CAN_Exchange/CAN_Rx_global.h"
+#include "../../CAN_Exchange/CAN_Rx_Filter_global.h"
 
-
+/* SCI states */
 typedef enum{WAITING,RECEIVE,SEND}SCIstate_t;
+
+/* Raw character receive buffer */
 static char rxbuffer[300];
 Uint16 rxbufferSize = (sizeof(rxbuffer)/sizeof(rxbuffer[0]));
 
-typedef struct{
-	Uint16 mp;
-	Uint16 ID;
-	Uint32 count;
-} tempShadow_t;
-tempShadow_t filtermap[64];
-
-typedef struct{
-	Uint16 canID;
-	Uint16 canDLC;
-	Uint16 cycleTime;
-} logging_list_t;
-logging_list_t loggingList[64];
-
+/* Position control for packet data */
 enum {
 	FSC_DATAPOSITION = 1,
 	DUP_DATAPOSITION = 2,
@@ -39,31 +29,43 @@ enum {
 	CYT_DATAPOSITION = 6
 };
 
+/* Temporary arrays for data unpacking */
+typedef struct{
+	Uint16 sequenceIndex_SCITx;
+	Uint16 canID_SCITx;
+} tempShadow_t;
+tempShadow_t mailBoxFilterShadow_SCITx[NUM_MESSAGES_MAX];
 
-/* Init function called once when device boots */
-void controlSCI_init(void)
-{
+
+
+
+
+/***********************************************************************************************************
+ * Initialisation - called once when the device boots, before the scheduler starts.
+ * *********************************************************************************************************/
+void controlSCI_init(void){
 	/* This TI function is found in the DSP2833x_Sci.c file. */
 	InitSciaGpio();
 	scia_fifo_init();	  	/* Initialize the SCI FIFO */
 	scia_init();  			/* Initalize SCI for echoback */
 }
 
-/* update function called periodically from TT scheduler */
-void controlSCI_update(void)
-{
+
+
+/***********************************************************************************************************
+ * Update function - called periodically from scheduler
+ * *********************************************************************************************************/
+void controlSCI_update(void){
 	static SCIstate_t SCIstate = WAITING;
     static Uint16 i = 0, j = 0;
     Uint32 IDH = 0, IDL = 0;
     char tempCharOut;
-    static Uint16 pointerShift = 0;
-    Uint16 sequenceNum = 0;
+    static Uint16 indexShift = 0;
+    Uint16 sequenceNum = 0, sequenceSize_Rx = 0;
 
 
-    /*
-     * state machine controls whether the device is transmitting or receiving logging list information
-     * will always receive until first logging list is received
-     * */
+    /* state machine controls whether the device is transmitting or receiving logging list information
+     * will always receive until first logging list is received */
     switch(SCIstate){
 
     case WAITING:
@@ -88,10 +90,10 @@ void controlSCI_update(void)
          		SCIstate = WAITING;
          	}
 
-         	/* *
-         	 * Data packet looks like this:
-         	 * 		 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
-         	 * 		"{ f d a a A X b b B  Y  c  c  C  Z  ~  }" where:
+         	/* Received data packet looks like this:
+         	 * 		index:  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+         	 * 		chars:  { f d a a A X b b B  Y  c  c  C  Z  ~  }
+         	 * Where:
          	 * 		f is the filter size control constant
          	 * 		d is the duplication control constant
          	 *  	aa is two byte CAN ID
@@ -102,7 +104,7 @@ void controlSCI_update(void)
 			if((i>0)&&(rxbuffer[i-1] == '~')&&(rxbuffer[i] == '}')){
 
 				/* In above eg, i = 16 at end of packet, numRxCANMsgs_G = 3 */
-				numRxCANMsgs_G = (i-4)/4;
+				sequenceSize_Rx = (i-4)/4;
 
 				/* Safeguard against mailbox overload */
 				if(rxbuffer[FSC_DATAPOSITION] <= NUM_MAILBOXES_MAX){
@@ -113,19 +115,19 @@ void controlSCI_update(void)
 				}
 
 				/* Unpackaging logging list info from data packet */
-				for(sequenceNum=0;sequenceNum<numRxCANMsgs_G;sequenceNum++){
+				for(sequenceNum=0;sequenceNum<sequenceSize_Rx;sequenceNum++){
 					IDH = rxbuffer[(4*sequenceNum)+IDH_DATAPOSITION];
 					IDH <<= 8;
 					IDL = rxbuffer[(4*sequenceNum)+IDL_DATAPOSITION];
 
-					loggingList[sequenceNum].canID = (IDH|IDL);
-					loggingList[sequenceNum].canID &= 0x7FF;
-					loggingList[sequenceNum].canDLC = rxbuffer[(4*sequenceNum)+DLC_DATAPOSITION];
-					loggingList[sequenceNum].cycleTime = rxbuffer[(4*sequenceNum)+CYT_DATAPOSITION];
+					loggingList_G[sequenceNum].canID_LLRx = (IDH|IDL);
+					loggingList_G[sequenceNum].canID_LLRx &= 0x7FF;
+					loggingList_G[sequenceNum].canDLC_LLRx = rxbuffer[(4*sequenceNum)+DLC_DATAPOSITION];
+					loggingList_G[sequenceNum].cycleTime_LLRx = rxbuffer[(4*sequenceNum)+CYT_DATAPOSITION];
 				}
 
 				/* Initialise sequence */
-				buildSequence(numRxCANMsgs_G);
+				buildSequence(sequenceSize_Rx);
 
 				/* flag tells receiveCAN to update the logging sequence */
 				updateSequenceRequired_G = RESET;
@@ -157,38 +159,57 @@ void controlSCI_update(void)
      	else{
 			/* Take snapshot of filters (should prevent updates halfway through transmission)*/
 			for(i=0;i<filterSize_G;i++){
-				j = mailBoxFilters_G[i].messagePointer;
-				filtermap[i].mp = j;
-				filtermap[i].count = CAN_RxMessages_G[j].counter;
-				filtermap[i].ID = mailBoxFilters_G[i].canID;
+				j = mailBoxFilterShadow_G[i].sequenceIndex_mapped;
+				mailBoxFilterShadow_SCITx[i].sequenceIndex_SCITx = j;
+				mailBoxFilterShadow_SCITx[i].canID_SCITx = mailBoxFilterShadow_G[i].canID_mapped;
 			}
 
-			/* Transmit mailbox data */
+			/* Transmit mailbox data
+			 *
+			 * Data packet looks like this:
+			 *    index:  0 1 2 3 4 5 6 7
+			 *    chars:  { M A a a X ~ }
+			 * Where:
+			 *    A is the sequence location mapped to mailbox
+			 *    aa is two byte CAN ID
+			 *    X mailbox location
+			 *    This is fixed length.
+			 * */
 			scia_xmit('{');
 			scia_xmit('M');
 
 			for(i=0;i<filterSize_G;i++){
-				j = filtermap[i].mp;
+				j = mailBoxFilterShadow_SCITx[i].sequenceIndex_SCITx;
 
-				tempCharOut = ((filtermap[i].ID>>8) & 0xFF);
+				tempCharOut = ((mailBoxFilterShadow_SCITx[i].canID_SCITx>>8) & 0xFF);
 				scia_xmit(tempCharOut);
 
-				tempCharOut = (filtermap[i].ID & 0xFF);
+				tempCharOut = (mailBoxFilterShadow_SCITx[i].canID_SCITx & 0xFF);
 				scia_xmit(tempCharOut);
 
 				tempCharOut = (j & 0xFF);
 				scia_xmit(tempCharOut);
-		   }
+		    }
 
 			scia_xmit('~');
 			scia_xmit('}');
 
-			/* Transmit message counts */
-			/* Due to the large amount of data for the message counts
-			 * Data is transmitted as max 10 values, 6 apart, offset by pointerShift*/
+			/* Transmit message counts
+			 * Due to the large amount of data for the message counts
+			 * Data is transmitted as max 10 values, 6 apart, offset by pointerShift
+			 *
+			 * Data packet looks like this:
+			 *     index:  0 1 2 3 4 5 6 7 8
+			 *     chars:  { S A a a a a ~ }
+			 * Where:
+		 	 *    A is the sequence location
+		 	 *    aaaa is four byte hit count for the sequence location
+		 	 *
+			 *    This is fixed length.
+			 * */
 			for(i=0;i<=SEQ_TX_CHUNK_SIZE;i++){
 
-				j = (i*SEQ_TX_CHUNK_SPACING)+pointerShift;
+				j = (i*SEQ_TX_CHUNK_SPACING)+indexShift;
 
 				if(j<=numRxCANMsgs_G){
 					scia_xmit('{');
@@ -197,6 +218,7 @@ void controlSCI_update(void)
 					tempCharOut = (j & 0xff);
 					scia_xmit(tempCharOut);
 
+					/* Send the 32-bit counter value */
 					tempCharOut = ((CAN_RxMessages_G[j].counter>>24)&0xFF);
 					scia_xmit(tempCharOut);
 					tempCharOut = ((CAN_RxMessages_G[j].counter>>16)&0xFF);
@@ -213,9 +235,9 @@ void controlSCI_update(void)
 		   }
 
 			/* Increment pointerShift to inter-space next set of values next time */
-			pointerShift++;
-			if(pointerShift > 6){
-				pointerShift = 0;
+			indexShift++;
+			if(indexShift > 6){
+				indexShift = 0;
 			}
 
 			/* Instruct desktop app to refresh screen */
@@ -234,37 +256,3 @@ void controlSCI_update(void)
 
 }
 
-/* Iterates through logging sequence (CAN_Rx_global.c) and updates / resets values */
-void buildSequence(Uint16 listSize){
-	Uint16 i, cycleTime_min, newReload, remainder = 0;
-
-	/* Finds the minimum cycle time in the logging list */
- 	cycleTime_min = 0xFFFF;
- 	for(i=0;i<listSize;i++){
- 		if(loggingList[i].cycleTime<cycleTime_min){
- 			cycleTime_min = loggingList[i].cycleTime;
- 		}
- 	}
-
- 	for(i=0;i<listSize;i++){
-		CAN_RxMessages_G[i].canID = loggingList[i].canID;
-		CAN_RxMessages_G[i].canData.rawData[0] = 0;
-		CAN_RxMessages_G[i].canData.rawData[1] = 0;
-		CAN_RxMessages_G[i].canDLC = loggingList[i].canDLC;
-
-		/* timer_reload set proportionally to weight the filter in favour of more frequent IDs */
-		newReload = loggingList[i].cycleTime/cycleTime_min;
-		/* Rounding logic */
-		remainder = loggingList[i].cycleTime%cycleTime_min;
-		if((remainder > 0)&&(remainder >= (cycleTime_min/2))){
-			CAN_RxMessages_G[i].timer_reload = (newReload + 1);
-		}
-		else{
-			CAN_RxMessages_G[i].timer_reload = newReload;
-		}
-
-		/* Force all timers to 1 for first iteration - level playing field */
-		CAN_RxMessages_G[i].timer = 1;
-		CAN_RxMessages_G[i].counter = 0;
- 	}
- }

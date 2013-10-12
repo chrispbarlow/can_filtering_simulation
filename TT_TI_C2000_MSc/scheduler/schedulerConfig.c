@@ -34,7 +34,6 @@ volatile task_t Tasks[] = {
 const unsigned int tasksInSchedule = (sizeof(Tasks) / sizeof(Tasks[0]));
 
 void Tasks_Init(void){
-	sendCAN_init();
 	receiveCAN_init();
 	controlSCI_init();
 }

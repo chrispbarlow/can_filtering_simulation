@@ -1,4 +1,5 @@
 /**
+ * Remote CAN filter configuration and
  * Filter Mapping Visualisation
  * 
  * A close-to-realtime visualisation of the mapping between 
@@ -42,8 +43,8 @@ int[] IDs = new int[64];
 int txPointer = 0;
 
 /* Config */
-int filterSizeTx = 15;      /* Set to zero to enable auto-sizing */
-int duplicatesAllowed = 1;
+int filterSizeTx = 0;      /* Set to zero to enable auto-sizing */
+int duplicatesAllowed = 1; /* This isn't implemented in the device code. Still deciding if it's beneficial */
 
 //int[][] loggingList = {
 //  {0x050,1,100},
@@ -97,80 +98,80 @@ int duplicatesAllowed = 1;
 //};
 
 /* The logging list. This is transmitted to the device for filter configuration */
-//int[][] loggingList = {
-//  {0x187,8,20},
-//  {0x188,8,20},
-//  {0x189,8,20},
-//  {0x18A,8,20},
-//  {0x18B,8,20},
-//  {0x18C,8,20},
-//  {0x18D,8,20},
-//  {0x18E,8,20},
-//  {0x207,8,20},
-//  {0x209,8,20},
-//  {0x20B,8,20},
-//  {0x20D,8,20},
-//  {0x287,8,20},
-//  {0x289,8,20},
-//  {0x28B,8,20},
-//  {0x28D,8,20},
-//  {0x307,8,20},
-//  {0x309,8,20},
-//  {0x30B,8,20},
-//  {0x30D,8,20},
-//  {0x385,8,20},
-//  {0x387,8,20},
-//  {0x389,8,20},
-//  {0x38B,8,20},
-//  {0x38D,8,20},
-//  {0x407,8,20},
-//  {0x409,8,20},
-//  {0x40B,8,20},
-//  {0x40D,8,20},
-//  {0x707,1,100},
-//  {0x709,1,100},
-//  {0x70B,1,100},
-//  {0x70D,1,100},  
-//};  
+int[][] loggingList = {
+  {0x187,8,20},
+  {0x188,8,20},
+  {0x189,8,20},
+  {0x18A,8,20},
+  {0x18B,8,20},
+  {0x18C,8,20},
+  {0x18D,8,20},
+  {0x18E,8,20},
+  {0x207,8,20},
+  {0x209,8,20},
+  {0x20B,8,20},
+  {0x20D,8,20},
+  {0x287,8,20},
+  {0x289,8,20},
+  {0x28B,8,20},
+  {0x28D,8,20},
+  {0x307,8,20},
+  {0x309,8,20},
+  {0x30B,8,20},
+  {0x30D,8,20},
+  {0x385,8,20},
+  {0x387,8,20},
+  {0x389,8,20},
+  {0x38B,8,20},
+  {0x38D,8,20},
+  {0x407,8,20},
+  {0x409,8,20},
+  {0x40B,8,20},
+  {0x40D,8,20},
+  {0x707,1,100},
+  {0x709,1,100},
+  {0x70B,1,100},
+  {0x70D,1,100},  
+};  
 
 /* The logging list. This is transmitted to the device for filter configuration */
-int[][] loggingList = {
-  {80,0,20},
-  {389,8,20},
-  {391,8,20},
-  {392,8,20},
-  {393,8,20},
-  {394,8,20},
-  {395,8,20},
-  {396,8,20},
-  {397,8,20},
-  {398,8,20},
-  {519,8,20},
-  {521,8,20},
-  {523,8,20},
-  {525,8,20},
-  {647,8,20},
-  {649,8,20},
-  {651,8,20},
-  {653,8,20},
-  {775,8,20},
-  {777,8,20},
-  {779,8,20},
-  {781,8,20},
-  {901,8,20},
-  {903,8,20},
-  {905,8,20},
-  {907,8,20},
-  {909,8,20},
-  {1031,8,20},
-  {1033,8,20},
-  {1035,8,20},
-  {1037,8,20},
-  {1799,1,100},
-  {1801,1,100},
-  {1803,1,100},
-  {1805,1,100},
-};
+//int[][] loggingList = {
+//  {80,0,20},
+//  {389,8,20},
+//  {391,8,20},
+//  {392,8,20},
+//  {393,8,20},
+//  {394,8,20},
+//  {395,8,20},
+//  {396,8,20},
+//  {397,8,20},
+//  {398,8,20},
+//  {519,8,20},
+//  {521,8,20},
+//  {523,8,20},
+//  {525,8,20},
+//  {647,8,20},
+//  {649,8,20},
+//  {651,8,20},
+//  {653,8,20},
+//  {775,8,20},
+//  {777,8,20},
+//  {779,8,20},
+//  {781,8,20},
+//  {901,8,20},
+//  {903,8,20},
+//  {905,8,20},
+//  {907,8,20},
+//  {909,8,20},
+//  {1031,8,20},
+//  {1033,8,20},
+//  {1035,8,20},
+//  {1037,8,20},
+//  {1799,1,100},
+//  {1801,1,100},
+//  {1803,1,100},
+//  {1805,1,100},
+//};
 
 /* counters for counting */
 long[] counters = new long[loggingList.length];
@@ -291,7 +292,7 @@ void draw(){
     }
     
     textFont(fontBold, 16);
-    text("Dynamic CAN Filter Mapping Visualisation", (s-((4*d)+100)), standardSpacingY(55,6));
+    text("Dynamic CAN Filter Remote Configuration and Mapping Visualisation Tool", (s-((4*d)+100)), standardSpacingY(55,6));
     textFont(fontBold, 14);
     text("Chris Barlow, MSc Reliable Embedded Systems 2013, University of Leicester", (s-((4*d)+100)), standardSpacingY(56,8));
     textFont(font, 14);
@@ -312,17 +313,18 @@ void transmitLoggingList(){
   int txListPointer;
 
 
-  /* *
-  * Data packet looks like this:
-  *      0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
-  *     "{ f d a a A X b b B  Y  c  c  C  Z  ~  }" where:
-  *     f is the filter size control constant
-  *     d is the duplication control constant
-  *    aa is two byte CAN ID
-  *     A is the CAN data length
-  *    X is the CAN message cycle time
-  *    etc
-  * */
+  /* Transmitted data packet looks like this:
+   *
+   *     index:  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+   *     chars:  { f d a a A X b b B  Y  c  c  C  Z  ~  }
+   * Where:
+   *     f is the filter size control constant
+   *     d is the duplication control constant
+   *    aa is two byte CAN ID
+   *     A is the CAN data length
+   *     X is the CAN message cycle time
+   *    etc
+   * */
   print(txPointer+" ");
   
   if(txPointer == 0){
@@ -375,16 +377,17 @@ void receiveLoggingDetails(){
           switch(serialInArray[1]){ 
                
           case 'M': 
-          /* Data packet contains mailbox information */
-          /* *
-          * Data packet looks like this:
-          *      0 1 2 3 4 5 6 7 
-          *     "{ M A a a X ~ }" where:
-          *    A is the sequence location mapped to mailbox
-          *    aa is two byte CAN ID        
-          *    X mailbox location
-          *    This is fixed length.
-          * */
+          /* Data packet contains mailbox information
+           *
+           * Data packet looks like this:
+           *    index:  0 1 2 3 4 5 6 7
+           *    chars:  { M A a a X ~ }
+           * Where:
+           *    A is the sequence location mapped to mailbox
+           *    aa is two byte CAN ID
+           *    X mailbox location
+           *    This is fixed length.
+           * */
           
             if(serialCount-3 == 1){
               filterSizeRx = 1;
@@ -404,15 +407,19 @@ void receiveLoggingDetails(){
             break;
                    
           case 'S':
-          /* Data packet contains loggingList information */
-          /* *
-          * Data packet looks like this:
-          *      0 1 2 3 4 5 6 7 8 
-          *     "{ S A a a a a ~ }" where:
-          *    A is the sequence location
-          *    aaaa is four byte hit count for the sequence location      
-          *    This is fixed length.
-          * */ 
+          /* Data packet contains loggingList information 
+           * Due to the large amount of data for the message counts
+           * Data is transmitted as max 10 values, 6 apart, offset by pointerShift
+           *
+           * Data packet looks like this:
+           *     index:  0 1 2 3 4 5 6 7 8
+           *     chars:  { S A a a a a ~ }
+           * Where:
+           *    A is the sequence location
+           *    aaaa is four byte hit count for the sequence location
+           *
+           *    This is fixed length.
+           * */
            
             loggingListPointer = serialInArray[2];
 //            println(loggingListPointer);
@@ -586,19 +593,17 @@ void keyPressed() {
       counters[k] = 0;
     }
     filterSizeRx = 0;
-//    status = 0;
     redraw();
   }
   
   /* Save */
   if((key == 's')||(key == 'S')){
-//    saveCounters();
     selectOutput("Select file","saveCounters",lastFile);
   } 
   
   /* Close and save */
   if((key == 'c')||(key == 'C')){
-//    saveCounters();
+    selectOutput("Select file","saveCounters",lastFile);
     exit(); // Stop the program
   } 
   
@@ -617,13 +622,19 @@ void keyPressed() {
 /* Save counters to text file */
 void saveCounters(File selection){
   int k;
-  String[] lines = new String[loggingList.length+1];
+  String[] lines = new String[loggingList.length+6];
+  
+  lines[0] = ("CAN Filter Hit Rates");
+  lines[1] = ("Tested on:,"+ day()+"/"+month()+"/"+year()+",at:,"+hour()+":"+minute());
+  lines[2] = (",");
+  lines[3] = ("CAN ID,Hits");
   
   for (k = 0; k < loggingList.length; k++) {
-      lines[k] = (hex(loggingList[k][0],3)+","+counters[k]);
+      lines[k+4] = (hex(loggingList[k][0],3)+","+counters[k]);
   }
   
-  lines[k] = ("Total,"+countersTotal);
+  lines[k+4] = (" ");
+  lines[k+5] = ("Total,"+countersTotal);
   
   if(selection != null){
     saveStrings(selection, lines);

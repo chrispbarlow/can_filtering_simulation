@@ -11,7 +11,6 @@
 
 #include "global.h"
 #include "Lib/CAN/CAN.h"
-#include "Lib/ADC/ADC.h"
 
 Uint32 tickCount_G;
 
@@ -23,7 +22,6 @@ void main(void){
 	gpioInit();
 	scheduler_Init();
 	CAN_Init(500,0);
-	ADC_Init();
 	Tasks_Init();
 	timerStart();
 

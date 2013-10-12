@@ -307,6 +307,15 @@ int16 commitSendMailbox(char port, char mbNum){
 	return success;
 }
 
+void disableMailbox(char port, char mbNum){
+	canRegsShadow.CANME.all = CAN_Ports[port].canRegs->CANME.all;
+	/* disable mailbox */
+	canRegsShadow.CANME.all &= ~(bitSelect_32<<mbNum);
+	CAN_Ports[port].canRegs->CANME.all = canRegsShadow.CANME.all;
+	CAN_Ports[port].message_Objects[mbNum].mailboxState = DISABLED;
+}
+
+
 int16 readRxMailbox(char port, char mbNum, Uint32 data[]){
 	int16 dataLength = 0;
 	Uint32 messagePending = 0;
@@ -325,11 +334,6 @@ int16 readRxMailbox(char port, char mbNum, Uint32 data[]){
 	else{
 		dataLength = -1;	/* mailbox not set to receive */
 	}
-
-	/* disable mailbox */
-	canRegsShadow.CANME.all &= ~(bitSelect_32<<mbNum);
-	CAN_Ports[port].canRegs->CANME.all = canRegsShadow.CANME.all;
-	CAN_Ports[port].message_Objects[mbNum].mailboxState = DISABLED;
 
 	/* Trying to force CANRMP.mbNum to clear */
 	do{
