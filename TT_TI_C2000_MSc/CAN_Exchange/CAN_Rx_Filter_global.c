@@ -25,15 +25,8 @@ updateFlags_t updateSequenceRequired_G = INIT;
 Uint16 numRxCANMsgs_G = 0;
 Uint16 filterSize_G = 0;
 
-typedef struct{
-	Uint16 filterStart;
-	Uint16 filterEnd;
-	Uint16 sequenceStart;
-	Uint16 sequenceEnd;
-	Uint16 sequenceIndex;
-} filterSegment_t;
-
-filterSegment_t segments[2];
+/* Filter segment array */
+filterSegment_t segments[NUM_FILTER_SEGMENTS];
 
 
 /***********************************************************************************************************
@@ -43,15 +36,17 @@ filterSegment_t segments[2];
 void buildSequence(Uint16 listSize){
 	Uint16 i, cycleTime_min, newReload, remainder = 0;
 
-	segments[0].filterStart = 0;
-	segments[0].filterEnd = 10;
-	segments[0].sequenceStart = 0;
-	segments[0].sequenceEnd = 21;
 
-	segments[1].filterStart = 11;
-	segments[1].filterEnd = 31;
-	segments[1].sequenceStart = 22;
-	segments[1].sequenceEnd = 81;
+	/* Define filter segments parameters - ideally this would be dynamic, but out of the scope of this project. */
+	segments[0].filterStart 	= 0;
+	segments[0].filterEnd 		= 10;
+	segments[0].sequenceStart 	= 0;
+	segments[0].sequenceEnd 	= 21;
+
+	segments[1].filterStart 	= 11;
+	segments[1].filterEnd 		= 31;
+	segments[1].sequenceStart 	= 22;
+	segments[1].sequenceEnd 	= 81;
 
 	/* Finds the minimum cycle time in the logging list */
  	cycleTime_min = 0xFFFF;
@@ -91,10 +86,12 @@ void buildSequence(Uint16 listSize){
 /***********************************************************************************************************
  * Controls the scheduling of the IDs in the filter.
  * *********************************************************************************************************/
-int16 getNextSequenceIndex(Uint16 segment){
+int16 getNextSequenceIndex(Uint16 mailbox_num){
 	int16 sequenceIndex_next = -1;
 	boolean_t searchResult = FALSE;
+	Uint16 segment;
 
+	segment =  findSegment(mailbox_num);
 
 	if(updateSequenceRequired_G != RUN){
 		/* Reset sequencePointer to continue sequence after loading mailbox */
@@ -138,10 +135,13 @@ int16 getNextSequenceIndex(Uint16 segment){
 }
 
 
+/***********************************************************************************************************
+ * Returns the filter segment that matches the requested mailbox. *
+ * *********************************************************************************************************/
 Uint16 findSegment(Uint16 mailbox){
 	Uint16 segmentNumber = 0, i;
 
-	for(i = 0; i < sizeof(segments)/sizeof(segments[0]); i++){
+	for(i = 0; i < NUM_FILTER_SEGMENTS; i++){
 		if((mailbox >= segments[i].filterStart) && (mailbox <= segments[i].filterEnd)){
 			segmentNumber = i;
 		}

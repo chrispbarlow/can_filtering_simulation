@@ -26,7 +26,7 @@ void receiveCAN_init(void){
  * *********************************************************************************************************/
 void receiveCAN_update(void){
 	static Uint16 mailBox = 0;
-	Uint16 sequenceIndex_received, segment;
+	Uint16 sequenceIndex_received;
 	int16 sequenceIndex_new;
 
 	/* updateSequenceRequired_G controls the sequence update mechanism when a new logging list is transmitted to the device */
@@ -99,8 +99,7 @@ void receiveCAN_update(void){
 				disableMailbox(CANPORT_A, mailBox);
 
 				/* ID scheduling and duplication control */
-				segment = findSegment(mailBox);
-				sequenceIndex_new = getNextSequenceIndex(segment);
+				sequenceIndex_new = getNextSequenceIndex(mailBox);
 
 				/* update the filter for next required ID  */
 				updateFilter(mailBox, sequenceIndex_new);	/* Mailbox is re-enabled in configureRxMailbox() - this is done last to help prevent new message arrivals causing erroneous hits mid-way through process*/

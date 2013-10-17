@@ -13,6 +13,7 @@
 #define NUM_MAILBOXES_MAX 	(32)
 #define NUM_MESSAGES_MAX 	(100)
 #define MAILBOX_DECAY_TIME	(100)
+#define NUM_FILTER_SEGMENTS	(2)
 
 #define DUPLICATES_LIMIT 	(1)		/* Controls the number of duplicates for each ID allowed to be added to filter between arrivals of that ID */
 #define FILTERSIZE_RATIO	(2)
@@ -88,6 +89,19 @@ typedef struct{
 extern logging_list_t loggingList_G[];
 
 
+/*******************************************************************************
+ * The segment structure - used to map segment space in the filter with part of the sequence,
+ * and to keep track of the multiple sequence indexes required for segmentation.
+ * *****************************************************************************/
+typedef struct{
+	Uint16 filterStart		: 8;
+	Uint16 filterEnd		: 8;
+	Uint16 sequenceStart	: 8;
+	Uint16 sequenceEnd		: 8;
+	Uint16 sequenceIndex	: 8;
+} filterSegment_t;
+
+
 
 /*******************************************************************************
  * Control values set dynamically when logging list is received
@@ -110,8 +124,11 @@ void buildSequence(Uint16 listSize);
  * Controls the scheduling of the IDs in the filter.
  * Returns the next valid sequence index to use in the filter.
  * *********************************************************************************************************/
-int16 getNextSequenceIndex(Uint16 segment);
+int16 getNextSequenceIndex(Uint16 mailbox_num);
 
+/***********************************************************************************************************
+ * Returns the filter segment that matches the requested mailbox. *
+ * *********************************************************************************************************/
 Uint16 findSegment(Uint16 mailbox);
 
 /***********************************************************************************************************
