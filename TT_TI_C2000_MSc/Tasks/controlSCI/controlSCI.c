@@ -13,10 +13,10 @@
 #include "../../CAN_Exchange/CAN_Rx_Filter_global.h"
 
 /* SCI states */
-typedef enum{WAITING,RECEIVE,SEND}SCIstate_t;
+typedef enum{WAITING,RECEIVE,SEND_M,SEND_S}SCIstate_t;
 
 /* Raw character receive buffer */
-static char rxbuffer[300];
+static char rxbuffer[350];
 Uint16 rxbufferSize = (sizeof(rxbuffer)/sizeof(rxbuffer[0]));
 
 /* Position control for packet data */
@@ -132,7 +132,7 @@ void controlSCI_update(void){
 				/* flag tells receiveCAN to update the logging sequence */
 				updateSequenceRequired_G = RESET;
 
-				SCIstate = SEND;
+				SCIstate = SEND_M;
 			}
 			else if(rxbuffer[0] == '{'){
 				/* data packet reception still in progress */
@@ -147,7 +147,7 @@ void controlSCI_update(void){
     	break;
 
 
-    case SEND:
+    case SEND_M:
 		/* check for reset request from desktop app */
     	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
     		rxbuffer[0] = SciaRegs.SCIRXBUF.all;
@@ -194,6 +194,28 @@ void controlSCI_update(void){
 			scia_xmit('~');
 			scia_xmit('}');
 
+			/* Instruct desktop app to refresh screen */
+			scia_xmit('{');
+			scia_xmit('~');
+			scia_xmit('}');
+
+			SCIstate = SEND_S;
+
+     	}
+
+		break;
+
+    case SEND_S:
+
+		/* check for reset request from desktop app */
+    	if(SciaRegs.SCIFFRX.bit.RXFFST != 0){
+    		rxbuffer[0] = SciaRegs.SCIRXBUF.all;
+    	}
+
+     	if(rxbuffer[0] == '?'){
+     		SCIstate = WAITING;
+     	}
+     	else{
 			/* Transmit message counts
 			 * Due to the large amount of data for the message counts
 			 * Data is transmitted as max 10 values, 6 apart, offset by pointerShift
@@ -236,7 +258,7 @@ void controlSCI_update(void){
 
 			/* Increment pointerShift to inter-space next set of values next time */
 			indexShift++;
-			if(indexShift > 6){
+			if(indexShift > 10){
 				indexShift = 0;
 			}
 
@@ -244,7 +266,10 @@ void controlSCI_update(void){
 			scia_xmit('{');
 			scia_xmit('~');
 			scia_xmit('}');
-    	}
+
+			SCIstate = SEND_M;
+		}
+
     	break;
 
     default:

@@ -11,7 +11,7 @@
 #define CONTROLSCI_H_
 
 #define SEQ_TX_CHUNK_SIZE		(10)
-#define SEQ_TX_CHUNK_SPACING	(6)
+#define SEQ_TX_CHUNK_SPACING	(10)
 
 #include "DSP28x_Project.h"     // Device Headerfile and Examples Include File
 

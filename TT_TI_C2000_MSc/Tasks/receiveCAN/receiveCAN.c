@@ -26,7 +26,7 @@ void receiveCAN_init(void){
  * *********************************************************************************************************/
 void receiveCAN_update(void){
 	static Uint16 mailBox = 0;
-	Uint16 sequenceIndex_received;
+	Uint16 sequenceIndex_received, segment;
 	int16 sequenceIndex_new;
 
 	/* updateSequenceRequired_G controls the sequence update mechanism when a new logging list is transmitted to the device */
@@ -47,7 +47,7 @@ void receiveCAN_update(void){
 		mailBox = 0;
 		if(filterSize_G == 0){	/* Dynamic filterSize calculation if 0 is received from configuration app */
 			filterSize_G = numRxCANMsgs_G/FILTERSIZE_RATIO;
-			if((numRxCANMsgs_G%2)!=0){
+			if((numRxCANMsgs_G%FILTERSIZE_RATIO)!=0){
 				filterSize_G += 1;
 			}
 		}
@@ -59,13 +59,16 @@ void receiveCAN_update(void){
 
 		/* Direct copy of first filterSize_G IDs in the sequence */
 		updateFilter(mailBox,mailBox);
-		printf("%d: %d %d\n",mailBox, CAN_RxMessages_G[mailBox].timer, CAN_RxMessages_G[mailBox].timer_reload);
+		mailBoxFilterShadow_G[mailBox].mailboxTimeout = MAILBOX_DECAY_TIME;
+		//printf("%d: %d %d\n",mailBox, CAN_RxMessages_G[mailBox].timer, CAN_RxMessages_G[mailBox].timer_reload);
 
 		/* Initialising one mailBox per tick ensures all mailboxes are initialised before moving to RUN (mainly so that we can printf some debug info) */
 		mailBox++;
 		if(mailBox == filterSize_G){
-			getNextSequenceIndex(); /* Calling here re-initialises the sequencePointer */
+			getNextSequenceIndex(0); /* Calling here re-initialises the sequencePointer */
+			getNextSequenceIndex(1); /* Calling here re-initialises the sequencePointer */
 			updateSequenceRequired_G = RUN;
+			//printf("T:%d", mailBox);
 		}
 		break;
 
@@ -73,8 +76,9 @@ void receiveCAN_update(void){
 	case RUN:
 		/* look through mailboxes for pending messages */
 		for(mailBox=0; mailBox<filterSize_G; mailBox++){
-			if(checkMailboxState(CANPORT_A, mailBox) == RX_PENDING){
 
+			if(checkMailboxState(CANPORT_A, mailBox) == RX_PENDING){
+				mailBoxFilterShadow_G[mailBox].mailboxTimeout = 0;
 				disableMailbox(CANPORT_A, mailBox);
 
 				/* Find message pointer from mailbox shadow */
@@ -83,15 +87,27 @@ void receiveCAN_update(void){
 				/* read the CAN data into buffer (Nothing is done with the data, but nice to do this for realistic timing) */
 				readRxMailbox(CANPORT_A, mailBox, CAN_RxMessages_G[sequenceIndex_received].canData.rawData);
 
+				/* Count message hits */
+				CAN_RxMessages_G[sequenceIndex_received].counter++;
+			}
+			else if(mailBoxFilterShadow_G[mailBox].mailboxTimeout > 0){
+//				mailBoxFilterShadow_G[mailBox].mailboxTimeout--;
+			}
+
+			if(mailBoxFilterShadow_G[mailBox].mailboxTimeout == 0){
+
+				disableMailbox(CANPORT_A, mailBox);
+
 				/* ID scheduling and duplication control */
-				sequenceIndex_new = getNextSequenceIndex();
+				segment = findSegment(mailBox);
+				sequenceIndex_new = getNextSequenceIndex(segment);
 
 				/* update the filter for next required ID  */
 				updateFilter(mailBox, sequenceIndex_new);	/* Mailbox is re-enabled in configureRxMailbox() - this is done last to help prevent new message arrivals causing erroneous hits mid-way through process*/
 
-				/* Count message hits */
-				CAN_RxMessages_G[sequenceIndex_received].counter++;
+				mailBoxFilterShadow_G[mailBox].mailboxTimeout = MAILBOX_DECAY_TIME;
 			}
+
 		}
 		break;
 	}

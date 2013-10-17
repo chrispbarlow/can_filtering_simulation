@@ -11,7 +11,8 @@
 #define CAN_RX_GLOBAL_H_
 
 #define NUM_MAILBOXES_MAX 	(32)
-#define NUM_MESSAGES_MAX 	(64)
+#define NUM_MESSAGES_MAX 	(100)
+#define MAILBOX_DECAY_TIME	(100)
 
 #define DUPLICATES_LIMIT 	(1)		/* Controls the number of duplicates for each ID allowed to be added to filter between arrivals of that ID */
 #define FILTERSIZE_RATIO	(2)
@@ -69,6 +70,7 @@ extern canRxMessage_t CAN_RxMessages_G[];
 typedef struct{
 	Uint32 canID_mapped;				/* CAN ID currently being held in mailbox */
 	Uint16 sequenceIndex_mapped;		/* Index of CAN_RxMessages[] mapped to mailbox */
+	Uint16 mailboxTimeout;
 }filterShadow_t;
 
 extern filterShadow_t mailBoxFilterShadow_G[];
@@ -108,8 +110,9 @@ void buildSequence(Uint16 listSize);
  * Controls the scheduling of the IDs in the filter.
  * Returns the next valid sequence index to use in the filter.
  * *********************************************************************************************************/
-int16 getNextSequenceIndex(void);
+int16 getNextSequenceIndex(Uint16 segment);
 
+Uint16 findSegment(Uint16 mailbox);
 
 /***********************************************************************************************************
  * Replaces the ID in the filter at location filterPointer, with ID from sequence at location sequencePointer.

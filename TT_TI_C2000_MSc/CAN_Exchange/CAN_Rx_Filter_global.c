@@ -25,6 +25,15 @@ updateFlags_t updateSequenceRequired_G = INIT;
 Uint16 numRxCANMsgs_G = 0;
 Uint16 filterSize_G = 0;
 
+typedef struct{
+	Uint16 filterStart;
+	Uint16 filterEnd;
+	Uint16 sequenceStart;
+	Uint16 sequenceEnd;
+	Uint16 sequenceIndex;
+} filterSegment_t;
+
+filterSegment_t segments[2];
 
 
 /***********************************************************************************************************
@@ -33,6 +42,16 @@ Uint16 filterSize_G = 0;
  * *********************************************************************************************************/
 void buildSequence(Uint16 listSize){
 	Uint16 i, cycleTime_min, newReload, remainder = 0;
+
+	segments[0].filterStart = 0;
+	segments[0].filterEnd = 10;
+	segments[0].sequenceStart = 0;
+	segments[0].sequenceEnd = 21;
+
+	segments[1].filterStart = 11;
+	segments[1].filterEnd = 31;
+	segments[1].sequenceStart = 22;
+	segments[1].sequenceEnd = 81;
 
 	/* Finds the minimum cycle time in the logging list */
  	cycleTime_min = 0xFFFF;
@@ -72,26 +91,25 @@ void buildSequence(Uint16 listSize){
 /***********************************************************************************************************
  * Controls the scheduling of the IDs in the filter.
  * *********************************************************************************************************/
-int16 getNextSequenceIndex(void){
-	static int16 sequenceIndex_next = -1;
-	int16 sequenceIndex_last;
+int16 getNextSequenceIndex(Uint16 segment){
+	int16 sequenceIndex_next = -1;
 	boolean_t searchResult = FALSE;
 
 
 	if(updateSequenceRequired_G != RUN){
 		/* Reset sequencePointer to continue sequence after loading mailbox */
-		sequenceIndex_next = (filterSize_G - 1);
+		segments[segment].sequenceIndex = (segments[segment].sequenceEnd-1);
 	}
 	else{
 		/* Find next required CAN ID in sequence */
-		sequenceIndex_last = sequenceIndex_next;
+		sequenceIndex_next = segments[segment].sequenceIndex;
 		do{
 			/* Wrap search */
-			if(sequenceIndex_next<(numRxCANMsgs_G-1)){
+			if(sequenceIndex_next < segments[segment].sequenceEnd){
 				sequenceIndex_next++;
 			}
 			else{
-				sequenceIndex_next = 0;
+				sequenceIndex_next = segments[segment].sequenceStart;
 			}
 
 			/* ID not already in mailbox, decrement 'schedule' timer (timer sits between -DUPLICATES ALLOWED and 0 while ID is in one or more mailboxes) */
@@ -110,12 +128,26 @@ int16 getNextSequenceIndex(void){
 				searchResult = FALSE;		/* ET balancing */
 			}
 		}	/* Search will abort if all messages have been checked */
-		while((searchResult == FALSE)&&(sequenceIndex_next != sequenceIndex_last));
+		while((searchResult == FALSE)&&(sequenceIndex_next != segments[segment].sequenceIndex));
+
+		segments[segment].sequenceIndex = sequenceIndex_next;
 	}
 
 	return sequenceIndex_next;
 }
 
+
+Uint16 findSegment(Uint16 mailbox){
+	Uint16 segmentNumber = 0, i;
+
+	for(i = 0; i < sizeof(segments)/sizeof(segments[0]); i++){
+		if((mailbox >= segments[i].filterStart) && (mailbox <= segments[i].filterEnd)){
+			segmentNumber = i;
+		}
+	}
+
+	return segmentNumber;
+}
 
 /***********************************************************************************************************
  * Replaces the ID in the filter at location filterPointer, with ID from sequence at location sequencePointer.
@@ -126,7 +158,13 @@ void updateFilter(Uint16 filterIndex, int16 sequenceIndex_replace){
 	if(updateSequenceRequired_G == RUN){
 		/* Message scheduling */
 		sequenceIndex_old = mailBoxFilterShadow_G[filterIndex].sequenceIndex_mapped;
-		CAN_RxMessages_G[sequenceIndex_old].timer = CAN_RxMessages_G[sequenceIndex_old].timer_reload;
+
+//		if(CAN_RxMessages_G[sequenceIndex_old].timer >= 0){
+			CAN_RxMessages_G[sequenceIndex_old].timer = CAN_RxMessages_G[sequenceIndex_old].timer_reload;
+//		}
+//		else{
+//			CAN_RxMessages_G[sequenceIndex_old].timer++;
+//		}
 	}
 	else{
 		/* Used during mailbox reload - replicates the timer mechanism for first use of ID */
