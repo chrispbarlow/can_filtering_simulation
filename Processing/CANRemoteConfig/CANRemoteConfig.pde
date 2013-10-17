@@ -28,22 +28,22 @@ int hsCount = 0;
 PFont font, fontBold;
 
 /* standard positioning values and indexing vars */
-int d = 15;  
+int d = 11;  
 int s = 200;
 int w = 900;
 int i,j;
 
 /* This array holds the variable end positions for the mapping lines (logging list end) */
-int[] mapLineEnd = new int[64];
+int[] mapLineEnd = new int[100];
 
 /* This array holds the variable ID's in the device mailboxes */
-int[] IDs = new int[64];
+int[] IDs = new int[100];
 
 /* logging list transmission progress */
 int txPointer = 0;
 
 /* Config */
-int filterSizeTx = 0;      /* Set to zero to enable auto-sizing */
+int filterSizeTx = 32;      /* Set to zero to enable auto-sizing */
 int duplicatesAllowed = 1; /* This isn't implemented in the device code. Still deciding if it's beneficial */
 
 //int[][] loggingList = {
@@ -137,89 +137,108 @@ int duplicatesAllowed = 1; /* This isn't implemented in the device code. Still d
 /* The logging list. This is transmitted to the device for filter configuration 
     Smith Power Prismatic B CAN */
 int[][] loggingList = {
-  {0x185,8,100},
-  {0x187,8,100},
-  {0x189,8,100},
-  {0x18B,8,100},
-  {0x18D,8,100},
-  {0x207,8,100},
-  {0x209,8,100},
-  {0x20B,8,100},
-  {0x20D,8,100},
-  {0x287,8,100},
-  {0x289,8,100},
-  {0x28B,8,100},
-  {0x28D,8,100},
-  {0x307,8,100},
-  {0x309,8,100},
-  {0x30B,8,100},
-  {0x30D,8,100},
-  {0x385,8,100},
-  {0x387,8,100},
-  {0x389,8,100},
-  {0x38B,8,100},
-  {0x38D,8,100},
-  {0x3A0,8,1000},
-  {0x3A1,8,1000},
-  {0x3A2,8,1000},
-  {0x3A3,8,1000},
-  {0x3A4,8,1000},
-  {0x3A5,8,1000},
-  {0x3A6,8,1000},
-  {0x3A7,8,1000},
-  {0x3A8,8,1000},
-  {0x3A9,8,1000},
-  {0x3AA,8,1000},
-  {0x3AB,8,1000},
-  {0x3AC,8,1000},
-  {0x3AD,8,1000},
-  {0x3AE,8,1000},
-  {0x3B0,8,1000},
-  {0x3B1,8,1000},
-  {0x3B2,8,1000},
-  {0x3B3,8,1000},
-  {0x3B4,8,1000},
-  {0x3B5,8,1000},
-  {0x3B6,8,1000},
-  {0x3B7,8,1000},
-  {0x3B8,8,1000},
-  {0x3B9,8,1000},
-  {0x3BA,8,1000},
-  {0x3BB,8,1000},
-  {0x3BC,8,1000},
-  {0x3BD,8,1000},
-  {0x3BE,8,1000},
-  {0x3C0,8,1000},
-  {0x3C1,8,1000},
-  {0x3C2,8,1000},
-  {0x3C3,8,1000},
-  {0x3C4,8,1000},
-  {0x3C5,8,1000},
-  {0x3C6,8,1000},
-  {0x3C7,8,1000},
-  {0x3C8,8,1000},
-  {0x3C9,8,1000},
-  {0x3CA,8,1000},
-  {0x3CB,8,1000},
-  {0x3CC,8,1000},
-  {0x3CD,8,1000},
-  {0x3CE,8,1000},
-  {0x3D0,8,1000},
-  {0x3D1,8,1000},
-  {0x3D2,8,1000},
-  {0x3D3,8,1000},
-  {0x3D4,8,1000},
-  {0x3D5,8,1000},
-  {0x3D6,8,1000},
-  {0x3D7,8,1000},
-  {0x3D8,8,1000},
-  {0x3D9,8,1000},
-  {0x3DA,8,1000},
-  {0x3DB,8,1000},
-  {0x3DC,8,1000},
-  {0x3DD,8,1000},
-  {0x3DE,8,1000}
-}
+  {0x185,8,10},
+  {0x385,8,10},
+  
+  {0x187,8,10},
+  {0x207,8,10},
+  {0x287,8,10},
+  {0x307,8,10},
+  {0x387,8,10},
+  
+  {0x189,8,10},  
+  {0x209,8,10},
+  {0x289,8,10},
+  {0x309,8,10},
+  {0x389,8,10},
+  
+  {0x18B,8,10},
+  {0x20B,8,10},
+  {0x28B,8,10},
+  {0x30B,8,10},
+  {0x38B,8,10},  
+  
+  {0x18D,8,10},
+  {0x20D,8,10},
+  {0x28D,8,10},
+  {0x30D,8,10},
+  {0x38D,8,10},  
+  
+  {0x3A0,8,100},
+  {0x3B0,8,100},
+  {0x3C0,8,100},
+  {0x3D0,8,100},
+  
+  {0x3A1,8,100},
+  {0x3B1,8,100},
+  {0x3C1,8,100},
+  {0x3D1,8,100},
+  
+  {0x3A2,8,100},
+  {0x3B2,8,100},
+  {0x3C2,8,100},
+  {0x3D2,8,100},
+
+  {0x3A3,8,100},
+  {0x3B3,8,100},
+  {0x3C3,8,100},
+  {0x3D3,8,100},
+
+  {0x3A4,8,100},
+  {0x3B4,8,100},
+  {0x3C4,8,100},
+  {0x3D4,8,100},
+
+  {0x3A5,8,100},
+  {0x3B5,8,100},
+  {0x3C5,8,100},
+  {0x3D5,8,100},
+
+  {0x3A6,8,100},
+  {0x3B6,8,100},
+  {0x3C6,8,100},
+  {0x3D6,8,100},
+
+  {0x3A7,8,100},
+  {0x3B7,8,100},
+  {0x3C7,8,100},
+  {0x3D7,8,100},
+
+  {0x3A8,8,100},
+  {0x3B8,8,100},
+  {0x3C8,8,100},
+  {0x3D8,8,100},
+
+  {0x3A9,8,100},
+  {0x3B9,8,100},
+  {0x3C9,8,100},
+  {0x3D9,8,100},
+
+  {0x3AA,8,100},
+  {0x3BA,8,100},
+  {0x3CA,8,100},
+  {0x3DA,8,100},
+
+  {0x3AB,8,100},
+  {0x3BB,8,100},
+  {0x3CB,8,100},
+  {0x3DB,8,100},
+
+  {0x3AC,8,100},
+  {0x3BC,8,100},
+  {0x3CC,8,100},
+  {0x3DC,8,100},
+
+  {0x3AD,8,100},
+  {0x3BD,8,100},
+  {0x3CD,8,100},
+  {0x3DD,8,100},
+
+  {0x3AE,8,100},  
+  {0x3BE,8,100},  
+  {0x3CE,8,100},  
+  {0x3DE,8,100}
+};
 /* The logging list. This is transmitted to the device for filter configuration */
 //int[][] loggingList = {
 //  {80,0,20},
@@ -284,9 +303,9 @@ void setup(){
     background(0);
     font = loadFont("Consolas-16.vlw");
     fontBold = loadFont("Consolas-Bold-16.vlw");
-    textFont(font, 12);    
+    textFont(font, 10);    
     stroke(153);
-    /* draw handled manually by RS232 reception */    
+    /* RS232 reception triggers redraw */    
     noLoop();
 
 }
@@ -306,7 +325,7 @@ void draw(){
     
     stroke(255);
     fill(255);
-    textFont(fontBold, 14);
+    textFont(fontBold, 10);
     text("Device Mailboxes", (s-((4*d)+100)), (d+4));
     text(" Logging List      Hits", (w+d+3), (d+4));
 
@@ -331,7 +350,7 @@ void draw(){
     }
     
     /* Draws device filter information and mapping lines */
-    textFont(fontBold, 12);    
+    textFont(fontBold, 10);    
     for(i=0;i<filterSizeRx;i++){
       /* Text and leader lines */
       strg = intToStr_02(i);
@@ -345,7 +364,7 @@ void draw(){
 
     /* Title and status block */
     fill(0);
-    rect((s-((4*d)+110)), standardSpacingY(53,15), 760, 150, 10);
+    rect((s-((4*d)+110)), standardSpacingY(70,15), 760, 150, 10);
     fill(255);  
     
     switch(status){
@@ -359,7 +378,7 @@ void draw(){
       strg = "Transmitting logging list: ";   
       if(txPointer>6){
        strg += txPointer-6; 
-       rect((s-((4*d)+100)), standardSpacingY(61,15), (740/(loggingList.length/(txPointer-6))), 6);
+       rect((s-((4*d)+100)), standardSpacingY(79,15), (740/(loggingList.length/(txPointer-6))), 6);
       }
       break;
     case 3:
@@ -373,14 +392,14 @@ void draw(){
     }
     
     textFont(fontBold, 16);
-    text("Dynamic CAN Filter Remote Configuration and Mapping Visualisation Tool", (s-((4*d)+100)), standardSpacingY(55,6));
+    text("Dynamic CAN Filter Remote Configuration and Mapping Visualisation Tool", (s-((4*d)+100)), standardSpacingY(73,6));
     textFont(fontBold, 14);
-    text("Chris Barlow, MSc Reliable Embedded Systems 2013, University of Leicester", (s-((4*d)+100)), standardSpacingY(56,8));
+    text("Chris Barlow, MSc Reliable Embedded Systems 2013, University of Leicester", (s-((4*d)+100)), standardSpacingY(74,8));
     textFont(font, 14);
-    text("This application displays the CAN mailbox to logging list mapping.", (s-((4*d)+100)), standardSpacingY(58,6));
-    text("Logging list is sent to the device on connection", (s-((4*d)+100)), standardSpacingY(59,6));
+    text("This application displays the CAN mailbox to logging list mapping.", (s-((4*d)+100)), standardSpacingY(76,6));
+    text("Logging list is sent to the device on connection", (s-((4*d)+100)), standardSpacingY(77,6));
     textFont(fontBold, 14);
-    text("Status: "+strg, (s-((4*d)+100)), standardSpacingY(61,6));
+    text("Status: "+strg, (s-((4*d)+100)), standardSpacingY(79,6));
     
     allRefresh = false;  
     
@@ -503,7 +522,6 @@ void receiveLoggingDetails(){
            * */
            
             loggingListPointer = serialInArray[2];
-//            println(loggingListPointer);
             
             if(loggingListPointer < loggingList.length){
               /* Unpack 32 bit counter */
@@ -518,7 +536,7 @@ void receiveLoggingDetails(){
               /* Only refresh loggingList counters on screen when all counters have been received (takes several packets) */
               if(loggingListPointer >= (loggingList.length-1)){
                 allRefresh = true;
-              }
+              }               
             }
       
             break;

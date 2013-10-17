@@ -99,6 +99,7 @@ int16 getNextSequenceIndex(Uint16 segment){
 	if(updateSequenceRequired_G != RUN){
 		/* Reset sequencePointer to continue sequence after loading mailbox */
 		segments[segment].sequenceIndex = (segments[segment].sequenceEnd-1);
+		sequenceIndex_next = segments[segment].sequenceIndex;
 	}
 	else{
 		/* Find next required CAN ID in sequence */
@@ -159,7 +160,7 @@ void updateFilter(Uint16 filterIndex, int16 sequenceIndex_replace){
 		/* Message scheduling */
 		sequenceIndex_old = mailBoxFilterShadow_G[filterIndex].sequenceIndex_mapped;
 
-//		if(CAN_RxMessages_G[sequenceIndex_old].timer >= 0){
+//		if(CAN_RxMessages_G[sequenceIndex_old].timer >= 0){														/* Duplication restriction DOES NOT help when filter is segmented */
 			CAN_RxMessages_G[sequenceIndex_old].timer = CAN_RxMessages_G[sequenceIndex_old].timer_reload;
 //		}
 //		else{

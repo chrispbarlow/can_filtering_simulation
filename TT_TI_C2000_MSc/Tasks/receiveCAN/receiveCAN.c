@@ -91,7 +91,7 @@ void receiveCAN_update(void){
 				CAN_RxMessages_G[sequenceIndex_received].counter++;
 			}
 			else if(mailBoxFilterShadow_G[mailBox].mailboxTimeout > 0){
-//				mailBoxFilterShadow_G[mailBox].mailboxTimeout--;
+//				mailBoxFilterShadow_G[mailBox].mailboxTimeout--;			/* Unsure whether decay is helpful. It appears not to make much difference with the segmentation */
 			}
 
 			if(mailBoxFilterShadow_G[mailBox].mailboxTimeout == 0){
