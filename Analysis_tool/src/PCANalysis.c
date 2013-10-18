@@ -175,11 +175,11 @@ int main(void){
 	int i;
 
 	FILE *outputFile = fopen("Staggered_Relay_Protocol.trc", "w");
-	canTraceConverter(CANlogFile, outputFile);
+//	canTraceConverter(CANlogFile, outputFile);
 
 
-//
-//	FILE *logFile = fopen("CAN_Logging_new.txt", "w");
+
+	FILE *logFile = fopen("CAN_Logging_new.txt", "w");
 
 
 //	noIDs = 0;
@@ -206,7 +206,10 @@ int main(void){
 }
 
 
-
+/* Runs simulation on CAN trace compared to recorded sequence.
+ * Outputs the number of hits, misses and total number of messages per CAN ID
+ * Used to find optimum filter size for a given sequence.
+ */
 void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize){
 	char inputStr[200];
 	char canData[200];
