@@ -168,39 +168,39 @@ flag_t updateFilter(unsigned int filterPointer){
 
 
 char *logFormat = "%4u.%06u 1  %3x             Tx%s";
-char *detailedLogFormat = "%4u.%06u 1  %3x             Tx   d %1u %02X %02X %02X %02X %02X %02X %02X %02X";
+char *detailedLogFormat = "%4u.%06u 1  %3x             Rx   d %1u %02X %02X %02X %02X %02X %02X %02X %02X";
 
 int main(void){
-	char *CANlogFile = "Logs/Log_for_analysis2.asc";
+	char *CANlogFile = "Staggered_Relay_Protocol.asc";
 	int i;
 
-	FILE *outputFile = fopen("newOutput.txt", "w");
-//	canTraceConverter(CANlogFile, outputFile);
+	FILE *outputFile = fopen("Staggered_Relay_Protocol.trc", "w");
+	canTraceConverter(CANlogFile, outputFile);
 
 
 //
-	FILE *logFile = fopen("CAN_Logging_new.txt", "w");
+//	FILE *logFile = fopen("CAN_Logging_new.txt", "w");
 
 
-	noIDs = 0;
-	buildSequence();
-	CanSequenceMessageCounter(CANlogFile);
-	orderSequence();
-
-	sequenceSize = countSequence();
-	printf("\n\n\n");
-	printf("\n\n %u ID's\n\n",sequenceSize);
-
-	printf("\n\n\nChecking logability...\r\n\n");
-	fprintf(logFile,"\n\n,,Filter Size,Logged,Missed\n");
+//	noIDs = 0;
+//	buildSequence();
+//	CanSequenceMessageCounter(CANlogFile);
+//	orderSequence();
+//
+//	sequenceSize = countSequence();
+//	printf("\n\n\n");
+//	printf("\n\n %u ID's\n\n",sequenceSize);
+//
+//	printf("\n\n\nChecking logability...\r\n\n");
+//	fprintf(logFile,"\n\n,,Filter Size,Logged,Missed\n");
 //	for(i = 1; i <= sequenceSize; i++)	{
 //		checkLogability(CANlogFile, logFile, i, sequenceSize);
 //	}
 
-	checkLogability(CANlogFile, logFile, 16, sequenceSize);
+//	checkLogability(CANlogFile, logFile, 16, sequenceSize);
 
 	fclose(outputFile);
-	fclose(logFile);
+//	fclose(logFile);
 
 	return EXIT_SUCCESS;
 }
