@@ -54,6 +54,7 @@ typedef struct
 logging_Sequence_t loggingSequence[BUFFERSIZE];
 filter_t acceptanceFilter[FILTERSIZE];
 
+/* The logging list is the list of CAN ID's to filter out */
 logging_list_t loggingList[]={
 	{ 0x187 , 10 },
 	{ 0x188 , 10 },
@@ -92,6 +93,12 @@ logging_list_t loggingList[]={
 
 int listSize = sizeof(loggingList)/sizeof(logging_list_t);
 int sequenceSize;
+
+char *logFormat = "%4u.%06u 1  %3x             Tx%s";
+char *detailedLogFormat = "%4u.%06u 1  %3x             Rx   d %1u %02X %02X %02X %02X %02X %02X %02X %02X";
+
+void buildSequence(void);
+flag_t updateFilter(unsigned int filterPointer);
 void canTraceConverter(char *filename, FILE *output);
 void CanSequenceMessageCounter(char *filename);
 void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize);
@@ -99,6 +106,44 @@ void orderSequence(void);
 int countSequence(void);
 flag_t GetCAN1BufferPointer(unsigned int ID);
 
+int main(void){
+	char *CANlogFile = "Staggered_Relay_Protocol.asc";
+	int i;
+
+	FILE *outputFile = fopen("Staggered_Relay_Protocol.trc", "w");
+	canTraceConverter(CANlogFile, outputFile);
+
+
+
+//	FILE *logFile = fopen("CAN_Logging_new.txt", "w");
+
+
+//	noIDs = 0;
+//	buildSequence();
+//	CanSequenceMessageCounter(CANlogFile);
+//	orderSequence();
+//
+//	sequenceSize = countSequence();
+//	printf("\n\n\n");
+//	printf("\n\n %u ID's\n\n",sequenceSize);
+//
+//	printf("\n\n\nChecking logability...\r\n\n");
+//	fprintf(logFile,"\n\n,,Filter Size,Logged,Missed\n");
+//	for(i = 1; i <= sequenceSize; i++)	{
+//		checkLogability(CANlogFile, logFile, i, sequenceSize);
+//	}
+
+//	checkLogability(CANlogFile, logFile, 16, sequenceSize);
+
+	fclose(outputFile);
+//	fclose(logFile);
+
+	return EXIT_SUCCESS;
+}
+
+/*
+ * Builds the logging sequence from the logging list.
+ */
 void buildSequence(void){
 	int i, cycleTime_min;
 
@@ -119,6 +164,10 @@ void buildSequence(void){
 	}
 }
 
+/*
+ * Used to update mapping between filter and sequence.
+ * Returns a TRUE if the mapping was changed successfully.
+ */
 flag_t updateFilter(unsigned int filterPointer){
 	static int last_i = -1;
 	int i, j;
@@ -167,46 +216,10 @@ flag_t updateFilter(unsigned int filterPointer){
 }
 
 
-char *logFormat = "%4u.%06u 1  %3x             Tx%s";
-char *detailedLogFormat = "%4u.%06u 1  %3x             Rx   d %1u %02X %02X %02X %02X %02X %02X %02X %02X";
-
-int main(void){
-	char *CANlogFile = "Staggered_Relay_Protocol.asc";
-	int i;
-
-	FILE *outputFile = fopen("Staggered_Relay_Protocol.trc", "w");
-//	canTraceConverter(CANlogFile, outputFile);
 
 
-
-	FILE *logFile = fopen("CAN_Logging_new.txt", "w");
-
-
-//	noIDs = 0;
-//	buildSequence();
-//	CanSequenceMessageCounter(CANlogFile);
-//	orderSequence();
-//
-//	sequenceSize = countSequence();
-//	printf("\n\n\n");
-//	printf("\n\n %u ID's\n\n",sequenceSize);
-//
-//	printf("\n\n\nChecking logability...\r\n\n");
-//	fprintf(logFile,"\n\n,,Filter Size,Logged,Missed\n");
-//	for(i = 1; i <= sequenceSize; i++)	{
-//		checkLogability(CANlogFile, logFile, i, sequenceSize);
-//	}
-
-//	checkLogability(CANlogFile, logFile, 16, sequenceSize);
-
-	fclose(outputFile);
-//	fclose(logFile);
-
-	return EXIT_SUCCESS;
-}
-
-
-/* Runs simulation on CAN trace compared to recorded sequence.
+/*
+ * Runs simulation on CAN trace compared to recorded sequence.
  * Outputs the number of hits, misses and total number of messages per CAN ID
  * Used to find optimum filter size for a given sequence.
  */
@@ -319,6 +332,10 @@ void checkLogability(char *filename, FILE *log, int filterSize, int sequenceSize
 
 }
 
+/*
+ * Tool to convert a Vector CAN .asc trace to a PCAN .trc file.
+ * Run once to allow .asc files to be published through PCAN dongle.
+ */
 void canTraceConverter(char *filename, FILE *output){
 	char inputStr[200];
 	unsigned int canData[8];
@@ -380,6 +397,9 @@ void canTraceConverter(char *filename, FILE *output){
 
 }
 
+/*
+ * Counts the total number of messages per ID in the trace.
+ */
 void CanSequenceMessageCounter(char *filename)
 {
 	char inputStr[200];
@@ -430,7 +450,10 @@ void CanSequenceMessageCounter(char *filename)
 	}
 }
 
-/* Orders sequence by CAN ID */
+
+/*
+ * Orders sequence by CAN ID
+ */
 void orderSequence(void)
 {
 	unsigned int i, j, minIDPrev = 0, minID = 0xFFFF, minIDPointer;
@@ -472,7 +495,11 @@ void orderSequence(void)
 	}
 }
 
-/* Counts number if ID's in sequence */
+
+
+/*
+ * Counts number if ID's in sequence
+ */
 int countSequence(void){
 	int i, counter = 0;
 
@@ -490,7 +517,9 @@ int countSequence(void){
 
 
 
-/* Checks if ID is in logging list */
+/*
+ * Checks if ID is in logging list
+ */
 flag_t GetCAN1BufferPointer(unsigned int ID){
 	int i;
 	flag_t IDfound = FALSE;
