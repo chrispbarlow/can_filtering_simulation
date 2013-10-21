@@ -107,10 +107,10 @@ int countSequence(void);
 flag_t GetCAN1BufferPointer(unsigned int ID);
 
 int main(void){
-	char *CANlogFile = "Staggered_Relay_Protocol.asc";
+	char *CANlogFile = "MHI_Test_Drive_log-2013-10-21.asc";
 	int i;
 
-	FILE *outputFile = fopen("Staggered_Relay_Protocol.trc", "w");
+	FILE *outputFile = fopen("MHI_Test_Drive_log-2013-10-21.trc", "w");
 	canTraceConverter(CANlogFile, outputFile);
 
 
